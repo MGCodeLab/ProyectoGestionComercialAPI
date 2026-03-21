@@ -1,0 +1,46 @@
+## Build
+bin/
+obj/
+out/
+
+## Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Rider / VS Code
+.idea/
+.vscode/
+
+## Logs
+*.log
+
+## OS
+.DS_Store
+Thumbs.db
+
+## NuGet
+*.nupkg
+packages/
+.nuget/
+
+## EF Core
+*.dbmdl
+
+## SQL / Database
+*.mdf
+*.ldf
+
+## Secrets
+appsettings.Development.json
+appsettings.Local.json
+
+## Node (por si luego usas Angular)
+node_modules/
+dist/
+.angular/
+
+## Docker (opcional)
+*.env
