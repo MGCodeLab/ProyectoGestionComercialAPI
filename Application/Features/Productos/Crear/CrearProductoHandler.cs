@@ -4,7 +4,7 @@ using Domain.Catalogo;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace Application.Features.Productos.Crear.Commands
+namespace Application.Features.Productos.Crear
 {
     public class CrearProductoHandler : IRequestHandler<CrearProductoCommand, int>
     {

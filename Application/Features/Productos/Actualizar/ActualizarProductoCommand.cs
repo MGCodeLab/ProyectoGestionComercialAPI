@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Application.Features.Productos.Actualizar.Commands
+namespace Application.Features.Productos.Actualizar
 {
     public record ActualizarProductoCommand(
     string Nombre,

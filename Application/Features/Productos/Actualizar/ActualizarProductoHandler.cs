@@ -5,7 +5,7 @@ using Domain.Catalogo;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace Application.Features.Productos.Actualizar.Commands
+namespace Application.Features.Productos.Actualizar
 {
     public class ActualizarProductoHandler : IRequestHandler<ActualizarProductoCommand, Unit>
     {

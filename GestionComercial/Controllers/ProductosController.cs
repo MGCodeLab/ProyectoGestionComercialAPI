@@ -1,7 +1,7 @@
 ﻿using Application.Dtos.Producto;
-using Application.Features.Productos.Actualizar.Commands;
+using Application.Features.Productos.Actualizar;
 using Application.Features.Productos.ActualizarEstado;
-using Application.Features.Productos.Crear.Commands;
+using Application.Features.Productos.Crear;
 using Application.Features.Productos.Eliminar.Commands;
 using Application.Interfaces;
 using AutoMapper;

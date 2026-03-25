@@ -1,6 +1,6 @@
 ﻿using Application.Dtos.Producto;
-using Application.Features.Productos.Actualizar.Commands;
-using Application.Features.Productos.Crear.Commands;
+using Application.Features.Productos.Actualizar;
+using Application.Features.Productos.Crear;
 using AutoMapper;
 using Domain.Catalogo;
 
