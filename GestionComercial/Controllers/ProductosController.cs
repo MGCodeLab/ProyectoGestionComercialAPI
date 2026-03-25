@@ -1,11 +1,17 @@
 ﻿using Application.Dtos.Producto;
+using Application.Features.Productos.Actualizar.Commands;
+using Application.Features.Productos.ActualizarEstado;
+using Application.Features.Productos.Crear.Commands;
+using Application.Features.Productos.Eliminar.Commands;
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Catalogo;
 using Infrastructure.Persistence;
 using Infrastructure.Repository;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace API.GestionComercial.Controllers
 {
@@ -15,14 +21,17 @@ namespace API.GestionComercial.Controllers
     {
         private readonly IMapper _mapper;
         private readonly IProductoService _service;
+        private readonly IMediator _mediator;
 
         public ProductosController(
             IMapper mapper,
             IProductoService productoService
-            )
+,
+            IMediator mediator)
         {
             _mapper = mapper;
             _service = productoService;
+            _mediator = mediator;
         }
 
         [HttpGet]
@@ -48,23 +57,20 @@ namespace API.GestionComercial.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateProduct(CrearProductoDto dto)
         {
-            var producto = _mapper.Map<Producto>(dto);
-            await _service.Crear(producto, HttpContext.RequestAborted);
-            //return Ok(producto);
-            return CreatedAtAction(nameof(GetById), new { id = producto.Id }, producto);
+            var command = _mapper.Map<CrearProductoCommand>(dto);
+
+            var id = await _mediator.Send(command);
+
+            return CreatedAtAction(nameof(GetById), new { id }, new { id });
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, ActualizarProductoDto dto)
         {
-            var producto = await _service.ObtenerPorId(id, isAsTracking: true, HttpContext.RequestAborted);
+            var command = _mapper.Map<ActualizarProductoCommand>(dto);
+            command = command with { Id = id };
 
-            if (producto == null)
-                return NotFound();
-
-            _mapper.Map(dto, producto);
-
-            await _service.Actualizar(HttpContext.RequestAborted);
+            await _mediator.Send(command);
 
             return NoContent();
         }
@@ -72,27 +78,14 @@ namespace API.GestionComercial.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var producto = await _service.ObtenerPorId(id, isAsTracking: false, HttpContext.RequestAborted);
-
-            if (producto == null)
-                return NotFound();
-
-            await _service.Eliminar(producto, HttpContext.RequestAborted);
-
+            await _mediator.Send(new EliminarProductoCommand(id));
             return NoContent();
         }
 
         [HttpPatch("{id}/inactivar")]
         public async Task<IActionResult> Inactivar(int id)
         {
-            var producto = await _service.ObtenerPorId(id, isAsTracking: true, HttpContext.RequestAborted);
-
-            if (producto == null)
-                return NotFound();
-
-            producto.Activo = false;
-
-            await _service.Actualizar(HttpContext.RequestAborted);
+            await _mediator.Send(new ActualizarEstadoProductoCommand(id, false));
 
             return NoContent();
         }
@@ -100,18 +93,9 @@ namespace API.GestionComercial.Controllers
         [HttpPatch("{id}/activar")]
         public async Task<IActionResult> Activar(int id)
         {
-            var producto = await _service.ObtenerPorId(id, isAsTracking: true, HttpContext.RequestAborted);
-
-            if (producto == null)
-                return NotFound();
-
-            producto.Activo = true;
-
-            await _service.Actualizar(HttpContext.RequestAborted);
+            await _mediator.Send(new ActualizarEstadoProductoCommand(id, true));
 
             return NoContent();
         }
-
-
     }
 }

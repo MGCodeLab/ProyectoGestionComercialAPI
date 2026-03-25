@@ -1,9 +1,11 @@
+using API.GestionComercial;
+using API.GestionComercial.Middleware;
+using Application.Interfaces;
 using Application.Mappings;
 using AutoMapper;
 using Infrastructure.Persistence;
-using Microsoft.EntityFrameworkCore;
-using Application.Interfaces;
 using Infrastructure.Repository;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddApplication();
 
 var config = new MapperConfiguration(cfg =>
 {
@@ -33,6 +36,8 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 
