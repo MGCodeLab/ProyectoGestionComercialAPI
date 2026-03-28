@@ -26,11 +26,14 @@ GestionComercial/
 ├── API.GestionComercial/
 │   ├── Controllers/
 │   ├── Middleware/
+│   ├── Extensions/ 
 │   ├── DependencyInjection.cs
 │   └── Program.cs
 │
 ├── Application/
 │   ├── Behaviours/
+│   ├── Common/
+│   │   └── Models/ (ApiResponse) 
 │   ├── Dtos/
 │   │   └── Producto/
 │   ├── Exceptions/
@@ -72,6 +75,8 @@ Responsable de exponer los endpoints y delegar la lógica mediante MediatR.
 Incluye:
 
 * Middleware global para manejo de excepciones
+* Extensions para respuestas estandarizadas
+* Versionado básico de endpoints 
 * Configuración de dependencias
 
 ---
@@ -87,6 +92,7 @@ Contiene la lógica de aplicación y reglas del sistema:
 * Interfaces
 * Mapeos (AutoMapper)
 * Excepciones personalizadas
+* Response Wrapper (`ApiResponse`)
 
 ---
 
@@ -145,6 +151,7 @@ Se implementa un **middleware personalizado** para:
 
 * Centralizar errores
 * Retornar respuestas HTTP consistentes
+* Incluir `traceId` para debugging 
 * Evitar try/catch repetitivos
 
 ---
@@ -158,6 +165,46 @@ Uso de **FluentValidation** junto con pipeline de MediatR:
 
 ---
 
+### 🔸 Response Wrapper (v2.1.0)
+
+Se implementa un wrapper estándar para todas las respuestas de la API:
+
+```json
+{
+  "success": true,
+  "message": "Operación exitosa",
+  "data": {},
+  "traceId": "..."
+}
+```
+
+Beneficios:
+
+* Respuestas consistentes en toda la API
+* Mejor integración con frontend (Angular-ready)
+* Manejo uniforme de errores
+* Mayor claridad en contratos de API
+
+---
+
+### 🔸 Versionado de API (básico) 
+
+Se implementa un versionado simple a nivel de rutas para preparar la evolución futura del sistema:
+
+Ejemplo:
+
+```text
+/api/v1/productos
+```
+
+Beneficios:
+
+* Permite evolucionar la API sin romper clientes existentes
+* Base para versionado más robusto en el futuro
+* Mejora el control de cambios en endpoints
+
+---
+
 ## 🧪 Estado actual
 
 ✔ CRUD de Productos (completo)
@@ -168,16 +215,18 @@ Uso de **FluentValidation** junto con pipeline de MediatR:
 ✔ Separación por Features
 ✔ AutoMapper configurado por módulos
 ✔ Scripts de base de datos versionados
+✔ Response Wrapper implementado 
+✔ TraceId para debugging distribuido 
+✔ Versionado básico de API 
 
 ---
 
 ## 🔄 Próximas mejoras
 
-* Response Wrapper (estandarización de respuestas)
-* Integración con Angular (frontend)
-* CQRS completo (queries con MediatR opcional)
-* Versionado de API
+* Integración con Angular (frontend) 
+* Versionado de API avanzado
 * Health Checks
+* CQRS completo (queries con MediatR opcional)
 * Módulos de ventas, compras e inventario
 
 ---
@@ -195,10 +244,12 @@ Uso de **FluentValidation** junto con pipeline de MediatR:
 ## 🏷️ Versionado
 
 * `v1.0.0`: CRUD básico con arquitectura base
-* `v2.0.0`: Implementación de CQRS con MediatR, validaciones y middleware global
+* `v2.0.0`: CQRS con MediatR + validaciones + middleware global
+* `v2.1.0`: Response Wrapper + respuestas estandarizadas + traceId 
 
 ---
 
 ## 📌 Autor
 
-Desarrollado por Miguel Gonzalez (MGCodeLab)
+Desarrollado por **Miguel Gonzalez (MGCodeLab)** 🚀
+Full Stack Developer | .NET | Arquitectura de Software
