@@ -1,4 +1,5 @@
-﻿using Application.Exceptions;
+﻿using Application.Common.Models;
+using Application.Exceptions;
 using FluentValidation;
 using System.Net;
 using System.Text.Json;
@@ -24,57 +25,54 @@ namespace API.GestionComercial.Middleware
             }
             catch (ValidationException ex)
             {
-                _logger.LogError(ex, "Error por exepcion de validacion");
+                _logger.LogError(ex, "Error por excepción de validación");
                 await HandleValidationException(context, ex);
             }
             catch (NotFoundException ex)
             {
-                context.Response.StatusCode = StatusCodes.Status404NotFound;
-                context.Response.ContentType = "application/json";
+                _logger.LogWarning(ex, "Recurso no encontrado");
 
-                var response = JsonSerializer.Serialize(new
-                {
-                    error = ex.Message,
-                    traceId = context.TraceIdentifier
-                });
+                var response = ApiResponse<string>.Fail(ex.Message);
 
-                await context.Response.WriteAsync(response);
+                await WriteResponse(context, HttpStatusCode.NotFound, response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error no controlado");
-                await HandleGenericException(context, ex);
+
+                var response = ApiResponse<string>.Fail("Ocurrió un error interno");
+
+                await WriteResponse(context, HttpStatusCode.InternalServerError, response);
             }
         }
 
         private static async Task HandleValidationException(HttpContext context, ValidationException ex)
         {
-            context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
-            context.Response.ContentType = "application/json";
+            var errors = ex.Errors
+                .Select(e => e.ErrorMessage)
+                .ToList();
 
-            var errors = ex.Errors.Select(e => e.ErrorMessage);
+            var response = ApiResponse<List<string>>.Fail("Errores de validación", errors);
 
-            var response = JsonSerializer.Serialize(new
-            {
-                errors,
-                traceId = context.TraceIdentifier
-            });
-
-            await context.Response.WriteAsync(response);
+            await WriteResponse(context, HttpStatusCode.BadRequest, response);
         }
 
-        private static async Task HandleGenericException(HttpContext context, Exception ex)
+        private static async Task WriteResponse<T>(
+            HttpContext context,
+            HttpStatusCode statusCode,
+            ApiResponse<T> response)
         {
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            context.Response.StatusCode = (int)statusCode;
             context.Response.ContentType = "application/json";
+            
+            response.TraceId = context.TraceIdentifier;
 
-            var response = JsonSerializer.Serialize(new
+            var json = JsonSerializer.Serialize(response, new JsonSerializerOptions
             {
-                error = "Ocurrió un error interno",
-                traceId = context.TraceIdentifier
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
             });
 
-            await context.Response.WriteAsync(response);
+            await context.Response.WriteAsync(json);
         }
     }
 }
