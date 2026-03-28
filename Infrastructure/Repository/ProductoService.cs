@@ -15,7 +15,7 @@ namespace Infrastructure.Repository
         }
 
         public async Task<List<Producto>> ObtenerTodos(CancellationToken token)
-            => await _context.Productos.ToListAsync();
+            => await _context.Productos.ToListAsync(token);
 
         public async Task<Producto?> ObtenerPorId(int id, bool isAsTracking, CancellationToken token) 
             => (isAsTracking) ?

@@ -12,11 +12,12 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using API.GestionComercial.Extensions;
 
 namespace API.GestionComercial.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     public class ProductosController : ControllerBase
     {
         private readonly IMapper _mapper;
@@ -39,7 +40,7 @@ namespace API.GestionComercial.Controllers
         {
             var productos = await _service.ObtenerTodos(HttpContext.RequestAborted);
             var result = _mapper.Map<List<ProductoDto>>(productos);
-            return Ok(result);
+            return this.OkResponse(result);
         }
 
         [HttpGet("{id}")]
@@ -48,10 +49,10 @@ namespace API.GestionComercial.Controllers
             var producto = await _service.ObtenerPorId(id, isAsTracking: false, HttpContext.RequestAborted);
 
             if (producto == null)
-                return NotFound();
+                return this.NotFoundResponse("Producto no encontrado");
 
             var result = _mapper.Map<ProductoDto>(producto);
-            return Ok(result);
+            return this.OkResponse(result);
         }
 
         [HttpPost]
@@ -61,7 +62,13 @@ namespace API.GestionComercial.Controllers
 
             var id = await _mediator.Send(command);
 
-            return CreatedAtAction(nameof(GetById), new { id }, new { id });
+            var result = new ProductoDto { Id = id, Nombre = dto.Nombre };
+
+            return this.CreatedResponse(
+                nameof(GetById),
+                new { id },
+                result,
+                "Producto Creado Exitosamente");
         }
 
         [HttpPut("{id}")]
@@ -72,14 +79,14 @@ namespace API.GestionComercial.Controllers
 
             await _mediator.Send(command);
 
-            return NoContent();
+            return this.OkResponse(string.Empty, "Producto actualizado correctamente");
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             await _mediator.Send(new EliminarProductoCommand(id));
-            return NoContent();
+            return this.OkResponse(string.Empty, "Producto eliminado correctamente");
         }
 
         [HttpPatch("{id}/inactivar")]
@@ -87,7 +94,7 @@ namespace API.GestionComercial.Controllers
         {
             await _mediator.Send(new ActualizarEstadoProductoCommand(id, false));
 
-            return NoContent();
+            return this.OkResponse(string.Empty, "Producto inactivado correctamente");
         }
 
         [HttpPatch("{id}/activar")]
@@ -95,7 +102,7 @@ namespace API.GestionComercial.Controllers
         {
             await _mediator.Send(new ActualizarEstadoProductoCommand(id, true));
 
-            return NoContent();
+            return this.OkResponse(string.Empty, "Producto activado correctamente");
         }
     }
 }
