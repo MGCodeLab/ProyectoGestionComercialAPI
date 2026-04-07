@@ -303,5 +303,3 @@ Ahora el cambio de estado queda desacoplado y centralizado en:
 
 Desarrollado por **Miguel Gonzalez (MGCodeLab)** 🚀
 Full Stack Developer | .NET | Arquitectura de Software
-
-<!-- test branch protection -->
