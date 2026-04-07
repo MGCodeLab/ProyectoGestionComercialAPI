@@ -205,19 +205,67 @@ Beneficios:
 
 ---
 
+🔹 Integración frontend:
+
+* CORS policy configurada para Angular (localhost:4200) 
+* Preparado para consumo desde SPA frontend
+* Contratos de respuesta consistentes
+
+---
+🔹 Mejoras recientes (v2.2.1) 
+
+Se corrigió un bug en actualización de productos:
+
+✅ Se removió Activo de:
+
+* ActualizarProductoCommand
+* ActualizarProductoDto
+
+Esto evita inconsistencias entre:
+
+* actualización de datos
+* activación/inactivación
+* comandos especializados de estado
+
+Ahora el cambio de estado queda desacoplado y centralizado en:
+
+🔹ActualizarEstadoProductoCommand
+
+✔ diseño más limpio
+
+✔ separación de responsabilidades
+
+✔ evita bugs por sobreescritura accidental
+
+---
+
 ## 🧪 Estado actual
 
 ✔ CRUD de Productos (completo)
+
 ✔ Implementación de CQRS con MediatR
+
 ✔ Validaciones con FluentValidation
+
 ✔ Middleware global de excepciones
+
 ✔ Logging en Handlers
+
 ✔ Separación por Features
+
 ✔ AutoMapper configurado por módulos
+
 ✔ Scripts de base de datos versionados
+
 ✔ Response Wrapper implementado 
+
 ✔ TraceId para debugging distribuido 
+
 ✔ Versionado básico de API 
+
+✔ CORS para Angular
+
+✔ Bugfix en actualización (Activo)
 
 ---
 
@@ -246,6 +294,8 @@ Beneficios:
 * `v1.0.0`: CRUD básico con arquitectura base
 * `v2.0.0`: CQRS con MediatR + validaciones + middleware global
 * `v2.1.0`: Response Wrapper + respuestas estandarizadas + traceId 
+* `v2.2.0`: Configuración CORS para Angular
+* `v2.2.1`: Bugfix en actualización de producto (remoción de Activo)
 
 ---
 
