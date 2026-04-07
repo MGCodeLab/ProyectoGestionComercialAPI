@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Domain.Catalogo;
+using Domain.Comercial;
 
 namespace Infrastructure.Persistence
 {
@@ -18,5 +19,7 @@ namespace Infrastructure.Persistence
         }
 
         public DbSet<Producto> Productos { get; set; }
+        public DbSet<TipoDocumento> TipoDocumentos { get; set; }
+        public DbSet<Cliente> Clientes { get; set; }
     }
 }

@@ -1,0 +1,6 @@
+CREATE TABLE catalogo.TipoDocumentos (
+	Id INT IDENTITY(1,1) PRIMARY KEY,
+	Codigo NVARCHAR(20) NOT NULL,
+	Descripcion NVARCHAR(250),
+	Activo BIT NOT NULL DEFAULT 1
+);

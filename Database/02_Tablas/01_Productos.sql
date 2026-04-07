@@ -1,4 +1,4 @@
-CREATE TABLE Productos (
+CREATE TABLE catalogo.Productos (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     Nombre NVARCHAR(150) NOT NULL,
     Descripcion NVARCHAR(250),
