@@ -26,8 +26,7 @@ namespace API.GestionComercial.Controllers
 
         public ProductosController(
             IMapper mapper,
-            IProductoService productoService
-,
+            IProductoService productoService,
             IMediator mediator)
         {
             _mapper = mapper;

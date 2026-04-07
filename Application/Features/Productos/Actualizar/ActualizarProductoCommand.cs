@@ -6,7 +6,6 @@ namespace Application.Features.Productos.Actualizar
     string Nombre,
     string? Descripcion,
     decimal Precio,
-    bool Activo,
     int Id = 0
     ) : IRequest<Unit>;
 }
