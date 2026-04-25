@@ -1,23 +1,16 @@
 ﻿using Domain.Comercial;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Infrastructure.Persistence.Configurations
 {
-    public class ClienteConfiguration : IEntityTypeConfiguration<Cliente>
+    public class ClienteConfiguration : AuditableEntityConfiguration<Cliente>
     {
-        public void Configure(EntityTypeBuilder<Cliente> builder)
+        public override void Configure(EntityTypeBuilder<Cliente> builder)
         {
+            base.Configure(builder);
+
             builder.ToTable("Clientes", schema: "comercial");
-
-            builder.HasKey(c => c.Id);
-
-            builder.Property(c => c.PublicId)
-              .IsRequired()
-              .HasDefaultValueSql("NEWSEQUENTIALID()");
 
             builder.Property(c => c.TipoDocumentoId)
                 .IsRequired();
@@ -46,15 +39,6 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property(c => c.Direccion)
                 .HasMaxLength(250);
 
-            builder.Property(c => c.Activo)
-                .IsRequired();
-
-            builder.Property(c => c.FechaRegistro) 
-                .IsRequired()
-                .HasDefaultValueSql("GETUTCDATE()");
-
-            builder.Property(c => c.FechaActualizacion);
-
             builder.HasOne(c => c.TipoDocumento)
                 .WithMany()
                 .HasForeignKey(c => c.TipoDocumentoId)
@@ -71,9 +55,6 @@ namespace Infrastructure.Persistence.Configurations
             builder.HasIndex(c => c.Correo)
                 .IsUnique()
                 .HasFilter("[Correo] IS NOT NULL");
-
-            builder.HasIndex(c => c.PublicId)
-                .IsUnique();
         }
     }
 }

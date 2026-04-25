@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Domain.Common;
 
 namespace Domain.Catalogo
 {
-    public class TipoDocumento
+    public class TipoDocumento : AuditableEntity
     {
-        public int Id { get; set; }
         public required string Codigo { get; set; }
         public string? Descripcion { get; set; }
-        public bool Activo { get; set; }
     }
 }

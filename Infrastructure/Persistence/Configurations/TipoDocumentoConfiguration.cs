@@ -1,19 +1,16 @@
 ﻿using Domain.Catalogo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Infrastructure.Persistence.Configurations
 {
-    public class TipoDocumentoConfiguration : IEntityTypeConfiguration<TipoDocumento>
+    public class TipoDocumentoConfiguration : AuditableEntityConfiguration<TipoDocumento>
     {
-        public void Configure(EntityTypeBuilder<TipoDocumento> builder)
+        public override void Configure(EntityTypeBuilder<TipoDocumento> builder)
         {
-            builder.ToTable("TipoDocumento", schema: "catalogo");
+            base.Configure(builder);
 
-            builder.HasKey(e => e.Id);
+            builder.ToTable("TipoDocumento", schema: "catalogo");
 
             builder.Property(e => e.Codigo)
                 .IsRequired()
@@ -22,8 +19,8 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property(e => e.Descripcion)
                 .HasMaxLength(250);
 
-            builder.Property(e => e.Activo)
-                .IsRequired();
+            builder.HasIndex(e => e.Codigo)
+                .IsUnique();
         }
     }
 }

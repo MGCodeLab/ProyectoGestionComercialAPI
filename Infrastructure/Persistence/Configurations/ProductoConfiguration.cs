@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Infrastructure.Persistence.Configurations
 {
-    public class ProductoConfiguration : IEntityTypeConfiguration<Producto>
+    public class ProductoConfiguration : AuditableEntityConfiguration<Producto>
     {
-        public void Configure(EntityTypeBuilder<Producto> builder)
+        public override void Configure(EntityTypeBuilder<Producto> builder)
         {
-            builder.ToTable("Productos", schema: "catalogo");
+            base.Configure(builder);
 
-            builder.HasKey(p => p.Id);
+            builder.ToTable("Productos", schema: "catalogo");
 
             builder.Property(p => p.Nombre)
                 .IsRequired()
@@ -21,9 +21,6 @@ namespace Infrastructure.Persistence.Configurations
 
             builder.Property(p => p.Precio)
                 .HasColumnType("decimal(18,2)");
-
-            builder.Property(p => p.Activo)
-                .HasDefaultValue(true);
         }
     }
 }
