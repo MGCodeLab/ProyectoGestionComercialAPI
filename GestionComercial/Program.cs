@@ -25,6 +25,7 @@ var config = new MapperConfiguration(cfg =>
 
 builder.Services.AddSingleton<IMapper>(config.CreateMapper());
 builder.Services.AddScoped<IProductoService, ProductoService>();
+builder.Services.AddScoped<IClienteService, ClienteService>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
