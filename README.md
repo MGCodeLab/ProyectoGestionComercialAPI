@@ -1,305 +1,206 @@
-# 🧾 Gestión Comercial
+# Nexus-ERP — Backend
 
-Sistema de gestión comercial en desarrollo, enfocado en ventas, compras, inventario y reportes.
+Sistema de gestión comercial empresarial. Diseñado para producción real.
 
-Este proyecto está diseñado siguiendo principios de **Clean Architecture** y **CQRS (Command Query Responsibility Segregation)**, con el objetivo de ser escalable, mantenible y preparado para crecimiento futuro.
-
----
-
-## 🚀 Tecnologías utilizadas
-
-* .NET 10
-* Entity Framework Core
-* SQL Server (Docker)
-* AutoMapper
-* MediatR (CQRS)
-* FluentValidation
-* Arquitectura en capas (Clean Architecture)
+**Stack:** .NET 10 · SQL Server · Clean Architecture · CQRS · JWT Auth  
+**Versión:** v3.0.0  
+**Estado:** En desarrollo activo
 
 ---
 
-## 🧱 Arquitectura del proyecto
+## Arquitectura
 
-El sistema está organizado en múltiples capas separadas por responsabilidad:
+```
+Domain/              Entidades puras. Sin dependencias externas.
+Application/         Casos de uso, Commands, DTOs, Validators, Interfaces.
+Infrastructure/      EF Core, Services (JWT, Auth), Configurations.
+GestionComercial/    API: Controllers, Middleware, Program.cs.
+Database/            Scripts SQL versionados (sin EF Migrations).
+IA_Docs/             Documentación técnica para IAs y desarrolladores.
+History Changed/     Registro de iteraciones arquitectónicas.
+```
 
-GestionComercial/
-├── API.GestionComercial/
-│   ├── Controllers/
-│   ├── Middleware/
-│   ├── Extensions/ 
-│   ├── DependencyInjection.cs
-│   └── Program.cs
-│
-├── Application/
-│   ├── Behaviours/
-│   ├── Common/
-│   │   └── Models/ (ApiResponse) 
-│   ├── Dtos/
-│   │   └── Producto/
-│   ├── Exceptions/
-│   ├── Features/
-│   │   └── Productos/
-│   │       ├── Crear/
-│   │       ├── Actualizar/
-│   │       ├── ActualizarEstado/
-│   │       └── Eliminar/
-│   ├── Interfaces/
-│   └── Mappings/
-│       └── Productos/
-│
-├── Domain/
-│   └── Catalogo/
-│
-├── Infrastructure/
-│   ├── Persistence/
-│   │   ├── Configurations/
-│   │   └── AppDbContext.cs
-│   └── Repository/
-│
-└── Database/
-├── 00_Inicializacion/
-├── 01_Schemas/
-├── 02_Tablas/
-├── 03_Seeds/
-└── 04_Procedures/
+### Regla de dependencias
+```
+API  →  Application  ←  Infrastructure
+              ↓
+           Domain
+```
+Application nunca referencia Infrastructure. Solo conoce interfaces.
 
 ---
 
-## 🧠 Descripción de capas
+## Stack Tecnológico
 
-### 🔹 API
-
-Contiene los controladores REST.
-Responsable de exponer los endpoints y delegar la lógica mediante MediatR.
-
-Incluye:
-
-* Middleware global para manejo de excepciones
-* Extensions para respuestas estandarizadas
-* Versionado básico de endpoints 
-* Configuración de dependencias
-
----
-
-### 🔹 Application
-
-Contiene la lógica de aplicación y reglas del sistema:
-
-* DTOs
-* Commands (CQRS)
-* Handlers (MediatR)
-* Validators (FluentValidation)
-* Interfaces
-* Mapeos (AutoMapper)
-* Excepciones personalizadas
-* Response Wrapper (`ApiResponse`)
+| Tecnología | Uso |
+|------------|-----|
+| .NET 10 + C# 13 | Runtime |
+| Entity Framework Core 10 | ORM |
+| SQL Server 2019+ | Base de datos |
+| MediatR | CQRS (Commands) |
+| FluentValidation | Validación de inputs |
+| AutoMapper | Mapeo DTO ↔ Entity |
+| BCrypt.Net-Next | Hash de passwords |
+| JWT Bearer (HS256) | Autenticación |
 
 ---
 
-### 🔹 Domain
+## Módulos Disponibles
 
-Contiene las entidades del negocio.
-No depende de ninguna otra capa.
-
----
-
-### 🔹 Infrastructure
-
-Implementaciones técnicas:
-
-* Entity Framework Core
-* Repositorios
-* Configuración de base de datos (Fluent API)
+| Módulo | Endpoints | Estado |
+|--------|-----------|--------|
+| Productos | GET, GET/{id}, POST, PUT, DELETE | ✅ |
+| Clientes | GET, GET/{id}, POST, PUT, PATCH inactivar/activar, DELETE | ✅ |
+| Auth | POST /login, POST /logout, GET /me | ✅ |
+| Ventas | — | 🔜 |
+| Compras | — | 🔜 |
+| Inventario | — | 🔜 |
 
 ---
 
-### 🔹 Database
+## Cómo Iniciar el Proyecto
 
-Scripts SQL versionados:
+### 1. Prerrequisitos
+- .NET 10 SDK
+- SQL Server 2019+ (local o remoto)
+- Visual Studio 2022+ o VS Code
 
-* Creación de esquemas
-* Tablas
-* Seeds
-* Procedimientos almacenados
+### 2. Configurar conexión a BD
+Editar `GestionComercial/appsettings.json`:
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=NexusERP;Trusted_Connection=True;"
+  },
+  "Jwt": {
+    "Key": "tu-clave-secreta-minimo-32-caracteres",
+    "Issuer": "nexus-erp-backend",
+    "Audience": "nexus-erp-frontend",
+    "ExpirationMinutes": 60
+  }
+}
+```
+
+### 3. Crear la base de datos
+Ejecutar los scripts en orden desde `Database/`:
+```
+01_Schemas/01_Schemas.sql
+02_Tablas/01_Productos.sql
+02_Tablas/02_TipoDocumento.sql
+02_Tablas/03_Clientes.sql
+02_Tablas/04_Auth_Tablas.sql
+03_Seeds/01_InitProductos.sql
+03_Seeds/02_InitTipoDocumento.sql
+03_Seeds/04_Auth_Seed.sql
+```
+
+### 4. Ejecutar la API
+```bash
+cd GestionComercial
+dotnet run
+# API disponible en http://localhost:5198
+```
+
+### 5. Usuarios de prueba (ya incluidos en seed)
+| Email | Password | Rol |
+|-------|----------|-----|
+| admin@nexus.com | 123456 | ADMIN |
+| vendedor@nexus.com | 123456 | VENDOR |
+| readonly@nexus.com | 123456 | READ_ONLY |
 
 ---
 
-## ⚙️ Enfoque arquitectónico
+## Convenciones de Desarrollo
 
-### 🔸 CQRS (implementación pragmática)
+### Commits
+```
+feat(modulo): descripcion nueva funcionalidad
+fix(modulo): descripcion corrección de bug
+refactor(modulo): descripcion mejora sin cambio de comportamiento
+chore(infra): descripcion cambio de infraestructura
+docs: descripcion cambio de documentación
+```
 
-* **Commands (MediatR)** → operaciones que modifican el estado (Create, Update, Delete)
-* **Queries (Services)** → operaciones de solo lectura
+### Branches
+```
+main              ← producción
+develop           ← integración
+feature/*         ← nuevas funcionalidades
+hotfix/*          ← correcciones urgentes
+```
 
-Esto permite mantener simplicidad sin caer en sobreingeniería.
-
----
-
-### 🔸 Controllers delgados
-
-Los controladores:
-
-* No contienen lógica de negocio
-* No acceden directamente a la base de datos
-* Solo envían comandos o consumen servicios
-
----
-
-### 🔸 Manejo global de errores
-
-Se implementa un **middleware personalizado** para:
-
-* Centralizar errores
-* Retornar respuestas HTTP consistentes
-* Incluir `traceId` para debugging 
-* Evitar try/catch repetitivos
-
----
-
-### 🔸 Validaciones desacopladas
-
-Uso de **FluentValidation** junto con pipeline de MediatR:
-
-* Validaciones automáticas antes de ejecutar handlers
-* Código limpio y reutilizable
+### Endpoints
+```
+GET    /api/v1/{recurso}           ← listar (todos, activos e inactivos)
+GET    /api/v1/{recurso}/{id}      ← obtener por ID
+POST   /api/v1/{recurso}           ← crear
+PUT    /api/v1/{recurso}/{id}      ← actualizar completo
+PATCH  /api/v1/{recurso}/{id}/inactivar  ← soft delete
+PATCH  /api/v1/{recurso}/{id}/activar    ← reactivar
+DELETE /api/v1/{recurso}/{id}      ← hard delete
+```
 
 ---
 
-### 🔸 Response Wrapper (v2.1.0)
+## Reglas Importantes
 
-Se implementa un wrapper estándar para todas las respuestas de la API:
+### Lo que SIEMPRE se debe hacer
+- Toda entidad hereda `AuditableEntity`
+- Toda configuración EF hereda `AuditableEntityConfiguration<T>`
+- Toda respuesta usa `ApiResponse<T>` (via `ControllerExtensions`)
+- Los `GET` devuelven **todos** los registros (activos + inactivos)
+- Los Commands se envían vía MediatR
+- Las Queries usan Services directos
+- Los mensajes de validación van en español
+
+### Lo que NUNCA se debe hacer
+- `HasQueryFilter(x => x.Activo)` — rompe el principio de soft delete del proyecto
+- Lógica de negocio en Controllers
+- Acceder a `AppDbContext` desde Application layer
+- Agregar paquetes externos en Application (BCrypt, JWT, etc.)
+- Cambios arquitectónicos sin consultar primero
+
+---
+
+## Respuesta Estándar de la API
 
 ```json
 {
   "success": true,
   "message": "Operación exitosa",
   "data": {},
-  "traceId": "..."
+  "errors": null,
+  "traceId": "0HNL30ONNEOHU:00000001"
 }
 ```
 
-Beneficios:
-
-* Respuestas consistentes en toda la API
-* Mejor integración con frontend (Angular-ready)
-* Manejo uniforme de errores
-* Mayor claridad en contratos de API
-
----
-
-### 🔸 Versionado de API (básico) 
-
-Se implementa un versionado simple a nivel de rutas para preparar la evolución futura del sistema:
-
-Ejemplo:
-
-```text
-/api/v1/productos
+En error:
+```json
+{
+  "success": false,
+  "message": "Credenciales inválidas",
+  "data": null,
+  "errors": ["Email o contraseña incorrectos"],
+  "traceId": "0HNL30ONNEOHU:00000002"
+}
 ```
 
-Beneficios:
+---
 
-* Permite evolucionar la API sin romper clientes existentes
-* Base para versionado más robusto en el futuro
-* Mejora el control de cambios en endpoints
+## Documentación Adicional
+
+| Documento | Ubicación |
+|-----------|-----------|
+| Knowledge Base para IAs | `IA_Docs/PROJECT_KNOWLEDGE_BASE.md` |
+| Decisiones Arquitectónicas | `IA_Docs/ARCHITECTURE_DECISIONS.md` |
+| Patrones de Implementación | `IA_Docs/IMPLEMENTATION_PATTERNS.md` |
+| Setup de Base de Datos | `IA_Docs/DATABASE_SETUP_INSTRUCTIONS.md` |
+| Reglas para IAs | `CLAUDE.md` |
+| Historial de cambios | `History Changed/` |
 
 ---
 
-🔹 Integración frontend:
+## Autor
 
-* CORS policy configurada para Angular (localhost:4200) 
-* Preparado para consumo desde SPA frontend
-* Contratos de respuesta consistentes
-
----
-🔹 Mejoras recientes (v2.2.1) 
-
-Se corrigió un bug en actualización de productos:
-
-✅ Se removió Activo de:
-
-* ActualizarProductoCommand
-* ActualizarProductoDto
-
-Esto evita inconsistencias entre:
-
-* actualización de datos
-* activación/inactivación
-* comandos especializados de estado
-
-Ahora el cambio de estado queda desacoplado y centralizado en:
-
-🔹ActualizarEstadoProductoCommand
-
-✔ diseño más limpio
-
-✔ separación de responsabilidades
-
-✔ evita bugs por sobreescritura accidental
-
----
-
-## 🧪 Estado actual
-
-✔ CRUD de Productos (completo)
-
-✔ Implementación de CQRS con MediatR
-
-✔ Validaciones con FluentValidation
-
-✔ Middleware global de excepciones
-
-✔ Logging en Handlers
-
-✔ Separación por Features
-
-✔ AutoMapper configurado por módulos
-
-✔ Scripts de base de datos versionados
-
-✔ Response Wrapper implementado 
-
-✔ TraceId para debugging distribuido 
-
-✔ Versionado básico de API 
-
-✔ CORS para Angular
-
-✔ Bugfix en actualización (Activo)
-
----
-
-## 🔄 Próximas mejoras
-
-* Integración con Angular (frontend) 
-* Versionado de API avanzado
-* Health Checks
-* CQRS completo (queries con MediatR opcional)
-* Módulos de ventas, compras e inventario
-
----
-
-## ⚙️ Cómo ejecutar el proyecto
-
-1. Clonar el repositorio
-2. Levantar SQL Server (Docker recomendado)
-3. Ejecutar scripts de la carpeta `Database`
-4. Configurar cadena de conexión en `appsettings.json`
-5. Ejecutar la API
-
----
-
-## 🏷️ Versionado
-
-* `v1.0.0`: CRUD básico con arquitectura base
-* `v2.0.0`: CQRS con MediatR + validaciones + middleware global
-* `v2.1.0`: Response Wrapper + respuestas estandarizadas + traceId 
-* `v2.2.0`: Configuración CORS para Angular
-* `v2.2.1`: Bugfix en actualización de producto (remoción de Activo)
-
----
-
-## 📌 Autor
-
-Desarrollado por **Miguel Gonzalez (MGCodeLab)** 🚀
-Full Stack Developer | .NET | Arquitectura de Software
+**Miguel González Cuevas** — MGCodeLab  
+Full Stack Developer · .NET · Angular · Arquitectura de Software

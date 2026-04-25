@@ -1,65 +1,145 @@
-# Nexus-ERP: Knowledge Base para IAs Futuras
+# Nexus-ERP: Knowledge Base — Documento Principal de IA
 
 **Última actualización:** 2026-04-25  
-**Proyecto:** Nexus-ERP v3.0.0  
-**Estado:** En desarrollo activo - Fase de módulos (Cliente ✅, Producto ✅)  
-**Usuario:** Miguel González Cuevas
+**Versión activa:** v3.0.0  
+**Estado:** ✅ Build OK — Módulos Producto, Cliente y Auth implementados  
+**Propietario:** Miguel González Cuevas
+
+> Este documento es la fuente de verdad para cualquier IA o desarrollador que continúe el proyecto.  
+> Léelo completo antes de proponer o implementar cualquier cambio.
 
 ---
 
-## 📚 Resumen Ejecutivo
+## 1. ¿Qué es este proyecto?
 
-**Nexus-ERP** es un sistema de gestión comercial empresarial real (no demo) diseñado para:
-- Gestión integral de clientes
+**Nexus-ERP** es un sistema de gestión comercial empresarial real, destinado a producción con clientes reales. No es un demo ni una práctica.
+
+Cubre gestión de:
+- Clientes
 - Catálogo de productos
-- Módulos futuros: Ventas, Compras, Inventario
+- Autenticación y control de acceso (JWT + roles + permisos)
+- Ventas, Compras, Inventario (próximas fases)
 
-**Stack Tecnológico:**
-- Backend: .NET 10, C# 13, Clean Architecture
-- Database: SQL Server 2019+
-- Frontend: Angular 19+
-- Arquitectura: Clean Architecture + CQRS Pragmático
-- ORM: Entity Framework Core 10
-- Validation: FluentValidation
-- Mapping: AutoMapper
-
-**Ambiente de Desarrollo:**
-- Windows 11 Home
-- Visual Studio (no VS Code)
-- SQL Server Management Studio
-- Puerto API: http://localhost:5198
+**Frontend:** Angular 19+, completamente separado del backend. Se comunica vía API REST con Bearer token.  
+**Backend:** Este repositorio. .NET 10 + SQL Server.
 
 ---
 
-## 🏗️ Arquitectura Implementada
+## 2. Stack Tecnológico
 
-### Principios Fundamentales
+| Capa | Tecnología |
+|------|-----------|
+| Runtime | .NET 10, C# 13 |
+| ORM | Entity Framework Core 10 |
+| Base de Datos | SQL Server 2019+ |
+| Autenticación | JWT Bearer (HS256) |
+| Password Hashing | BCrypt.Net-Next (cost 11) |
+| CQRS | MediatR |
+| Validación | FluentValidation |
+| Mapping | AutoMapper (modular Profiles) |
+| Frontend | Angular 19+ (repositorio separado) |
+| IDE | Visual Studio (no VS Code) |
+| Puerto Dev | http://localhost:5198 |
 
-1. **Arquitectura Limpia (Clean Architecture)**
-   - Domain (entidades, lógica de negocio)
-   - Application (casos de uso, DTOs, servicios)
-   - Infrastructure (persistencia, repositorios)
-   - API (controladores, middleware)
+---
 
-2. **CQRS Pragmático (NO purista)**
-   - **Commands:** Operaciones que cambian estado → MediatR
-   - **Queries:** Operaciones de lectura → Services directos
-   - **Razón:** Evitar over-engineering innecesario
+## 3. Arquitectura
 
-3. **Auditoría Obligatoria (AuditableEntity)**
-   - `Id` (int): Identificador interno
-   - `PublicId` (GUID): Identificador externo para API
-   - `Activo` (bit): Flag para soft delete
-   - `FechaRegistro` (datetime2): Creación automática
-   - `FechaActualizacion` (datetime2): Última modificación manual
+### Capas (Clean Architecture)
 
-### Patrones Clave
+```
+Domain/           ← Entidades puras. Sin dependencias externas.
+Application/      ← Casos de uso, DTOs, Commands, Validators, Interfaces
+Infrastructure/   ← EF Core, Configurations, Services (JWT, Usuario, etc.)
+GestionComercial/ ← API: Controllers, Middleware, Extensions, Program.cs
+Database/         ← Scripts SQL versionados (no usa EF Migrations)
+```
 
-#### Template Method Pattern (Configuraciones)
+### Regla de dependencias
+```
+API → Application ← Infrastructure
+         ↓
+       Domain
+```
+Application NUNCA referencia Infrastructure. Infrastructure sí referencia Application (implementa sus interfaces).
+
+### CQRS Pragmático
+- **Commands** (crear, actualizar, eliminar, autenticar) → **MediatR**
+- **Queries** (leer lista, leer por id) → **Services directos**
+- No se usa MediatR para queries: es overhead innecesario para lecturas simples.
+
+---
+
+## 4. Entidades del Dominio
+
+### Base obligatoria: `AuditableEntity` (`Domain/Common/AuditableEntity.cs`)
 ```csharp
-// Base class que todos heredan
+public abstract class AuditableEntity
+{
+    public int Id { get; set; }                    // PK interna (int, IDENTITY)
+    public Guid PublicId { get; private set; }     // GUID externo (NEWSEQUENTIALID)
+    public bool Activo { get; set; } = true;       // Soft delete flag
+    public DateTime FechaRegistro { get; set; }    // GETUTCDATE() automático
+    public DateTime? FechaActualizacion { get; set; } // Actualizado manualmente en handlers
+}
+```
+
+**TODA entidad hereda `AuditableEntity` sin excepción.**
+
+### Entidades existentes
+
+| Entidad | Namespace | Schema BD | Notas |
+|---------|-----------|-----------|-------|
+| `Producto` | `Domain.Catalogo` | `catalogo` | CRUD completo |
+| `TipoDocumento` | `Domain.Catalogo` | `catalogo` | Catálogo soporte para Cliente |
+| `Cliente` | `Domain.Comercial` | `comercial` | CRUD + soft delete + FK TipoDocumento |
+| `Usuario` | `Domain.Seguridad` | `seguridad` | Auth, tiene UsuarioRoles |
+| `Rol` | `Domain.Seguridad` | `seguridad` | Tiene RolPermisos y UsuarioRoles |
+| `Permiso` | `Domain.Seguridad` | `seguridad` | Recurso + Accion, tiene RolPermisos |
+| `UsuarioRol` | `Domain.Seguridad` | `seguridad` | Pivot, sin herencia AuditableEntity |
+| `RolPermiso` | `Domain.Seguridad` | `seguridad` | Pivot, sin herencia AuditableEntity |
+
+---
+
+## 5. Módulos Implementados
+
+### 5.1 Producto ✅
+**Endpoints:** `GET /api/v1/productos`, `GET /{id}`, `POST`, `PUT /{id}`, `DELETE /{id}`  
+**Soft delete:** Solo `Activo` flag, sin PATCH de estado propio (usar PUT)
+
+### 5.2 Cliente ✅
+**Endpoints:** `GET /api/v1/clientes`, `GET /{id}`, `POST`, `PUT /{id}`, `PATCH /{id}/inactivar`, `PATCH /{id}/activar`, `DELETE /{id}`  
+**FK:** TipoDocumentoId obligatorio  
+**Unique constraints:** (TipoDocumentoId, NumeroDocumento) y Correo  
+**NombreCompleto:** Columna computada en BD = Nombres + ApellidoPaterno + ApellidoMaterno
+
+### 5.3 Auth ✅ (v3.0.0)
+**Endpoints:**
+- `POST /api/v1/auth/login` — [AllowAnonymous] — devuelve JWT + perfil + permisos
+- `POST /api/v1/auth/logout` — [AllowAnonymous] — respuesta dummy OK (limpieza en frontend)
+- `GET /api/v1/auth/me` — [Authorize] — perfil del usuario autenticado
+
+**JWT Claims:** sub (userId), email, nombre, roles (ClaimTypes.Role), iat, jti  
+**Algoritmo:** HS256  
+**Expiración:** 60 minutos (configurable en `appsettings.json → Jwt:ExpirationMinutes`)  
+**Password hashing:** BCrypt (cost 11) en `UsuarioService.AutenticarUsuario()`
+
+**Usuarios de prueba:**
+| Email | Password | Rol |
+|-------|----------|-----|
+| admin@nexus.com | 123456 | ADMIN (todos los permisos) |
+| vendedor@nexus.com | 123456 | VENDOR (create/edit/view en productos, clientes, ventas) |
+| readonly@nexus.com | 123456 | READ_ONLY (sin permisos) |
+
+---
+
+## 6. Patrones y Convenciones
+
+### 6.1 Configuraciones EF Core
+```csharp
+// TODOS heredan esto:
 public abstract class AuditableEntityConfiguration<T> : IEntityTypeConfiguration<T>
-where T : AuditableEntity
+    where T : AuditableEntity
 {
     public virtual void Configure(EntityTypeBuilder<T> builder)
     {
@@ -70,289 +150,45 @@ where T : AuditableEntity
         builder.HasIndex(e => e.PublicId).IsUnique();
     }
 }
+// Configuración específica de entidad hereda y llama base.Configure(builder)
+// + builder.ToTable("Nombre", schema: "esquema")
 ```
 
-#### Soft Delete (Auditoría, NO ocultamiento)
+### 6.2 Response Wrapper
 ```csharp
-// ❌ INCORRECTO: Global filter que oculta inactivos
-// query.Where(x => x.Activo == true)
-
-// ✅ CORRECTO: Retorna TODOS, frontend controla visualización
-// GET /api/v1/clientes → [activos e inactivos]
-// PATCH /api/v1/clientes/{id}/inactivar → Activo=false pero VISIBLE
+// TODA respuesta de la API usa ApiResponse<T>
+return this.OkResponse(data, "mensaje");        // HTTP 200
+return this.CreatedResponse(...);               // HTTP 201
+return this.NotFoundResponse("mensaje");        // HTTP 404
+return this.FailResponse("mensaje", errors);    // HTTP 400
+return this.UnauthorizedResponse("mensaje");    // HTTP 401
+// Formato JSON:
+{ "success": true/false, "message": "...", "data": {}, "errors": [], "traceId": "..." }
 ```
 
-#### Response Wrapper Pattern
-```csharp
-public class ApiResponse<T>
-{
-    public bool Success { get; set; }
-    public string Message { get; set; }
-    public T Data { get; set; }
-    public string TraceId { get; set; }
-}
+### 6.3 Soft Delete
+**REGLA CRÍTICA:** Soft delete es un flag de auditoría, NO es ocultamiento de datos.
+- `GET /api/v1/clientes` → devuelve activos E inactivos
+- `PATCH /{id}/inactivar` → pone `Activo=false`, registro sigue visible
+- `DELETE /{id}` → hard delete real (EF `Remove()`)
+- El frontend Angular controla la presentación visual (colores, filtros, scroll)
+- **NUNCA** agregar `HasQueryFilter(x => x.Activo)` en AppDbContext
 
-// Uso: return this.OkResponse(data, "mensaje");
+### 6.4 Estructura de un Comando (patrón)
+```
+Application/Features/{Modulo}/{Operacion}/
+  ├── {Operacion}{Entidad}Command.cs  ← record : IRequest<T>
+  ├── {Operacion}{Entidad}Handler.cs  ← IRequestHandler<Command, T>
+  └── {Operacion}{Entidad}Validator.cs ← AbstractValidator<Command>
 ```
 
-#### Global Exception Middleware
-```csharp
-public class ExceptionMiddleware
-{
-    // Captura TODAS las excepciones
-    // Retorna ApiResponse<T> consistente
-    // Evita stacktraces en cliente
-}
+### 6.5 Estructura de un Service (patrón)
+```
+Application/Interfaces/I{Entidad}Service.cs   ← contrato (solo lectura + operaciones de infra)
+Infrastructure/Repository/{Entidad}Service.cs ← implementación con AppDbContext
 ```
 
----
-
-## ✅ Módulos Implementados
-
-### 1. **Producto** (Completado)
-- **Estado:** ✅ CRUD funcional
-- **Campos:** Id, Nombre, Descripcion, Precio, Activo
-- **Endpoints:** 
-  - GET /api/v1/productos
-  - GET /api/v1/productos/{id}
-  - POST /api/v1/productos
-  - PUT /api/v1/productos/{id}
-  - DELETE /api/v1/productos/{id}
-- **Validaciones:** Nombre required, MaxLength(150), Precio > 0
-- **Auditoría:** PublicId, Activo, FechaRegistro, FechaActualizacion
-
-### 2. **Cliente** (Completado - v3.0.0)
-- **Estado:** ✅ CRUD completo con soft delete
-- **Campos:** TipoDocumentoId (FK), NumeroDocumento, Nombres, ApellidoPaterno, ApellidoMaterno, Correo, Telefono, Direccion
-- **Endpoints:**
-  - GET /api/v1/clientes (retorna TODOS: activos + inactivos)
-  - GET /api/v1/clientes/{id}
-  - POST /api/v1/clientes
-  - PUT /api/v1/clientes/{id}
-  - PATCH /api/v1/clientes/{id}/inactivar (soft delete)
-  - PATCH /api/v1/clientes/{id}/activar (reactivar)
-  - DELETE /api/v1/clientes/{id} (hard delete)
-- **Validaciones:** 
-  - TipoDocumentoId: Required, >0
-  - NumeroDocumento: Required, MaxLength(20), Unique per TipoDocumento
-  - Nombres: Required, MaxLength(100)
-  - ApellidoPaterno: Required, MaxLength(100)
-  - Correo: Optional, EmailAddress, Unique, MaxLength(150)
-  - Teléfono: Optional, MaxLength(20)
-  - Dirección: Optional, MaxLength(250)
-- **FK Constraint:** TipoDocumento obligatorio
-- **Auditoría:** PublicId, Activo, FechaRegistro, FechaActualizacion
-
-### 3. **TipoDocumento** (Soporte - Catálogo)
-- **Estado:** ✅ Implementado como soporte para Clientes
-- **Campos:** Codigo, Descripcion, Activo
-- **Ejemplos:** DNI, RUC, PASSPORT
-- **Uso:** FK en tabla Clientes
-
----
-
-## 🔄 Patrón de Implementación Replicable
-
-Cuando se agregue un nuevo módulo (ej: Ventas, Compras, Inventario), seguir exactamente este patrón:
-
-### Estructura de Carpetas
-```
-Domain/
-  ├── {Modulo}/
-  │   └── {Entity}.cs           (hereda AuditableEntity)
-
-Application/
-  ├── Dtos/{Modulo}/
-  │   ├── Crear{Entity}Dto.cs
-  │   ├── Actualizar{Entity}Dto.cs
-  │   └── {Entity}Dto.cs (response with audit fields)
-  ├── Features/{Modulo}/
-  │   ├── Crear/
-  │   │   ├── Crear{Entity}Command.cs
-  │   │   ├── Crear{Entity}Handler.cs
-  │   │   └── Crear{Entity}Validator.cs
-  │   ├── Actualizar/
-  │   │   ├── Actualizar{Entity}Command.cs
-  │   │   ├── Actualizar{Entity}Handler.cs
-  │   │   └── Actualizar{Entity}Validator.cs
-  │   ├── ActualizarEstado/
-  │   │   ├── ActualizarEstado{Entity}Command.cs
-  │   │   └── ActualizarEstado{Entity}Handler.cs
-  │   └── Eliminar/
-  │       ├── Eliminar{Entity}Command.cs
-  │       └── Eliminar{Entity}Handler.cs
-  ├── Interfaces/
-  │   └── I{Entity}Service.cs
-  └── Mappings/{Modulo}/
-      └── {Entity}Profile.cs
-
-Infrastructure/
-  ├── Repository/
-  │   └── {Entity}Service.cs    (implementa I{Entity}Service)
-  └── Persistence/Configurations/
-      └── {Entity}Configuration.cs (hereda AuditableEntityConfiguration<T>)
-
-API/
-  └── Controllers/
-      └── {Entity}sController.cs (6 endpoints CRUD + soft delete)
-```
-
-### Checklist de Implementación
-
-- [ ] Entity en Domain hereda `AuditableEntity`
-- [ ] Configuration hereda `AuditableEntityConfiguration<T>`
-- [ ] DTOs (Crear, Actualizar, Response)
-- [ ] Commands y Handlers con logging
-- [ ] Validators con reglas de negocio
-- [ ] AutoMapper Profile
-- [ ] Service Interface en Application/Interfaces
-- [ ] Service Implementation en Infrastructure/Repository
-- [ ] Controller con 6 endpoints (GET list, GET id, POST, PUT, PATCH inactivar, DELETE)
-- [ ] DI registration en Program.cs: `builder.Services.AddScoped<IService, Service>();`
-- [ ] Test data en database
-- [ ] Test endpoints
-
----
-
-## 📊 Decisiones Arquitectónicas y Razones
-
-### ❌ NO hacer global soft delete filter
-**Decidido:** Soft delete retorna TODOS (activos + inactivos)  
-**Razón:** Miguel necesita visibilidad de registros inactivos para auditoría y manejo en frontend  
-**Implementación:** Activo field + frontend visual control
-
-### ❌ NO usar Repository Pattern genérico obligatorio
-**Decidido:** Services específicos por entidad (ClienteService, ProductoService)  
-**Razón:** Evitar abstracción prematura; UnitOfWork se evaluará cuando Ventas requiera multi-entity transactions  
-**Patrón:** Pragmático sobre arquitectónico
-
-### ✅ USAR MediatR para Commands
-**Decidido:** Commands (POST, PUT, DELETE) vía MediatR  
-**Razón:** Logging centralizado, validación consistente, fácil de testear  
-**Beneficio:** Separación clara entre lectura (Services) y escritura (Commands)
-
-### ✅ USAR Services para Queries
-**Decidido:** Queries (GET) vía Services directos  
-**Razón:** Evitar overhead de MediatR para operaciones simples de lectura  
-**Beneficio:** Performance, sintaxis más limpia
-
-### ✅ USAR FluentValidation en Validators
-**Decidido:** Validación en Handlers vía FluentValidation  
-**Razón:** Reutilizable, expresiva, integrada con MediatR  
-**Beneficio:** Validaciones consistentes, mensajes de error en español
-
-### ✅ USAR AutoMapper modular (Profiles)
-**Decidido:** Un Profile por módulo/entidad  
-**Razón:** Encapsulación, fácil de mantener, auto-discovery via AddMaps()  
-**Beneficio:** Configuración centralizada sin duplicación
-
----
-
-## 🔧 Problemas Encontrados y Soluciones
-
-### Problema 1: Columnas de auditoría faltantes en BD
-**Síntoma:** Error "Invalid column name 'FechaActualizacion'" al ejecutar queries  
-**Causa:** Código v3.0.0 espera columnas que BD no tenía  
-**Solución:** Script v3.0.0_COMPLETE_SETUP.sql que agrega columnas con DEFAULT values  
-**Ubicación:** `History Changed/20260425_T1800_DatabaseSetupV3/v3.0.0_COMPLETE_SETUP.sql`
-
-### Problema 2: NEWSEQUENTIALID() en INSERT
-**Síntoma:** Error "NEWSEQUENTIALID() can only be used in DEFAULT expression"  
-**Causa:** Intentar generar GUID en INSERT VALUES (no permitido)  
-**Solución:** Omitir PublicId y FechaRegistro en INSERT, usar DEFAULT de tabla  
-**Lección:** SQL Server DEFAULT values se aplican automáticamente
-
-### Problema 3: Puerto 5198 ya en uso
-**Síntoma:** "Address already in use" al iniciar aplicación  
-**Causa:** Instancia anterior todavía en ejecución  
-**Solución:** PowerShell `Stop-Process` o cambiar puerto en launchSettings.json  
-**Comando:** `netstat -ano | grep 5198`
-
-### Problema 4: Soft delete ocultando registros
-**Síntoma:** GET /api/v1/clientes no mostraba inactivos  
-**Causa:** Global filter en AppDbContext que hacía WHERE Activo=1  
-**Solución:** Revertir filter, retornar TODOS, frontend maneja presentación  
-**Commit:** `775a0e2` (revert global soft delete filter)
-
----
-
-## 📈 Métricas del Proyecto
-
-### Código Implementado
-- **Entidades:** 3 (Producto, Cliente, TipoDocumento)
-- **DTOs:** 6 (2 por módulo principal)
-- **Commands:** 6 (CrearCliente, ActualizarCliente, ActualizarEstadoCliente, EliminarCliente, etc.)
-- **Handlers:** 6
-- **Validators:** 3 (uno por operación con lógica compleja)
-- **Controllers:** 2 (ProductosController, ClientesController)
-- **Endpoints:** 13 (GET list, GET id, POST, PUT, PATCH x2, DELETE para Cliente+Producto)
-- **Líneas de código arquitectónico:** ~500-600
-
-### Arquitectura
-- Clean Architecture: ✅ 4 capas (Domain, Application, Infrastructure, API)
-- CQRS Pragmático: ✅ Commands vía MediatR, Queries vía Services
-- DI Container: ✅ Configurado completamente
-- Global Middleware: ✅ Exception handling centralizado
-- Auditoría: ✅ AuditableEntity en todas las entidades
-- Response Wrapper: ✅ ApiResponse<T> consistente
-
-### Testing Ready
-- Validaciones en place: ✅
-- Logging en handlers: ✅
-- Exception handling: ✅
-- Test data seeded: ✅
-- Manual testing viable: ✅
-
----
-
-## 🚀 Próximas Fases (Roadmap v3.0.0+)
-
-### Fase 1: Módulo Ventas (POST v3.0.0)
-**Requerimientos esperados:**
-- Encabezado de venta (Cliente FK, fecha, total)
-- Detalle de venta (múltiples productos)
-- **Patrón:** Mismo que Cliente pero con:
-  - Multi-entity FK (Cliente, Producto)
-  - Posible necesidad de **UnitOfWork** para transacciones multi-tabla
-  - Posible necesidad de **totales calculados**
-
-### Fase 2: Módulo Compras
-**Patrón:** Similar a Ventas pero con Proveedores
-
-### Fase 3: Módulo Inventario
-**Patrón:** Producto + MovimientosInventario
-
-### Evaluación UnitOfWork
-- Cuando: Fase Ventas
-- Criterio: Si hay transacciones multi-entidad reales
-- Implementación: Explícita, no genérica
-
----
-
-## 📝 Reglas de Oro (SIEMPRE cumplir)
-
-### 1. Auditoría Obligatoria
-- ✅ TODA entidad hereda `AuditableEntity`
-- ✅ TODAS las configuraciones heredan `AuditableEntityConfiguration<T>`
-- ✅ NUNCA omitir PublicId, Activo, FechaRegistro, FechaActualizacion
-
-### 2. Soft Delete = Auditoría, NO Ocultamiento
-- ✅ GET siempre retorna TODOS (activos + inactivos)
-- ✅ PATCH /{id}/inactivar pone Activo=false pero visible
-- ✅ DELETE /{id} hace hard delete (Remove)
-- ✅ Frontend controla presentación visual
-
-### 3. Validación en Validators
-- ✅ FluentValidation en Handlers
-- ✅ Reglas de negocio en Validators
-- ✅ Mensajes en español
-
-### 4. Logging en Handlers
-- ✅ Log operación ANTES de ejecutar
-- ✅ Log resultado
-- ✅ Log errores
-
-### 5. Commit Convention
+### 6.6 Convención de commits
 ```
 feat(modulo): descripcion
 fix(modulo): descripcion
@@ -361,73 +197,124 @@ chore(infra): descripcion
 docs: descripcion
 ```
 
-### 6. NUNCA hacer
-- ❌ Soft delete global filter
-- ❌ Repository pattern genérico sin necesidad
-- ❌ DTOs sin campos de auditoría en Response
-- ❌ DI sin registración
-- ❌ Cambios arquitectónicos sin consultar Miguel primero
-- ❌ Deuda técnica por rapidez
-- ❌ Soluciones temporales en código base
+---
+
+## 7. Estructura de Archivos Críticos
+
+| Archivo | Propósito |
+|---------|-----------|
+| `GestionComercial/Program.cs` | DI completo, JWT, CORS, Middleware pipeline |
+| `GestionComercial/appsettings.json` | ConnectionString + Jwt config |
+| `Domain/Common/AuditableEntity.cs` | Base class de todas las entidades |
+| `Infrastructure/Persistence/AppDbContext.cs` | EF DbContext con todos los DbSets |
+| `Infrastructure/Persistence/Configurations/AuditableEntityConfiguration.cs` | Template base |
+| `Application/Common/Models/ApiResponse.cs` | Wrapper de respuesta |
+| `GestionComercial/Middleware/ExceptionMiddleware.cs` | Manejo global de errores |
+| `GestionComercial/Extensions/ControllerExtensions.cs` | Métodos de respuesta |
+| `GestionComercial/DependencyInjection.cs` | AddApplication() — MediatR + FluentValidation |
 
 ---
 
-## 🎯 Instrucciones para IAs Futuras
+## 8. Base de Datos
 
-### Cuando se continúe el proyecto:
+**Sin EF Migrations.** La BD se gestiona manualmente con scripts SQL en `Database/`.
 
-1. **Primero:** Lee este documento (PROJECT_KNOWLEDGE_BASE.md)
-2. **Luego:** Lee CLAUDE.md (reglas del proyecto)
-3. **Luego:** Revisa History Changed/ (decisiones pasadas)
-4. **Luego:** Abre el código (lea Domain, Application, Infrastructure)
-5. **Nunca:** Asumas que algo puede ser diferente sin consultar
+### Schemas
+| Schema | Propósito |
+|--------|-----------|
+| `catalogo` | Productos, TipoDocumentos |
+| `comercial` | Clientes |
+| `seguridad` | Usuarios, Roles, Permisos, tablas pivot |
 
-### Context Window Strategy
-- Este documento SIEMPRE debe estar en contexto
-- Cuando la ventana cierre, save importante info en memory
-- Usa memory para recordar decisiones y lecciones
+### Scripts a ejecutar (orden obligatorio)
+```
+1. Database/01_Schemas/01_Schemas.sql
+2. Database/02_Tablas/01_Productos.sql
+3. Database/02_Tablas/02_TipoDocumento.sql
+4. Database/02_Tablas/03_Clientes.sql
+5. Database/02_Tablas/04_Auth_Tablas.sql
+6. Database/03_Seeds/01_InitProductos.sql
+7. Database/03_Seeds/02_InitTipoDocumento.sql
+8. Database/03_Seeds/04_Auth_Seed.sql
+```
 
-### Git Workflow
-- Siempre haz commits con message descriptivo
-- Usa History Changed/ para cambios arquitectónicos
-- IA_Docs/ es para documentación reutilizable
-
----
-
-## 📞 Contacto / Clarificaciones
-
-**Usuario:** Miguel González Cuevas  
-**Email:** gonzalezcuevasmiguelignacio@gmail.com  
-**Rol:** Senior Software Engineer + Arquitecto del Proyecto  
-
-**Cuando dudes:**
-- Lee CLAUDE.md (contiene instrucciones arquitectónicas)
-- Lee Project Memory (si existe)
-- Consulta primero, implementa después
-- Nexus-ERP es producción real, no demo
+### Nota sobre NEWSEQUENTIALID()
+`NEWSEQUENTIALID()` solo funciona en cláusulas `DEFAULT` de DDL, NO en `INSERT VALUES`.  
+En seeds: omitir `PublicId` y `FechaRegistro` para que SQL Server los genere con el DEFAULT.
 
 ---
 
-## 📚 Referencias Rápidas
+## 9. Decisiones Arquitectónicas Registradas
 
-**Archivo crítico de configuración:**
-- `GestionComercial/Program.cs` - DI, CORS, Database, AutoMapper
-
-**Configuraciones base:**
-- `Infrastructure/Persistence/Configurations/AuditableEntityConfiguration.cs` - Template
-
-**Ejemplos de implementación:**
-- `Application/Features/Clientes/` - Referencia de CRUD completo
-- `Domain/Comercial/Cliente.cs` - Entity base
-- `Application/Interfaces/IClienteService.cs` - Service interface
-
-**Database:**
-- `Database/v3.0.0_COMPLETE_SETUP.sql` - Script de setup inicial
-- `IA_Docs/DATABASE_SETUP_INSTRUCTIONS.md` - Instrucciones
+| Decisión | Elegido | Rechazado | Razón |
+|----------|---------|-----------|-------|
+| Queries | Services directos | MediatR para queries | Overhead innecesario para lecturas simples |
+| Repository pattern | Services específicos | Repository genérico | Evitar abstracción prematura; se evalúa UoW cuando llegue Ventas |
+| Soft delete | Flag `Activo` sin filter global | HasQueryFilter en DbContext | Frontend necesita ver todos los registros; soft delete = auditoría |
+| JWT algoritmo | HS256 | RS256 | Entorno no distribuido, simplicidad suficiente |
+| BCrypt | En Infrastructure (UsuarioService) | En Application | Application no puede depender de paquetes externos de hashing |
+| Logout | Endpoint dummy OK | Blacklist de tokens | Frontend maneja estado; blacklist se evalúa en fases futuras |
+| /me endpoint | Query a BD | Decodificar JWT en handler | Datos frescos; permisos actualizados en cada request |
 
 ---
 
-**Última actualización:** 2026-04-25 18:00  
-**Versión del Proyecto:** v3.0.0 (en desarrollo)  
-**Compilación:** ✅ Success (0 errors, 0 warnings)  
-**Estado de Módulos:** Cliente ✅, Producto ✅, Pendientes: Ventas, Compras, Inventario
+## 10. Problemas Conocidos y Soluciones
+
+| Problema | Causa | Solución |
+|----------|-------|----------|
+| `Invalid column name 'PublicId'` | Scripts DDL viejos sin columnas audit | Ejecutar script de migration o recrear tablas |
+| `NEWSEQUENTIALID()` en INSERT | Uso incorrecto en VALUES | Omitir columna en INSERT; el DEFAULT la genera |
+| Puerto 5198 en uso | Instancia anterior viva | `Get-NetTCPConnection -LocalPort 5198 \| Stop-Process` |
+| IService not registered | Falta `AddScoped` en Program.cs | Agregar `builder.Services.AddScoped<IService, Impl>()` |
+| Soft delete filtraba datos | `HasQueryFilter` mal aplicado | Revertido; retornar todos los registros |
+
+---
+
+## 11. Roadmap
+
+### v3.0.0 (actual — en cierre)
+- ✅ Módulo Producto (CRUD)
+- ✅ Módulo Cliente (CRUD + soft delete)
+- ✅ Módulo Auth (JWT + roles + permisos)
+- ✅ AuditableEntity estandarizado
+- ✅ Base de datos normalizada
+
+### Post v3.0.0
+1. **Módulo Ventas** — Encabezado + Detalle, FK Cliente + Producto, calcular totales. Evaluar UnitOfWork aquí.
+2. **Módulo Compras** — Similar a Ventas con Proveedores.
+3. **Módulo Inventario** — Movimientos de stock.
+4. **Refresh Token** — Actualmente tokens expiran y user re-loguea. Implementar refresh en fase posterior.
+5. **[Authorize] en otros controllers** — Actualmente los endpoints de Productos y Clientes no requieren auth. Se habilitará cuando el frontend esté conectado.
+
+---
+
+## 12. Reglas de Oro (no negociables)
+
+1. **Toda entidad hereda AuditableEntity** — sin excepciones.
+2. **Toda configuración hereda AuditableEntityConfiguration<T>** — sin excepciones.
+3. **GET siempre devuelve todos los registros** — activos e inactivos. El frontend filtra.
+4. **Los cambios arquitectónicos se consultan primero** — Miguel decide, la IA propone.
+5. **Sin deuda técnica por rapidez** — este es un producto real para producción.
+6. **Sin Repository genérico sin justificación** — services específicos es suficiente.
+7. **BCrypt en Infrastructure** — Application no depende de librerías de hashing.
+8. **ApiResponse en TODA respuesta** — sin excepciones.
+
+---
+
+## 13. Cómo Continuar el Proyecto
+
+### Checklist para nueva sesión
+1. Leer este archivo
+2. Leer `CLAUDE.md` (reglas del proyecto para IAs)
+3. Revisar `History Changed/` para ver iteraciones pasadas
+4. Verificar estado de build: `dotnet build`
+5. Consultar con Miguel antes de proponer cambios arquitectónicos
+
+### Siguiente acción recomendada
+Conectar `[Authorize]` en ProductosController y ClientesController una vez que el frontend esté usando la API de auth real. Esto activa la protección de rutas en el backend.
+
+---
+
+**Versión:** v3.0.0  
+**Compilación:** ✅ 0 errores  
+**Última actualización:** 2026-04-25
