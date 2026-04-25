@@ -1,4 +1,6 @@
 CREATE SCHEMA catalogo;
-go
+GO
 CREATE SCHEMA comercial;
+GO
+CREATE SCHEMA seguridad;
 GO

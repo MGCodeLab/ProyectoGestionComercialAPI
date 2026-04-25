@@ -36,6 +36,14 @@ namespace API.GestionComercial.Middleware
 
                 await WriteResponse(context, HttpStatusCode.NotFound, response);
             }
+            catch (UnauthorizedException ex)
+            {
+                _logger.LogWarning(ex, "Acceso no autorizado");
+
+                var response = ApiResponse<string>.Fail(ex.Message, new List<string> { ex.Message });
+
+                await WriteResponse(context, HttpStatusCode.Unauthorized, response);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error no controlado");

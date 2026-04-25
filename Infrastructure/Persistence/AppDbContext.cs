@@ -2,6 +2,7 @@
 using Domain.Catalogo;
 using Domain.Comercial;
 using Domain.Common;
+using Domain.Seguridad;
 
 namespace Infrastructure.Persistence
 {
@@ -22,5 +23,9 @@ namespace Infrastructure.Persistence
         public DbSet<Producto> Productos { get; set; }
         public DbSet<TipoDocumento> TipoDocumentos { get; set; }
         public DbSet<Cliente> Clientes { get; set; }
+
+        public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Rol> Roles { get; set; }
+        public DbSet<Permiso> Permisos { get; set; }
     }
 }
