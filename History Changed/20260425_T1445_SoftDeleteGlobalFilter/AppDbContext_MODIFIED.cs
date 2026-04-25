@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Domain.Catalogo;
 using Domain.Comercial;
 using Domain.Common;
