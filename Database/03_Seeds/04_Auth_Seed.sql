@@ -56,9 +56,9 @@ GO
 -- BCrypt hash de "123456" con cost factor 11
 INSERT INTO seguridad.Usuarios (Nombre, Email, PasswordHash)
 VALUES
-    ('Administrador Nexus', 'admin@nexus.com',    '$2a$11$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.'),
-    ('Vendedor Demo',       'vendedor@nexus.com', '$2a$11$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.'),
-    ('Usuario Solo Lectura','readonly@nexus.com', '$2a$11$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.');
+    ('Administrador Nexus', 'admin@nexus.com',    '$2a$12$qhYkizfFDzxkEZF3MfsmzOPbQc88N/0/DF7i626AmRPCE9sGp.qQe'),
+    ('Vendedor Demo',       'vendedor@nexus.com', '$2a$12$qhYkizfFDzxkEZF3MfsmzOPbQc88N/0/DF7i626AmRPCE9sGp.qQe'),
+    ('Usuario Solo Lectura','readonly@nexus.com', '$2a$12$qhYkizfFDzxkEZF3MfsmzOPbQc88N/0/DF7i626AmRPCE9sGp.qQe');
 GO
 
 -- ============ ASIGNAR ROLES A USUARIOS ============
