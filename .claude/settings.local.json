@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build *)",
+      "Bash(dotnet clean *)",
+      "Bash(taskkill /F /IM dotnet.exe)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git commit -m 'docs: update iteration 3 plan with soft delete correction *)",
+      "Bash(netstat -ano)",
+      "PowerShell(Stop-Process -Id 22404 -Force)",
+      "Bash(curl -s http://localhost:5198/api/v1/clientes)",
+      "Bash(curl -s http://localhost:5198/api/v1/productos)",
+      "PowerShell(Get-NetTCPConnection -LocalPort 5198 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }; Start-Sleep -Milliseconds 500; Write-Output \"Puerto 5198 liberado\")"
+    ]
+  }
+}

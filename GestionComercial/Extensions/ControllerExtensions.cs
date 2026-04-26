@@ -11,8 +11,11 @@ namespace API.GestionComercial.Extensions
         public static IActionResult NotFoundResponse(this ControllerBase controller, string message = "Recurso no encontrado") 
             => controller.NotFound(ApiResponse<string>.Fail(message));
 
-        public static IActionResult FailResponse(this ControllerBase controller, string message, List<string>? errors = null) 
+        public static IActionResult FailResponse(this ControllerBase controller, string message, List<string>? errors = null)
             => controller.BadRequest(ApiResponse<string>.Fail(message, errors));
+
+        public static IActionResult UnauthorizedResponse(this ControllerBase controller, string message = "No autorizado")
+            => controller.Unauthorized(ApiResponse<string>.Fail(message, new List<string> { message }));
 
         public static IActionResult CreatedResponse<T>(this ControllerBase controller, string actionName, object routeValues,
             T data, string message = "")

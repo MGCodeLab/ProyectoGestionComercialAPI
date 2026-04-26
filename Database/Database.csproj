@@ -10,6 +10,7 @@
     <Folder Include="00_Inicializacion\" />
     <Folder Include="03_Seeds\" />
     <Folder Include="04_Procedures\" />
+    <Folder Include="05_Indices\" />
   </ItemGroup>
 
 </Project>
