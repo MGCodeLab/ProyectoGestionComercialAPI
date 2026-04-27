@@ -11,7 +11,9 @@
       "PowerShell(Stop-Process -Id 22404 -Force)",
       "Bash(curl -s http://localhost:5198/api/v1/clientes)",
       "Bash(curl -s http://localhost:5198/api/v1/productos)",
-      "PowerShell(Get-NetTCPConnection -LocalPort 5198 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }; Start-Sleep -Milliseconds 500; Write-Output \"Puerto 5198 liberado\")"
+      "PowerShell(Get-NetTCPConnection -LocalPort 5198 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }; Start-Sleep -Milliseconds 500; Write-Output \"Puerto 5198 liberado\")",
+      "PowerShell(Stop-Process -Force)",
+      "PowerShell(Stop-Process -Force -ErrorAction SilentlyContinue)"
     ]
   }
 }
