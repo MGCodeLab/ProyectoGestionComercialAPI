@@ -3,7 +3,6 @@ using MediatR;
 namespace Application.Features.Clientes.Actualizar
 {
     public record ActualizarClienteCommand(
-        int Id,
         int TipoDocumentoId,
         string NumeroDocumento,
         string Nombres,
@@ -11,6 +10,7 @@ namespace Application.Features.Clientes.Actualizar
         string? ApellidoMaterno,
         string? Correo,
         string? Telefono,
-        string? Direccion
+        string? Direccion,
+        int Id = 0
     ) : IRequest<Unit>;
 }

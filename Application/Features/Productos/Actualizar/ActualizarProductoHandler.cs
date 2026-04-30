@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using AutoMapper;
 using Domain.Catalogo;
+using Domain.Comercial;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -32,6 +33,7 @@ namespace Application.Features.Productos.Actualizar
             _logger.LogInformation("Actualizando producto {Nombre}", request.Nombre);
 
             _mapper.Map(request, producto);
+            producto.FechaActualizacion = DateTime.UtcNow;
 
             await _service.Actualizar(cancellationToken);
 

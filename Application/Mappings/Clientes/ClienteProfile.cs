@@ -10,12 +10,15 @@ namespace Application.Mappings.Clientes
     {
         public ClienteProfile()
         {
-            CreateMap<CrearClienteDto, CrearClienteCommand>();
-            CreateMap<ActualizarClienteDto, ActualizarClienteCommand>();
+            CreateMap<Cliente, ClienteDto>().ReverseMap();
 
+            CreateMap<CrearClienteDto, CrearClienteCommand>();
+            CreateMap<CrearClienteDto, Cliente>();
             CreateMap<CrearClienteCommand, Cliente>();
 
-            CreateMap<Cliente, ClienteDto>();
+            CreateMap<ActualizarClienteDto, Cliente>();
+            CreateMap<ActualizarClienteDto, ActualizarClienteCommand>();
+            CreateMap<ActualizarClienteCommand, Cliente>().ReverseMap();
         }
     }
 }
