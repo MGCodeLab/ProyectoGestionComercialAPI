@@ -31,14 +31,7 @@ namespace Application.Features.Clientes.Actualizar
             if (cliente == null)
                 throw new NotFoundException($"Cliente con id {request.Id} no encontrado");
 
-            cliente.TipoDocumentoId = request.TipoDocumentoId;
-            cliente.NumeroDocumento = request.NumeroDocumento;
-            cliente.Nombres = request.Nombres;
-            cliente.ApellidoPaterno = request.ApellidoPaterno;
-            cliente.ApellidoMaterno = request.ApellidoMaterno;
-            cliente.Correo = request.Correo;
-            cliente.Telefono = request.Telefono;
-            cliente.Direccion = request.Direccion;
+            _mapper.Map(request, cliente);
             cliente.FechaActualizacion = DateTime.UtcNow;
 
             await _service.Actualizar(cancellationToken);

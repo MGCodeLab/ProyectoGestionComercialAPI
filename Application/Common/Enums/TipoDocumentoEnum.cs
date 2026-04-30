@@ -2,8 +2,9 @@
 {
     public enum TipoDocumentoEnum
     {
-        DNI = 1,
-        RUC = 2,
         CE = 3,
+        DNI = 4,
+        RUC = 5,
+        PASSPORT = 6,
     }
 }

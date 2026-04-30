@@ -36,6 +36,12 @@ packages/
 ## Secrets
 appsettings.Development.json
 appsettings.Local.json
+.env
+
+## Claude Code
+.claude/agent-memory-local/
+.claude/local-settings.json
+.claude/secrets/
 
 ## Node (por si luego usas Angular)
 node_modules/
@@ -44,3 +50,4 @@ dist/
 
 ## Docker (opcional)
 *.env
+/.claude/settings.local.json
