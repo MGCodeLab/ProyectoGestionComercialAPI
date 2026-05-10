@@ -144,6 +144,118 @@ Hashes generados manualmente con caracteres extra.
 
 ---
 
+### 3b. (2026-05-10) Application Layer Importing Infrastructure — **RESUELTO**
+
+**ENCONTRADO EN:** Sprint 1 Catálogos Base (Handlers de Pais)  
+**ESTADO:** ✅ RESUELTO (2026-05-10 14:00)
+
+**Error Message:**
+```
+CS0246: El nombre del tipo o del espacio de nombres 'Infrastructure' no se encontró
+CS0246: El nombre del tipo o del espacio de nombres 'AppDbContext' no se encontrado
+```
+
+**Problema:**
+Handlers en Application layer importaban `Infrastructure.Persistence.AppDbContext` directamente:
+```csharp
+// ❌ INCORRECTO (en Application/Features/Catalogo/Pais/Crear/CrearPaisHandler.cs)
+using Infrastructure.Persistence;  // Application NO debe referenciar Infrastructure
+
+public class CrearPaisHandler : IRequestHandler<CrearPaisCommand, int>
+{
+    private readonly AppDbContext _context;  // Violación Clean Architecture
+    // ... usa _context directamente
+}
+```
+
+**Causa:**
+Clean Architecture requiere que Application sea agnóstica de detalles de persistencia. Application debe comunicarse SOLO a través de interfaces (servicios).
+
+**Solución Implementada (2026-05-10):**
+
+1. **Refactor de Handlers → Inyectar Services:**
+   ```csharp
+   // ✅ CORRECTO
+   using Application.Interfaces;  // Application conoce interfaces
+
+   public class CrearPaisHandler : IRequestHandler<CrearPaisCommand, int>
+   {
+       private readonly IPaisService _paisService;  // Interface, no implementación
+
+       public CrearPaisHandler(IPaisService paisService, IMapper mapper, ILogger<CrearPaisHandler> logger)
+       {
+           _paisService = paisService;
+       }
+
+       public async Task<int> Handle(CrearPaisCommand request, CancellationToken cancellationToken)
+       {
+           var pais = _mapper.Map<Pais>(request);
+           return await _paisService.Crear(pais, cancellationToken);  // Usa service
+       }
+   }
+   ```
+   
+   **Cambios realizados:**
+   - `CrearPaisHandler.cs` ✅
+   - `ActualizarPaisHandler.cs` ✅
+   - `ActualizarEstadoPaisHandler.cs` ✅
+   - `EliminarPaisHandler.cs` ✅
+
+2. **Refactor de Validators → Usar ValidatorService:**
+   ```csharp
+   // ✅ CORRECTO (ValidatorService en Infrastructure)
+   public class PaisValidatorService : IPaisValidatorService
+   {
+       private readonly AppDbContext _context;
+
+       public async Task<bool> IsCodigoUnique(string codigo, CancellationToken cancellationToken)
+           => !await _context.Paises.AnyAsync(p => p.Codigo == codigo, cancellationToken);
+   }
+
+   // ✅ Validator en Application (depende de interface)
+   public class CrearPaisValidator : AbstractValidator<CrearPaisCommand>
+   {
+       private readonly IPaisValidatorService _validatorService;
+
+       public CrearPaisValidator(IPaisValidatorService validatorService)
+       {
+           _validatorService = validatorService;
+           RuleFor(x => x.Codigo)
+               .MustAsync(BeUniqueCode).WithMessage("El código del país ya existe");
+       }
+
+       private async Task<bool> BeUniqueCode(string codigo, CancellationToken cancellationToken)
+       {
+           return await _validatorService.IsCodigoUnique(codigo, cancellationToken);
+       }
+   }
+   ```
+   
+   **Archivos creados:**
+   - `Application/Interfaces/IPaisValidatorService.cs` ✅
+   - `Infrastructure/Repository/PaisValidatorService.cs` ✅
+   - Registrado en `Program.cs` (DI) ✅
+
+3. **Resultado:**
+   ```
+   dotnet build → 0 errores, 0 advertencias
+   ✅ Clean Architecture respetada
+   ✅ Compilación exitosa
+   ```
+
+**Regla Para Futuro:**
+- Application NUNCA importa Infrastructure.* (clases concretas)
+- Application SIEMPRE importa Application.Interfaces
+- Application.Interfaces define contratos, Infrastructure implementa
+- Handlers usan Services, no AppDbContext
+- Si necesitas persistencia en validación, usar Service específico
+
+**Patrón de Referencia:** 
+- ClienteHandler (existente) — patrón correcto a seguir
+- PaisHandler (nuevo refactorizado) — ahora sigue patrón correcto
+
+---
+
 ### 4. AutoMapper Mapper Pattern Inconsistency
 
 **Síntomas:**
@@ -384,5 +496,62 @@ Si encuentras un problema crítico:
 
 ---
 
-**Última revisión:** 2026-04-30  
-**Próxima revisión:** Después de implementar Ventas
+### 5. (2026-05-10) DTO Actualizar Faltante — **RESUELTO**
+
+**ENCONTRADO EN:** Sprint 1 Catálogos (ModuloSistema y ParametroSistema)  
+**ESTADO:** ✅ RESUELTO (2026-05-10 18:00)
+
+**Error Message:**
+```
+CS0246: El nombre del tipo o del espacio de nombres 'ActualizarModuloSistemaDto' no se encontró
+CS0246: El nombre del tipo o del espacio de nombres 'ActualizarParametroSistemaDto' no se encontró
+```
+
+**Problema:**
+Controllers creados esperaban DTOs `ActualizarXxxDto`, pero estos no fueron creados durante la fase inicial de DTOs.
+
+```csharp
+// ❌ INCORRECTO (en Controller)
+public async Task<IActionResult> Actualizar(int id, [FromBody] ActualizarModuloSistemaDto dto)
+// Pero ActualizarModuloSistemaDto no existía
+```
+
+**Causa:**
+DTOs iniciales (Crear, Response) fueron creados, pero olvidó generar el DTO Actualizar para cada entidad. Verificación de compilación antes de crear Controllers habría detectado esto.
+
+**Solución Implementada (2026-05-10):**
+
+1. **Crear DTO Actualizar para cada entidad:**
+   ```csharp
+   // Application/Dtos/Catalogo/ActualizarModuloSistemaDto.cs
+   public class ActualizarModuloSistemaDto
+   {
+       [Required] public required string Nombre { get; set; }
+       [Required] public required string Codigo { get; set; }
+       [StringLength(500)] public string? Descripcion { get; set; }
+   }
+   ```
+
+2. **Aplica a entidades:**
+   - `ActualizarModuloSistemaDto` ✅
+   - `ActualizarParametroSistemaDto` ✅
+   - `ActualizarUnidadMedidaDto` (no necesitaba, solo se usaba creación)
+
+3. **Resultado:**
+   ```
+   dotnet build → 0 errores, 0 advertencias
+   Controllers compilaban exitosamente
+   ```
+
+**Regla Para Futuro:**
+- Checklist ANTES de crear Controller:
+  1. ¿Existe CrearXxxDto? (para POST)
+  2. ¿Existe ActualizarXxxDto? (para PUT)
+  3. ¿Existe XxxDto? (para GET response)
+  4. ¿Todos tienen validación con [Required], [StringLength]?
+  5. ¿Compilación? (dotnet build antes de escribir Controller)
+
+---
+
+**Última revisión:** 2026-05-10  
+**Próxima revisión:** Después de smoke testing SQL scripts

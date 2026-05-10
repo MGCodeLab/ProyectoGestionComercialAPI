@@ -1,8 +1,35 @@
-# Project Status — Nexus-ERP v3.0.0
+# Project Status — Nexus-ERP v3.0.0 → v3.1
 
-**Última actualización:** 2026-04-30  
-**Estado global:** 🟡 En desarrollo activo — Base lista, problemas resueltos  
-**Próxima fase:** Módulo Ventas
+**Última actualización:** 2026-05-10 (Sprint 1 Catálogos Base — 100% ARQUITECTURA IMPLEMENTADA)  
+**Estado global:** 🟢 Sprint 1 CQRS COMPLETO | P-03 RESUELTO | Compilación limpia | Pendiente: SQL scripts + smoke test  
+**Próxima fase:** Ejecutar SQL scripts → Smoke testing → Commit → Sprint 2 (Empresa/Sucursal)
+
+---
+
+## 🎯 STATUS SPRINT 1 — 100% COMPLETO
+
+### ✅ Entidades Base (Catálogos)
+
+| Entidad | Handlers | Validators | ValidatorService | DTOs | Controller | Status |
+|---------|----------|-----------|------------------|------|-----------|--------|
+| Pais | ✅ 4/4 | ✅ 2/2 | ✅ 1 | ✅ 3 | ✅ 7 endpoints | **100%** |
+| Moneda | ✅ 4/4 | ✅ 2/2 | ✅ 1 | ✅ 3 | ✅ 7 endpoints | **100%** |
+| UnidadMedida | ✅ 4/4 | ✅ 2/2 | ✅ 1 | ✅ 3 | ✅ 7 endpoints | **100%** |
+| ModuloSistema | ✅ 4/4 | ✅ 2/2 | ✅ 1 | ✅ 3 | ✅ 7 endpoints | **100%** |
+| ParametroSistema | ✅ 4/4 | ✅ 2/2 | ✅ 1 | ✅ 3 | ✅ 7 endpoints | **100%** |
+| **TOTAL** | **20/20** | **10/10** | **5/5** | **15/15** | **5/5** | **100%** |
+
+### ✅ Compilación y Arquitectura
+- ✅ dotnet build: 0 errores, 0 advertencias
+- ✅ Clean Architecture: 100% respetada
+- ✅ CQRS Pragmático: implementado
+- ✅ ValidatorServices: patrón validado
+- ✅ Dependency Injection: completa en Program.cs
+
+### 🔄 Pendiente
+- SQL scripts: schemas, tablas, índices, seeds
+- Smoke testing: endpoints GET, POST, PUT, PATCH, DELETE
+- Commit: una vez SQL + smoke test OK
 
 ---
 

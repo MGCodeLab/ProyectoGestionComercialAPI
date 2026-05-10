@@ -32,6 +32,16 @@ builder.Services.AddScoped<IProductoService, ProductoService>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IPaisService, PaisService>();
+builder.Services.AddScoped<IMonedaService, MonedaService>();
+builder.Services.AddScoped<IUnidadMedidaService, UnidadMedidaService>();
+builder.Services.AddScoped<IModuloSistemaService, ModuloSistemaService>();
+builder.Services.AddScoped<IParametroSistemaService, ParametroSistemaService>();
+builder.Services.AddScoped<IPaisValidatorService, PaisValidatorService>();
+builder.Services.AddScoped<IMonedaValidatorService, MonedaValidatorService>();
+builder.Services.AddScoped<IUnidadMedidaValidatorService, UnidadMedidaValidatorService>();
+builder.Services.AddScoped<IModuloSistemaValidatorService, ModuloSistemaValidatorService>();
+builder.Services.AddScoped<IParametroSistemaValidatorService, ParametroSistemaValidatorService>();
 
 var jwtKey = builder.Configuration["Jwt:Key"]!;
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

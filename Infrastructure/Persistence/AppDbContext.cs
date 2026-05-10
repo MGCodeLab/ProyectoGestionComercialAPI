@@ -3,6 +3,7 @@ using Domain.Catalogo;
 using Domain.Comercial;
 using Domain.Common;
 using Domain.Seguridad;
+using Domain.Configuracion;
 
 namespace Infrastructure.Persistence
 {
@@ -20,12 +21,23 @@ namespace Infrastructure.Persistence
             base.OnModelCreating(modelBuilder);
         }
 
+        // Catalogo
         public DbSet<Producto> Productos { get; set; }
         public DbSet<TipoDocumento> TipoDocumentos { get; set; }
+        public DbSet<Pais> Paises { get; set; }
+        public DbSet<Moneda> Monedas { get; set; }
+        public DbSet<UnidadMedida> UnidadesMedida { get; set; }
+
+        // Comercial
         public DbSet<Cliente> Clientes { get; set; }
 
+        // Seguridad
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Rol> Roles { get; set; }
         public DbSet<Permiso> Permisos { get; set; }
+
+        // Configuracion
+        public DbSet<ModuloSistema> ModulosSistema { get; set; }
+        public DbSet<ParametroSistema> ParametrosSistema { get; set; }
     }
 }
