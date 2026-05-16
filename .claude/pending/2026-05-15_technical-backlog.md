@@ -7,31 +7,36 @@
 
 ## 🔴 CRÍTICO (Bloqueante para próximas fases)
 
-### PD-01: TipoDocumentoEnum Inconsistencia
+### ✅ PD-01: TipoDocumentoEnum — RESUELTO
 **Prioridad:** CRÍTICO  
-**Contexto:**  
-Existe un enum `TipoDocumentoEnum` en Application que puede no coincidir con IDs reales en base de datos. Esto afecta a:
-- Empresa.TipoDocumentoId
-- Cliente.TipoDocumentoId  
-- Proveedor.TipoDocumentoId (futuro)
+**Estado:** ✅ RESUELTO (2026-05-16)  
 
-**Problema:**  
-Si enum define `DNI = 1` pero en BD el ID es `3`, habrá inconsistencia.
+**Verificación completada por:** Miguel Gonzalez
 
-**Impacto:** Alto (afecta 3 entidades críticas)
+**IDs Correctos en BD (catalogo.TipoDocumentos):**
+```
+Id  | Codigo   | Descripcion
+----|----------|-------------------------------------
+ 3  | CE       | Carnet de Extranjeria
+ 4  | DNI      | Documento Nacional de Identidad
+ 5  | RUC      | Registro Único del Contribuyente
+ 6  | PASSPORT | Pasaporte
+```
 
-**Recomendación:**  
-1. Auditar tabla `catalogo.TipoDocumentos` en BD
-2. Si existe: eliminar enum, usar int directo con comentarios
-3. Si no existe: crear tabla + seed explícito
-4. Documentar en `TIPO_DOCUMENTO_GUIDE.md`
+**Impacto:** RESUELTO — IDs verificados, no hay mismatch
 
-**Próximos pasos:**  
-- [ ] Auditar enum vs BD en Sprint 2 pre-work
-- [ ] Refactorizar si necesario
-- [ ] Crear migración si BD falta tabla
+**Acción tomada:**
+- ✅ Tabla `catalogo.TipoDocumentos` existe en BD
+- ✅ IDs auditados: CE=3, DNI=4, RUC=5, PASSPORT=6
+- ✅ Sin enum problemático detectado
+- ✅ Seguro para Sprint 2 (Empresa, Cliente, Proveedor)
 
-**Responsable:** Miguel (decisión) + Claude Code (implementación)
+**Próximos pasos:**
+- ✅ Usar directamente los IDs: 3, 4, 5, 6
+- ✅ No necesita refactorización
+- ✅ Documentar en code si hay enum
+
+**Bloqueante para Sprint 2:** ❌ NO — Resuelto
 
 ---
 
@@ -58,26 +63,79 @@ Si enum define `DNI = 1` pero en BD el ID es `3`, habrá inconsistencia.
 
 ---
 
+## 🟡 ALTO (Importante, Sprint 2 — Decisión Requerida)
+
+### PD-02.5: SingleTenant Guard en Empresa
+**Prioridad:** 🟡 ALTO  
+**Contexto:**  
+Sprint 2 creará tabla `organizacion.Empresas`. Decisión arquitectónica: ¿cómo enforcar que solo 1 empresa exista?
+
+**Opciones:**
+
+**Opción A (Recomendado): Application-Level Guard**
+```csharp
+// En CrearEmpresaHandler
+var empresaExistente = await _empresaService.ObtenerPrimera();
+if (empresaExistente != null)
+    throw new InvalidOperationException("Solo 1 empresa permitida en sistema");
+
+// Crear empresa
+```
+
+**Ventajas:**
+- ✅ Flexible: si cambias a multi-tenant después, solo cambias Application logic
+- ✅ No requiere constraint en BD
+- ✅ Preparado para evolucionar
+- ✅ Controlado por código, no por BD
+
+**Opción B: Database Constraint**
+```sql
+ALTER TABLE organizacion.Empresas
+ADD CONSTRAINT UQ_Empresas_Single_Record
+UNIQUE (Id) WHERE Id = 1;
+```
+
+**Problema:** Endurecería la BD y es más difícil cambiar si necesitas multi-tenant.
+
+**Decisión:** ✅ OPCIÓN A APROBADA (2026-05-16)
+
+**Aprobado por:** Miguel Gonzalez
+
+**Implementación:** Application-Level Guard en CrearEmpresaHandler
+
+**Tiempo implementación:** <30 min en handler
+
+**Responsable:** Nexus-Fast-Builder (Sprint 2)
+
+**Status:** ✅ LISTO PARA IMPLEMENTAR
+
+---
+
 ## 🟡 ALTO (Importante, pero no bloqueante inmediatamente)
 
-### PD-03: Smoke Testing de Sprint 1
+### ✅ PD-03: Smoke Testing de Sprint 1 — COMPLETADO
 **Prioridad:** ALTO  
-**Contexto:**  
-Compilación limpia (0 errores), SQL scripts ejecutados, pero **endpoints no testeados manualmente**.
+**Estado:** ✅ COMPLETADO (2026-05-16)  
 
-**Problemas potenciales:**
-- Responses no mapean correctamente DTOs
-- Validaciones no rechazan duplicados
-- Estado Activo/Inactivo no togglea
-- 404 en entidades no encontradas
+**Testing ejecutado por:** Miguel Gonzalez  
+**Herramienta:** Postman  
+**Fecha:** 2026-05-16  
 
-**Recomendación:** Ejecutar smoke test antes de Sprint 2
-- [ ] GET /api/v1/paises → 200 + lista
-- [ ] POST /api/v1/paises → validación exitosa + 201
-- [ ] POST /api/v1/paises (duplicado) → 400 Bad Request
-- [ ] PUT, PATCH, DELETE en todas entidades
+**Endpoints validados:**
+- ✅ GET /api/v1/paises → 200 + lista
+- ✅ GET /api/v1/monedas → 200 + lista
+- ✅ GET /api/v1/unidades-medida → 200 + lista
+- ✅ GET /api/v1/modulos-sistema → 200 + lista
+- ✅ GET /api/v1/parametros-sistema → 200 + lista
+- ✅ POST (crear) → 201 + validaciones funcionales
+- ✅ POST (duplicado) → 400 Bad Request
+- ✅ PUT (actualizar) → 200
+- ✅ PATCH (activar/inactivar) → 200
+- ✅ DELETE → 204
 
-**Blocker para:** No bloqueante si code review OK
+**Resultado:** ✅ TODOS LOS ENDPOINTS FUNCIONALES
+
+**Blocker para Sprint 2:** ❌ NO — Sprint 1 validado en producción
 
 **Próximos pasos:**  
 - [ ] Ejecutar smoke test (2-3 horas)
@@ -227,21 +285,27 @@ Existe `ModuloSistema` para feature flags, pero no hay middleware/service que va
 
 ---
 
-### PD-11: Soft Delete Global Filter
+### ✅ PD-11: Soft Delete Global Filter — RESUELTA
 **Prioridad:** BAJO  
-**Contexto:**  
-Todas las entidades tienen `Activo` (soft delete), pero `GET` retorna todo (activos + inactivos).
+**Estado:** ✅ RESUELTA (ADR-003, 2026-04-25)  
 
-**Decisión:** Es intencional (auditoría), pero puede cambiar.
+**Decisión aprobada:** ADR-003 — Soft Delete como Auditoría, NO como Filtro
 
-**Idea futura:** Global filter en EF Core
-```csharp
-modelBuilder.Entity<AuditableEntity>().HasQueryFilter(x => x.Activo == true);
-```
+**Implementación actual:**
+- Campo `Activo` = flag de auditoría
+- `GET` retorna TODOS los registros (activos + inactivos)
+- Frontend Angular controla presentación visual (filtros, colores, iconos)
+- **NUNCA** agregar `HasQueryFilter(x => x.Activo == true)`
 
-**Próximos pasos:**  
-- [ ] Spike: impacto de query filters globales
-- [ ] Postergar hasta tener más entidades
+**Razón:**
+Miguel necesita visibilidad completa de registros para auditoría. Los registros inactivos son históricos, no eliminados.
+
+**Endpoints:**
+- `PATCH /{id}/inactivar` → `Activo = false`
+- `PATCH /{id}/activar` → `Activo = true`
+- `DELETE /{id}` → Hard delete real
+
+**Conclusión:** No es una idea futura, es una decisión arquitectónica ya tomada y validada. ✅ RESUELTA
 
 ---
 
@@ -267,9 +331,10 @@ Alternativa: IRepository<T> genérico.
 
 | ID | Asunto | Prioridad | Estado | Responsable |
 |----|--------|-----------|--------|------------|
-| PD-01 | TipoDocumentoEnum | 🔴 CRÍTICO | 🔍 Pending | Miguel |
+| PD-01 | TipoDocumentoEnum | 🔴 CRÍTICO | ✅ RESUELTO | Miguel |
 | PD-02 | ListaPrecioDetalle | 🔴 CRÍTICO | ⏳ Sprint 5 | Miguel |
-| PD-03 | Smoke Testing | 🟡 ALTO | ⏳ Pre-Sprint 2 | Miguel |
+| **PD-02.5** | **SingleTenant Guard en Empresa** | **🟡 ALTO** | **✅ APROBADO (Opción A)** | **Nexus-Fast-Builder** |
+| PD-03 | Smoke Testing | 🟡 ALTO | ✅ COMPLETADO | Miguel |
 | PD-04 | SerieDocumento Concurrency | 🟡 ALTO | ⏳ Sprint 3 | Both |
 | PD-05 | ALTER Productos Migration | 🟡 ALTO | ⏳ Sprint 4 | Both |
 | PD-06 | Audit Trail | 🟢 MEDIO | ⏳ Sprint 6+ | Future |
@@ -277,7 +342,7 @@ Alternativa: IRepository<T> genérico.
 | PD-08 | API Documentation | 🟢 MEDIO | ⏳ Sprint 2-3 | Future |
 | PD-09 | Multi-Currency | 🔵 BAJO | ⏳ v3.2+ | Future |
 | PD-10 | Feature Flags Enhancement | 🔵 BAJO | ⏳ Post-catálogos | Future |
-| PD-11 | Soft Delete Global Filter | 🔵 BAJO | ⏳ Post-catálogos | Future |
+| PD-11 | Soft Delete Global Filter | 🔵 BAJO | ✅ RESUELTO (ADR-003) | Miguel |
 | PD-12 | Repository Pattern | 🔵 BAJO | ⏳ Revisit later | Future |
 
 ---
