@@ -43,6 +43,14 @@ builder.Services.AddScoped<IUnidadMedidaValidatorService, UnidadMedidaValidatorS
 builder.Services.AddScoped<IModuloSistemaValidatorService, ModuloSistemaValidatorService>();
 builder.Services.AddScoped<IParametroSistemaValidatorService, ParametroSistemaValidatorService>();
 
+// Organizacion
+builder.Services.AddScoped<IEmpresaService, EmpresaService>();
+builder.Services.AddScoped<IEmpresaValidatorService, EmpresaValidatorService>();
+builder.Services.AddScoped<ISucursalService, SucursalService>();
+builder.Services.AddScoped<ISucursalValidatorService, SucursalValidatorService>();
+builder.Services.AddScoped<IAlmacenService, AlmacenService>();
+builder.Services.AddScoped<IAlmacenValidatorService, AlmacenValidatorService>();
+
 var jwtKey = builder.Configuration["Jwt:Key"]!;
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

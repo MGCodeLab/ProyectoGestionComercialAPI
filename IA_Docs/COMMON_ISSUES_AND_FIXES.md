@@ -553,5 +553,135 @@ DTOs iniciales (Crear, Response) fueron creados, pero olvidó generar el DTO Act
 
 ---
 
-**Última revisión:** 2026-05-10  
+### 6. (2026-05-16) Record Parameter Ordering in Update Commands — **RESUELTO**
+
+**ENCONTRADO EN:** Sprint 2 Organización (Actualizar Empresa, Sucursal, Almacén)  
+**ESTADO:** ✅ RESUELTO (2026-05-16 14:00)
+
+**Síntoma:**
+Controller intenta usar `command with { Id = id }` para actualizar el Id del command, pero falla si el parámetro `Id` no está al final del record:
+
+```csharp
+// ❌ PROBLEMA: Id está al inicio
+public record ActualizarEmpresaCommand(
+    int Id,
+    string RazonSocial,
+    // ... más parámetros
+) : IRequest<int>;
+
+// En Controller:
+command = command with { Id = id };  // Error en compilación si Id no está al final
+```
+
+**Causa:**
+En C# records, cuando usas `with { }` (copy-constructor), los parámetros con valores por defecto deben estar al final del constructor. Si `Id` está primero sin valor por defecto, no puedes usar `with` sin proporcionar todos los demás parámetros.
+
+**Solución Implementada (2026-05-16):**
+
+1. **Reordenar parámetros en Update Commands:**
+   ```csharp
+   // ✅ CORRECTO: Parámetros sin default primero, Id al final con default
+   public record ActualizarEmpresaCommand(
+       string RazonSocial,
+       string? NombreComercial,
+       string NumeroDocumento,
+       int TipoDocumentoId,
+       int PaisId,
+       int MonedaBaseId,
+       string? DireccionFiscal,
+       string? Telefono,
+       string? Correo,
+       string? LogoUrl,
+       int Id = 0  // ← Al final con default
+   ) : IRequest<int>;
+   ```
+
+2. **Mantener en Controller:**
+   ```csharp
+   var command = _mapper.Map<ActualizarEmpresaCommand>(dto);
+   command = command with { Id = id };  // Ahora funciona
+   ```
+
+3. **Aplicado a:**
+   - `ActualizarEmpresaCommand` ✅
+   - `ActualizarSucursalCommand` ✅
+   - `ActualizarAlmacenCommand` ✅
+
+**Regla Para Futuro:**
+- **Record parameter ordering:**
+  - Parámetros sin default value → primero (en orden lógico)
+  - Parámetros con default value → último
+  - Ejemplo patrón: (nombre, email, telefono, id=0)
+- Si necesitas `with { }` para actualizar un parámetro, debe tener default value
+- Validación en code review: ¿Puedo compilar Controller.Update con `command with { }`?
+
+---
+
+### 7. (2026-05-16) SQL Table Naming Conventions — Plural Form — **RESUELTO**
+
+**ENCONTRADO EN:** Sprint 2 Organización (Script 07_Empresas.sql)  
+**ESTADO:** ✅ RESUELTO (2026-05-16 13:00)
+
+**Síntoma:**
+Foreign Key violation porque nombre de tabla en REFERENCES no coincide con nombre real:
+
+```sql
+-- ❌ PROBLEMA
+CONSTRAINT FK_Empresas_TipoDocumento
+    FOREIGN KEY (TipoDocumentoId)
+    REFERENCES catalogo.TipoDocumento(Id),  -- ❌ Tabla no existe, es "TipoDocumentos"
+
+-- En BD real existe:
+CREATE TABLE catalogo.TipoDocumentos (...)  -- Plural
+```
+
+**Causa:**
+Inconsistencia de convención: algunas tablas fueron creadas en plural (`TipoDocumentos`), pero FK reference asumió singular (`TipoDocumento`). Sin `SET FOREIGN_KEY_CHECKS OFF`, SQL Server rechaza la constraint.
+
+**Solución Implementada (2026-05-16):**
+
+1. **Corrección en Script:**
+   ```sql
+   -- ✅ CORRECTO
+   CONSTRAINT FK_Empresas_TipoDocumento
+       FOREIGN KEY (TipoDocumentoId)
+       REFERENCES catalogo.TipoDocumentos(Id),  -- ← Plural
+   ```
+
+2. **Aplicado a:**
+   - `Database/02_Tablas/07_Empresas.sql` → FK a `catalogo.TipoDocumentos` ✅
+
+3. **Verificación post-fix:**
+   ```sql
+   -- Scripts ejecutados sin error
+   DROP TABLE IF EXISTS organizacion.Almacenes;
+   DROP TABLE IF EXISTS organizacion.Sucursales;
+   DROP TABLE IF EXISTS organizacion.Empresas;
+   
+   -- Re-run 07_Empresas.sql → ✅ SUCCESS
+   ```
+
+**Regla Para Futuro:**
+- **SQL Naming Convention:** Todas las tablas en PLURAL
+  - ✅ `catalogo.Paises` (entidad: País)
+  - ✅ `catalogo.Monedas` (entidad: Moneda)
+  - ✅ `catalogo.TipoDocumentos` (entidad: TipoDocumento)
+  - ✅ `organizacion.Empresas` (entidad: Empresa)
+  - ✅ `organizacion.Sucursales` (entidad: Sucursal)
+  - ✅ `organizacion.Almacenes` (entidad: Almacén)
+
+- **Tabla → Nombre singular en código:**
+  - Tabla `Paises` → Entity `Pais` (singular, no plural)
+  - Tabla `Monedas` → Entity `Moneda`
+  - DbSet → nombre tabla (plural): `DbSet<Pais> Paises { get; }`
+
+- **Checklist FK creation:**
+  1. ¿Existe la tabla referenciada?
+  2. ¿Nombre está en PLURAL?
+  3. Verificar: `SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'catalog'`
+  4. Compilar script sin ejecutar primero (check sintaxis)
+
+---
+
+**Última revisión:** 2026-05-16  
 **Próxima revisión:** Después de smoke testing SQL scripts

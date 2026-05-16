@@ -4,6 +4,7 @@ using Domain.Comercial;
 using Domain.Common;
 using Domain.Seguridad;
 using Domain.Configuracion;
+using Domain.Organizacion;
 
 namespace Infrastructure.Persistence
 {
@@ -30,6 +31,11 @@ namespace Infrastructure.Persistence
 
         // Comercial
         public DbSet<Cliente> Clientes { get; set; }
+
+        // Organizacion
+        public DbSet<Empresa> Empresas { get; set; }
+        public DbSet<Sucursal> Sucursales { get; set; }
+        public DbSet<Almacen> Almacenes { get; set; }
 
         // Seguridad
         public DbSet<Usuario> Usuarios { get; set; }
