@@ -101,3 +101,173 @@ Example:
 * v2.1.0
 * v2.2.1
 * v3.0.0
+
+# Reglas Globales de Contexto y Trazabilidad para Todos los Agentes
+
+Todos los agentes del proyecto Nexus ERP deben obligatoriamente revisar y utilizar como contexto operativo las siguientes carpetas antes de realizar análisis, propuestas o implementaciones importantes:
+
+* IA_Docs/
+* History Changed/
+* USUARIO_DOCS/
+* .claude/plans/
+* .claude/execution-status/
+* .claude/pending/
+
+---
+
+# Objetivo
+
+Garantizar:
+
+* continuidad entre sesiones
+* trazabilidad histórica
+* coordinación entre agentes
+* consistencia arquitectónica
+* gobernanza técnica
+* reducción de pérdida de contexto
+* prevención de duplicidad de trabajo
+* alineación con decisiones previas
+
+---
+
+# Reglas Obligatorias
+
+## IA_Docs/
+
+Todos los agentes deben revisar IA_Docs antes de proponer cambios importantes.
+
+IA_Docs contiene:
+
+* arquitectura vigente
+* convenciones oficiales
+* decisiones técnicas
+* lineamientos del proyecto
+* reglas operativas
+* estructura organizacional
+
+Si un cambio modifica comportamiento arquitectónico, estructura o convenciones:
+
+→ IA_Docs debe actualizarse.
+
+---
+
+## History Changed/
+
+Todos los agentes deben revisar History Changed para comprender:
+
+* cambios históricos
+* decisiones aplicadas
+* impacto técnico previo
+* evolución del proyecto
+* problemas ya resueltos
+* patrones previamente utilizados
+
+Todo cambio importante debe generar su correspondiente documentación dentro de History Changed.
+
+La trazabilidad histórica es obligatoria.
+
+---
+
+## USUARIO_DOCS/
+
+USUARIO_DOCS representa la continuidad ejecutiva y funcional del proyecto.
+
+Después de cambios importantes o sesiones relevantes debe crearse o actualizarse un documento de avance siguiendo la nomenclatura oficial.
+
+Objetivo:
+
+* facilitar continuidad humana
+* resumir avances funcionales
+* explicar estado actual del sistema
+* registrar riesgos y próximos pasos
+* permitir retomar contexto rápidamente
+
+---
+
+## .claude/plans/
+
+Todos los planes activos del proyecto deben mantenerse aquí.
+
+Los agentes deben:
+
+* consultar planes existentes antes de iniciar trabajo
+* actualizar progreso real
+* mover planes según su estado:
+
+  * active
+  * completed
+  * paused
+  * archived
+
+No deben existir implementaciones importantes fuera de un plan documentado.
+
+---
+
+## .claude/execution-status/
+
+Debe mantenerse actualizado el estado real de ejecución del proyecto.
+
+Objetivo:
+
+* monitoreo rápido
+* estado global del proyecto
+* riesgos actuales
+* módulos completados
+* bloqueos
+* próximos objetivos
+
+Debe actualizarse cuando existan avances relevantes.
+
+---
+
+## .claude/pending/
+
+Todo pendiente técnico, arquitectónico o funcional identificado debe registrarse aquí.
+
+Incluye:
+
+* deuda técnica
+* mejoras futuras
+* refactors pendientes
+* riesgos identificados
+* decisiones pendientes
+* funcionalidades futuras
+
+---
+
+# Regla de Gobernanza
+
+Ningún agente debe:
+
+* ignorar documentación existente
+* duplicar decisiones ya tomadas
+* crear estructuras contradictorias
+* implementar cambios críticos sin revisar contexto histórico
+* asumir reglas funcionales no documentadas
+
+---
+
+# Prioridad Operativa
+
+Antes de implementar:
+
+1. Revisar contexto existente
+2. Validar arquitectura vigente
+3. Revisar planes activos
+4. Revisar riesgos/pending
+5. Revisar cambios históricos
+6. Actualizar documentación correspondiente
+7. Luego implementar
+
+---
+
+# Objetivo Final
+
+Nexus ERP debe poder continuar evolucionando incluso:
+
+* entre múltiples sesiones
+* entre distintos agentes
+* entre distintos sprints
+* entre distintas etapas del producto
+
+sin pérdida de contexto crítico ni degradación organizacional.
