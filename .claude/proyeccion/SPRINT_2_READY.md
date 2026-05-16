@@ -141,7 +141,7 @@ public class Almacen : AuditableEntity
 
 ### Domain/
 ```
-Domain/Catalogo/
+Domain/Organizacion/
 ├── Empresa.cs
 ├── Sucursal.cs
 └── Almacen.cs
@@ -150,7 +150,7 @@ Domain/Catalogo/
 ### Application/
 ```
 Application/
-├── Features/Catalogo/
+├── Features/Organizacion/
 │   ├── Empresa/
 │   │   ├── Crear/
 │   │   │   ├── CrearEmpresaCommand.cs
@@ -168,7 +168,7 @@ Application/
 │   │       └── EliminarEmpresaHandler.cs
 │   ├── Sucursal/ (estructura idéntica)
 │   └── Almacen/ (estructura idéntica)
-├── Dtos/Catalogo/
+├── Dtos/Organizacion/
 │   ├── CrearEmpresaDto.cs
 │   ├── ActualizarEmpresaDto.cs
 │   ├── EmpresaDto.cs
@@ -177,7 +177,7 @@ Application/
 │   ├── IEmpresaValidatorService.cs
 │   ├── ISucursalValidatorService.cs
 │   └── IAlmacenValidatorService.cs
-└── Mappings/Catalogo/
+└── Mappings/Organizacion/
     ├── EmpresaProfile.cs
     ├── SucursalProfile.cs
     └── AlmacenProfile.cs
@@ -276,8 +276,8 @@ DELETE /api/v1/almacenes/{id}
 - [ ] Leer `plans/active/2026-05-10_catalogo-roadmap-sprints2-5.md` (contexto general)
 - [ ] Leer `IA_Docs/VALIDATOR_SERVICE_PATTERN.md` (patrón obligatorio)
 - [ ] Compilar proyecto baseline (verify 0 errores)
-- [ ] Verificar Domain/Catalogo/ existe (para colocar entidades nuevas)
-- [ ] Verificar Application/Features/Catalogo/ existe
+- [ ] Verificar Domain/Organizacion/ existe (para colocar entidades nuevas)
+- [ ] Verificar Application/Features/Organizacion/ existe
 - [ ] Verificar Infrastructure/Repository/ existe
 - [ ] Verificar Database/ estructura (01_Schemas, 02_Tablas, 03_Seeds)
 
