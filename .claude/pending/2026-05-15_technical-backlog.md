@@ -1,8 +1,8 @@
 # Technical Backlog & Pending Decisions — Nexus-ERP
 
-**Última actualización:** 2026-05-18 (Sprint 4 completado)  
+**Última actualización:** 2026-05-18 (PD-02 decidido)  
 **Tipo:** Backlog técnico + arquitectónico + funcional  
-**Estado:** Sprint 1-4 ✅ completados — Sprint 5 próximo — Decisión pendiente: PD-02 (ListaPrecioDetalle)
+**Estado:** Sprint 1-4 ✅ completados — Sprint 5 ready — ✅ PD-02 decidido (Opción A: Diferir a Ventas)
 
 ---
 
@@ -93,26 +93,36 @@ Id  | Codigo   | Descripcion
 
 ---
 
-### PD-02: ListaPrecioDetalle Implementation
+### ✅ PD-02: ListaPrecioDetalle Implementation
 **Prioridad:** CRÍTICO  
+**Estado:** ✅ DECIDIDO (2026-05-18)  
 **Contexto:**  
 `ListaPrecio` será creada en Sprint 5 como catálogo. Pero los precios de cada producto por lista deben ir en tabla `ListaPrecioDetalle(ListaPrecioId, ProductoId, Precio)`.
 
-**Decisión pendiente:**  
-¿Crear `ListaPrecioDetalle` en Sprint 5 o deferir a módulo Ventas?
+**Decisión tomada: OPCIÓN A (Diferir a Ventas)**
+- ✅ Implementar solo `ListaPrecio` en Sprint 5 (catálogo simple)
+- ✅ Diferir `ListaPrecioDetalle` a módulo Ventas (Sprint 6+)
+- ✅ Sin tabla `ProductoPresentacion` en fase inicial
+- ✅ Abstracción por ProductoId (escalable a presentaciones futuro sin breaking changes)
 
-**Impacto:** 
-- Si ahora: +1 tabla, +1 controller con CRUD
-- Si deferred: Bloquea pricing en Ventas
+**Razón arquitectónica:**
+1. **YAGNI:** Presentaciones son especulación sin validación funcional del negocio
+2. **Velocidad:** Opción A completa catálogos en Sprint 5. Opción B suma 3-4h innecesarias
+3. **Escalabilidad:** Si se necesita `ProductoPresentacion` futuro:
+   - Se crea como entidad independiente
+   - `ListaPrecioDetalle` refactoriza a `(ListaPrecioId, ProductoPresentacionId, Precio)`
+   - Cero breaking changes en arquitectura actual
+4. **Validación real:** Presentaciones se demandan cuando usuario lo pide en Ventas, no antes
 
-**Recomendación:** Crear en Sprint 5 (completa catálogos)
+**Documentación:**
+- ✅ ADR-011 en IA_Docs/ARCHITECTURE_DECISIONS.md
 
-**Próximos pasos:**  
-- [ ] Confirmar incluir ListaPrecioDetalle en Sprint 5 plan
-- [ ] Implementar CRUD completo
-- [ ] Seed: 1 precio por producto en lista default
+**Impacto:**
+- Sprint 5: Catálogos completos (18 entidades) sin ListaPrecioDetalle
+- Sprint 6+ (Ventas): Agregar ListaPrecioDetalle (2-3h, simple)
+- Futuro: ProductoPresentacion si negocio lo solicita (refactor reversible)
 
-**Responsable:** Miguel (decisión)
+**Responsable:** Miguel (decisión aprobada 2026-05-18)
 
 ---
 
@@ -389,7 +399,7 @@ Alternativa: IRepository<T> genérico.
 | ID | Asunto | Prioridad | Estado | Sprint |
 |----|--------|-----------|--------|--------|
 | PD-01 | TipoDocumentoEnum | 🔴 CRÍTICO | ✅ RESUELTO | Sprint 1 |
-| PD-02 | ListaPrecioDetalle | 🔴 CRÍTICO | ⏳ Decidir antes Sprint 5 | Sprint 5 |
+| PD-02 | ListaPrecioDetalle | 🔴 CRÍTICO | ✅ DECIDIDO (Opción A: Diferir a Ventas) | Sprint 5 |
 | **PD-02.5** | **SingleTenant Guard en Empresa** | **🟡 ALTO** | **✅ IMPLEMENTADO** | **Sprint 2** |
 | PD-03 | Smoke Testing Sprint 1 | 🟡 ALTO | ✅ COMPLETADO | Sprint 1-2 |
 | PD-04 | SerieDocumento Concurrency | 🟡 ALTO | ✅ IMPLEMENTADO | Sprint 3 |
@@ -415,10 +425,12 @@ Alternativa: IRepository<T> genérico.
 3. ⏳ Push a develop (cuando SSH disponible)
 
 ### Antes de Sprint 5
-1. ⏳ **CRÍTICO:** Confirmar PD-02 (ListaPrecioDetalle) — ¿incluir en Sprint 5 o deferred a Ventas?
-   - Impacto: +1 tabla + CRUD + 2-3 horas si se incluye
-   - Recomendación: Incluir para completar catálogos
-2. ⏳ Consultar alcance final con Miguel
+1. ✅ PD-02 (ListaPrecioDetalle) — DECIDIDO: Opción A (Diferir a Ventas)
+   - ✅ ListaPrecio simple en Sprint 5 (catálogo)
+   - ✅ ListaPrecioDetalle en Sprint 6+ (módulo Ventas)
+   - ✅ Sin ProductoPresentacion ahora (escalable futuro sin breaking changes)
+   - ✅ Documentado en ADR-011
+2. ⏳ Iniciar Sprint 5 (CondicionPago, ListaPrecio, Proveedor)
 
 ### Después de Catálogos (Sprint 5 completo)
 1. Planificar Sprint 6: PD-06 (Audit Trail) + PD-07 (Testing)
