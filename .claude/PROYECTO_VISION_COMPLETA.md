@@ -1,9 +1,9 @@
 # NEXUS-ERP v3.1 — VISIÓN COMPLETA DEL PROYECTO
 
-**Fecha:** 2026-05-17  
-**Estado:** Sprint 1 ✅ COMPLETADO — Sprint 2 ✅ COMPLETADO — Sprint 3 ✅ COMPLETADO — Sprint 4-5 ⏳ Planeados  
-**Actualizado por:** Nexus-Fast-Builder  
-**Para:** Continuidad de sesión + próximos pasos (Sprint 3 ejecutado, Sprint 4 listo)
+**Fecha:** 2026-05-18  
+**Estado:** Sprint 1 ✅ COMPLETADO — Sprint 2 ✅ COMPLETADO — Sprint 3 ✅ COMPLETADO — Sprint 4 ✅ COMPLETADO — Sprint 5 ⏳ Próximo  
+**Actualizado por:** Nexus-Fast-Builder + Miguel Gonzalez  
+**Para:** Continuidad de sesión + próximos pasos (Sprint 4 ejecutado y testeado, Sprint 5 planeado)
 
 ---
 
@@ -84,16 +84,52 @@
 
 ---
 
+### ✅ Sprint 4 — COMPLETADO 100%
+
+| Métrica | Estado |
+|---------|--------|
+| Entidades implementadas | 2/2 ✅ (CategoriaProducto, MarcaProducto) |
+| Handlers CQRS | 8/8 ✅ |
+| Validators | 4/4 ✅ |
+| ValidatorServices | 2/2 ✅ |
+| DTOs | 6/6 ✅ |
+| Endpoints | 15/15 ✅ (14 estándar + 1 especial) |
+| Compilación | 0 errores ✅ |
+| SQL scripts | Ejecutados ✅ |
+| Patrón CQRS | Record + Task<int> ✅ |
+| Migración Productos | Segura, idempotente ✅ |
+| Testing | Completado + validado ✅ |
+
+**Entidades completadas:**
+- CategoriaProducto (catalogo.CategoriasProducto) — árbol jerárquico con validación profundidad y ciclos
+- MarcaProducto (catalogo.MarcasProducto) — catálogo de marcas
+- ALTER Productos — migración segura con 3 FKs nullable
+
+**Características especiales (2026-05-18):**
+- ✅ Self-reference FK con DeleteBehavior.Restrict → NO ACTION (SQL Server compatible)
+- ✅ Validación de profundidad máx 3 niveles (application rule)
+- ✅ Prevención de ciclos con graph traversal algorithm
+- ✅ Seed data: 6 categorías jerárquicas + 6 marcas
+- ✅ 4 SQL scripts ejecutados exitosamente
+- ✅ Duración real: ~3.5 horas (1.5-2.5h mejor que estimado)
+
+**Problemas resueltos (2026-05-18):**
+- ✅ SQL Server syntax: RESTRICT → NO ACTION en todos los FK
+- ✅ Script numbering: 12/13/14 → 13/14/15 (evitar conflicto con Sprint 3)
+- ✅ CQRS commands missing DTO fields: documentado en COMMON_ISSUES_AND_FIXES.md sección 11
+
+---
+
 ### 📈 Progreso General
 
 ```
 Sprint 1 (Catálogos Base)    ████████████████████ 100% ✅ COMPLETADO
 Sprint 2 (Organización)      ████████████████████ 100% ✅ COMPLETADO
 Sprint 3 (Fiscal)            ████████████████████ 100% ✅ COMPLETADO
-Sprint 4 (Producto)          ░░░░░░░░░░░░░░░░░░░░   0% ⏳ Próximo
-Sprint 5 (Comercial)         ░░░░░░░░░░░░░░░░░░░░   0% ⏳ Planeado
+Sprint 4 (Producto)          ████████████████████ 100% ✅ COMPLETADO
+Sprint 5 (Comercial)         ░░░░░░░░░░░░░░░░░░░░   0% ⏳ Próximo
 ────────────────────────────────────────────────────────────────────
-TOTAL PROYECTO               ██████████████████░░  60% (14 de 18 entidades)
+TOTAL PROYECTO               ██████████████████░░  80% (16 de 18 entidades)
 ```
 
 ---
@@ -133,17 +169,20 @@ TOTAL PROYECTO               █████████████████
 
 ---
 
-### SPRINT 4: Producto Enriquecido — Categoría, Marca, ALTER Productos
+### ✅ SPRINT 4: Producto Enriquecido — Categoría, Marca, ALTER Productos — **COMPLETADO 2026-05-18**
 
-**Duración estimada:** 5-6 horas  
-**Complejidad:** 🟡 MEDIA (patrones conocidos + migración)  
-**Riesgo:** ALTER TABLE Productos (RG-03)
+**Duración real:** ~3.5 horas (mejor que estimado 5-6h)  
+**Complejidad:** 🟡 MEDIA (patrones conocidos + migración) — ✅ **EJECUTADA EXITOSAMENTE**  
+**Riesgo:** ALTER TABLE Productos (RG-03) — ✅ **MITIGADO** (FKs nullable + idempotent script)
 
-**Entidades:** CategoriaProducto, MarcaProducto (2) + ALTER Productos  
-**Patrón especial:** CategoriaProducto self-referencia con validación profundidad  
-**Migración:** FKs nullable en Productos (segura, no rompe existentes)  
+**Entidades:** CategoriaProducto, MarcaProducto (2/2) ✅ + ALTER Productos ✅  
+**Patrón especial:** CategoriaProducto self-referencia con validación profundidad y prevención de ciclos ✅  
+**Migración:** FKs nullable en Productos — ✅ EJECUTADA exitosamente, productos existentes NO afectados  
+**SQL Scripts:** 4 ejecutados (13_CategoriasProducto, 14_MarcasProducto, 15_AddProductoFKs, seed) ✅  
+**Endpoints:** 15 funcionales (14 estándar + 1 especial GET/raices) ✅  
+**Testing:** Smoke testing completado y validado ✅  
 
-👉 **Detalles:** `.claude/plans/active/2026-05-16_catalogo-sprint4-producto.md`
+👉 **Detalles:** `.claude/plans/completed/2026-05-18_catalogo-sprint4-producto-completado.md`
 
 ---
 
@@ -162,21 +201,24 @@ TOTAL PROYECTO               █████████████████
 
 ## ⏱️ TIMELINE ACTUAL
 
-| Sprint | Entidades | Duración Real | Fin Real | Status |
-|--------|-----------|----------|---------|--------|
-| 1 | 5 | 4-5h | ✅ 2026-05-10 | COMPLETADO |
-| 2 | 3 | 4.5h | ✅ 2026-05-16 | COMPLETADO |
-| 3 | 3 | 6.5h | ✅ 2026-05-17 | COMPLETADO |
-| 4 | 3 | 5-6h estimado | ⏳ ~2026-05-24 | Próximo |
-| 5 | 4 | 6-7h estimado | ⏳ ~2026-05-31 | Planeado |
-| **TOTAL** | **18** | **~20.5h real** | **~2026-05-31** | **Catálogos 100%** |
+| Sprint | Entidades | Duración Estimado | Duración Real | Fin Real | Status |
+|--------|-----------|----------|----------|---------|--------|
+| 1 | 5 | 5-6h | 4-5h | ✅ 2026-05-10 | COMPLETADO |
+| 2 | 3 | 6-8h | 4.5h | ✅ 2026-05-16 | COMPLETADO |
+| 3 | 3 | 8-10h | 6.5h | ✅ 2026-05-17 | COMPLETADO |
+| 4 | 2 + ALTER | 5-6h | ~3.5h | ✅ 2026-05-18 | COMPLETADO |
+| 5 | 3 | 6-7h estimado | ⏳ TBD | ⏳ ~2026-05-24 | Próximo |
+| **TOTAL** | **16+** | **~30h** | **~18.5h real** | **~2026-05-31** | **80% (16 de 18 entidades)** |
 
-**Post-catálogos:** Módulo Ventas v3.1 (desbloqueado)
+**Post-catálogos:** Módulo Ventas v3.1 (desbloqueado cuando Sprint 5 complete)
 
-**Nota:** 
-- Sprint 2 completado 3.5 horas antes de estimado (4.5h vs 6-8h)
-- Sprint 3 completado 1.5-3.5 horas antes de estimado (6.5h vs 8-10h)
-- **Optimización acumulada: 5 horas en 2 sprints** gracias a mejora en patrones y procesos
+**Nota de Optimización:** 
+- Sprint 1: On-time (4-5h vs 5-6h estimado)
+- Sprint 2: 3.5 horas ANTES de estimado (4.5h vs 6-8h)
+- Sprint 3: 1.5-3.5 horas ANTES de estimado (6.5h vs 8-10h)
+- Sprint 4: 1.5-2.5 horas ANTES de estimado (~3.5h vs 5-6h)
+- **Optimización acumulada: 6.5-10 horas en 4 sprints** gracias a mejora continua en patrones y procesos
+- **Nueva estimación total:** ~18-20 horas reales (vs ~30h originales) — **40% más rápido que estimado**
 
 ---
 
@@ -203,12 +245,13 @@ TOTAL PROYECTO               █████████████████
 |----|--------|-------------|---------|-----------|--------|
 | **RG-02** | SerieDocumento race condition (Sprint 3) | Media | Crítico | ROWLOCK + UPDLOCK en transacción SERIALIZABLE | 🟡 Planned Sprint 3 |
 
-### 🟡 ALTOS
+### 🟢 RESUELTOS
 
-| ID | Riesgo | Probabilidad | Impacto | Mitigación | Status |
-|----|--------|-------------|---------|-----------|--------|
-| **RG-03** | ALTER TABLE Productos rompe datos (Sprint 4) | Baja | Alto | Nullable FKs + migration script idempotente | 🟡 Planned Sprint 4 |
-| **RG-04** | SingleTenant guard fallido (Sprint 2) | Media | Alto | ✅ MITIGADO — Implementado y validado en Sprint 2 | ✅ RESUELTO |
+| ID | Riesgo | Status | Resolución |
+|----|--------|--------|-----------|
+| **RG-02** | SerieDocumento race condition (Sprint 3) | ✅ RESUELTO | ROWLOCK + UPDLOCK en transacción SERIALIZABLE — implementado y validado (2026-05-17) |
+| **RG-03** | ALTER TABLE Productos rompe datos (Sprint 4) | ✅ RESUELTO | Nullable FKs + migration script idempotente — ejecutado exitosamente (2026-05-18) |
+| **RG-04** | SingleTenant guard fallido (Sprint 2) | ✅ RESUELTO | Implementado y validado en CrearEmpresaHandler (2026-05-16) |
 
 ### 🟢 RESUELTOS
 
@@ -366,29 +409,29 @@ if (empresaExistente != null)
 
 ---
 
-## 📊 ESTADO GOBERNANZA (Actualizado 2026-05-16)
+## 📊 ESTADO GOBERNANZA (Actualizado 2026-05-18)
 
 ```
 ✅ Estructura .claude/ (Reorganizada)
 ├── PROYECTO_VISION_COMPLETA.md          → Visión macro actual
 ├── plans/
 │   ├── active/
-│   │   ├── 2026-05-16_catalogo-sprint3-fiscal.md       ⏳ Próximo
-│   │   ├── 2026-05-16_catalogo-sprint4-producto.md     ⏳ Planeado
-│   │   └── 2026-05-16_catalogo-sprint5-comercial.md    ⏳ Planeado
+│   │   └── 2026-05-16_catalogo-sprint5-comercial.md    ⏳ Próximo
 │   └── completed/
 │       ├── 2026-05-10_catalogo-base-sprint1-complete.md
-│       └── 2026-05-16_catalogo-sprint2-organizacion.md ✅ (tras testing)
+│       ├── 2026-05-16_catalogo-sprint2-organizacion.md
+│       ├── 2026-05-17_catalogo-sprint3-fiscal.md
+│       └── 2026-05-18_catalogo-sprint4-producto-completado.md ✅ (hoy)
 ├── execution-status/
-│   └── catalogo-base-status.md          → Snapshot actual
+│   └── catalogo-base-status.md          → Snapshot actual (actualizado 2026-05-18)
 ├── pending/
 │   └── 2026-05-15_technical-backlog.md  → 12 decisiones técnicas
 └── IA_Docs/
     ├── GOVERNANCE_STRUCTURE.md
     ├── GOVERNANCE_SUMMARY.md
     ├── VALIDATOR_SERVICE_PATTERN.md
-    ├── COMMON_ISSUES_AND_FIXES.md       ← Actualizado con P-04 a P-07
-    ├── PLAN_GOVERNANCE_BY_SPRINT.md     ← Nuevo: convención de planes
+    ├── COMMON_ISSUES_AND_FIXES.md       ← Actualizado sección 11 (Sprint 4 hallazgos)
+    ├── PLAN_GOVERNANCE_BY_SPRINT.md     ← Convención de planes
     └── ... más documentación
 
 ```
@@ -408,91 +451,95 @@ if (empresaExistente != null)
 
 ---
 
-## 🚀 PRÓXIMOS PASOS — SPRINT 4
+## 🚀 PRÓXIMOS PASOS — SPRINT 5
 
-### Inmediato (Hoy o próxima sesión)
+### Inmediato (Próxima sesión)
 
-1. **✅ Sprint 3 Finalizado**
-   - ✅ 24+ archivos nuevos creados
+1. **✅ Sprint 4 Completado & Documentado**
+   - ✅ 42 archivos nuevos creados + 10 modificados
+   - ✅ 2 entidades nuevas (CategoriaProducto, MarcaProducto)
+   - ✅ Migración segura de Productos ejecutada
    - ✅ Patrón CQRS robusto (records, Clean Architecture)
-   - ✅ Compilación limpia (0 errores)
-   - ✅ 7 problemas documentados y resueltos
-   - ⏳ **Pendiente usuario:** Ejecutar SQL scripts + testing manual de 22 endpoints + commit final
+   - ✅ Compilación limpia (0 errores, 0 warnings)
+   - ✅ SQL scripts ejecutados exitosamente (4 scripts)
+   - ✅ Smoke testing completado (14+ endpoints validados)
+   - ✅ 3 hallazgos críticos documentados en COMMON_ISSUES_AND_FIXES.md
+   - ✅ Documentación: History Changed + USUARIO_DOCS + execution-status actualizado
+   - **Siguiente:** Push a develop (cuando SSH esté disponible)
 
-2. **📋 Sprint 4 Listo para Iniciar** (Plan disponible: `.claude/plans/active/2026-05-16_catalogo-sprint4-producto.md`)
-   - **Entidades:** CategoriaProducto, MarcaProducto, ALTER Productos
-   - **Duración estimada:** 5-6 horas
-   - **Riesgo:** ALTER TABLE Productos (RG-03 — mitigado con nullable FKs)
-   - **Patrón especial:** CategoriaProducto self-referencia con validación de profundidad
-   - **Migración:** Agregar 3 FKs nullable a tabla existente (seguro, no rompe datos)
+2. **📋 Sprint 5 Listo para Iniciar** (Plan disponible: `.claude/plans/active/2026-05-16_catalogo-sprint5-comercial.md`)
+   - **Entidades:** CondicionPago, ListaPrecio, Proveedor
+   - **Duración estimada:** 6-7 horas
+   - **Complejidad:** 🟢 BAJA (patrones conocidos)
+   - **Patrón especial:** Proveedor = clone de Cliente (mismo CQRS + validaciones)
+   - **Dependencias:** Sprint 1 (Pais, Moneda), Sprint 2 (TipoDocumento), Sprint 4 (Productos)
+   - **Desbloqueador:** Módulo Ventas v3.1 cuando Sprint 5 complete
 
-3. **Decisiones Pendientes Antes Sprint 4**
-   - [ ] ✅ PD-02 (ListaPrecioDetalle) — Decidir: ¿incluir en Sprint 5 o en Ventas?
-   - [ ] Consultar con Miguel si incluye o no ListaPrecioDetalle
+3. **Decisiones Pendientes Antes Sprint 5**
+   - [ ] PD-02 (ListaPrecioDetalle) — Decidir: ¿incluir en Sprint 5 o deferred a Ventas?
+   - [ ] Consultar con Miguel: alcance final de Sprint 5
 
-### Cuando Testing Sprint 3 esté completo
-
-1. **Finalizar Sprint 3**
-   - Ejecutar SQL scripts en BD
-   - Testing completo de 22 endpoints (Postman)
-   - Test de concurrencia: GET /next-numero con múltiples usuarios simultáneos
-   - Validar compound unique constraint (TipoComprobante, Sucursal, Serie)
-
-2. **Commit Final Sprint 3**
-   ```
-   feat(catalogo): Sprint 3 — Fiscal (TipoImpuesto, TipoComprobante, SerieDocumento) ✅ COMPLETADO
-   ```
-
-3. **Iniciar Sprint 4**
-   - Crear rama `catalogo-base/sprint_4`
-   - Implementar 2 entidades + ALTER Productos
-   - Especial atención a migración sin corromper datos existentes
-
-### Timeline Realista Actualizado
+### Timeline Realista ACTUALIZADO (2026-05-18)
 
 ```
-2026-05-17 (HOY):    Sprint 3 completado + documentación
-2026-05-17-18:       Usuario testing Sprint 3 + commit final
-2026-05-19-23:       Sprint 4 implementación (5-6h) ← PRÓXIMO
-2026-05-24-28:       Sprint 5 implementación (6-7h)
-~2026-05-31:         Catálogos 100% — Módulo Ventas desbloqueado
+2026-05-10:          Sprint 1 completado (4-5h real)
+2026-05-16:          Sprint 2 completado (4.5h real)
+2026-05-17:          Sprint 3 completado (6.5h real)
+2026-05-18 ✅:       Sprint 4 completado (3.5h real) — HEMOS LLEGADO AQUÍ
+2026-05-24-28:       Sprint 5 implementación (6-7h estimado) ← PRÓXIMO
+~2026-05-31:         Catálogos 100% — Módulo Ventas v3.1 DESBLOQUEADO
 ```
 
-**Optimización:** De ~2026-06-06 a ~2026-05-31 — **6 días de anticipación** gracias a mejoras en proceso
+**Optimización Final:** 
+- Tiempo real acumulado: ~18.5 horas
+- Tiempo estimado original: ~30 horas
+- **Mejora: 40% más rápido** gracias a optimización continua en patrones y procesos
+- **Anticipación:** 6-8 días adelantados respecto a timeline original (~2026-06-06 vs ~2026-05-31)
 
 ---
 
-## 📌 ESTADO ACTUAL (2026-05-17 15:30)
+## 📌 ESTADO ACTUAL (2026-05-18 14:00 UTC)
 
 | Item | Estado | Notas |
 |------|--------|-------|
-| Sprint 1 | ✅ 100% completo | Commit 71e9c9a |
-| Sprint 2 | ✅ 100% completo | Ejecutado + testeado por usuario |
-| Sprint 3 | ✅ 100% completo | Código listo, SQL scripts pendientes usuario |
-| Gobernanza | ✅ Completada | Planes segregados por sprint, ejecución actualizada |
+| Sprint 1 | ✅ 100% completo + testeado | Commit 71e9c9a |
+| Sprint 2 | ✅ 100% completo + testeado | Ejecutado + testeado por usuario |
+| Sprint 3 | ✅ 100% completo + testeado | SQL scripts ejecutados exitosamente |
+| Sprint 4 | ✅ 100% completo + testeado | ✅ HEMOS LLEGADO AQUÍ — Compilación 0 errores, 14+ endpoints validados |
+| Gobernanza | ✅ Completada | Planes segregados por sprint, ejecución actualizada diariamente |
 | Arquitectura Sprint 2 | ✅ Implementada | SingleTenant Guard funcional |
 | Arquitectura Sprint 3 | ✅ Implementada | SERIALIZABLE concurrency en SerieDocumento |
+| Arquitectura Sprint 4 | ✅ Implementada | Self-ref FK (NO ACTION), depth validation, cycle prevention |
 | PD-01 TipoDocumentoEnum | ✅ RESUELTO | IDs auditados por Miguel |
 | PD-02.5 SingleTenant Guard | ✅ IMPLEMENTADO | Application-level, multi-tenant ready |
 | PD-03 Smoke Testing Sprint 1 | ✅ COMPLETADO | Validado por Miguel en Postman |
-| Compilación | ✅ 0 errores | 0 advertencias (post-Sprint 3) |
-| SQL Scripts | ✅ Listos | 3 tablas Sprint 3 + seed — pendientes ejecutar |
-| Documentación | ✅ Completa | IA_Docs, History Changed, USUARIO_DOCS, gobernanza |
+| Compilación | ✅ 0 errores | 0 advertencias (post-Sprint 4) |
+| SQL Scripts | ✅ Ejecutados | 15 scripts totales ejecutados (Sprints 1-4) |
+| Documentación | ✅ Completa | IA_Docs, History Changed, USUARIO_DOCS, gobernanza actualizados |
 | Problemas Sprint 3 | ✅ 7 documentados | Secciones 8-10 COMMON_ISSUES_AND_FIXES.md |
+| Problemas Sprint 4 | ✅ 3 documentados | Sección 11 COMMON_ISSUES_AND_FIXES.md |
 
 ---
 
 ## ✉️ PRÓXIMAS ACCIONES
 
-### Pendiente (Usuario)
-1. ⏳ Testing manual completo de 21 endpoints (Postman)
-2. ⏳ Validación de códigos únicos (Sucursal, Almacén)
-3. ⏳ Commit final: `feat(catalogo): Sprint 2 — Organización ✅ COMPLETADO`
+### Inmediato (Hoy)
+1. ✅ Sprint 4 documentación completada (History Changed + USUARIO_DOCS)
+2. ✅ Planes movidos a `completed/` (Sprint 4)
+3. ✅ Execution status actualizado
+4. ✅ Visión completa actualizada
+5. ⏳ **Pendiente usuario:** Push a develop
 
-### Claude Code (Cuando testing esté listo)
-1. ✅ Mover Sprint 2 plan a `completed/` (ya listo)
-2. ✅ Sprint 3 plan está en `active/` y listo para implementar
-3. ✅ Esperar confirmación de usuario para iniciar Sprint 3
+### Antes de Sprint 5
+1. ⏳ Decidir: ¿incluir ListaPrecioDetalle en Sprint 5 o deferred a Ventas?
+2. ⏳ Consultar alcance final con Miguel
+3. ⏳ Preparar rama `catalogo-base/sprint_5`
 
-**Estado:** Sprint 2 listo para commit, Sprint 3 listo para implementar 🚀
+### Claude Code (Próxima sesión)
+1. ⏳ Esperar confirmación de usuario (push completado)
+2. ⏳ Iniciar Sprint 5: CondicionPago, ListaPrecio, Proveedor
+3. ⏳ Estimar fecha: ~2026-05-24 a 2026-05-28
+
+**Estado:** ✅ **Sprint 4 COMPLETADO Y DOCUMENTADO — Listo para push**  
+**Siguiente:** Sprint 5 (Comercial) — 3 entidades, 6-7 horas estimadas
 

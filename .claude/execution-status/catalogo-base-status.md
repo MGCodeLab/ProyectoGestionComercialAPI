@@ -1,9 +1,9 @@
 # Execution Status: Catálogos Base — Snapshot 2026-05-18
 
-**Fecha:** 2026-05-18 (18:50 actualizado)  
+**Fecha:** 2026-05-18 (14:00 finalizado)  
 **Rama actual:** `catalogo-base/sprint_4`  
 **Compilación:** ✅ 0 errores, 0 warnings  
-**SQL scripts:** ⏳ Pendientes de ejecución (Sprint 4)  
+**SQL scripts:** ✅ Ejecutados exitosamente (Sprint 4)  
 
 ---
 
@@ -132,7 +132,7 @@ PROYECTO TOTAL               █████████████████
 
 ## ✅ Módulos Completados (Sprint 4)
 
-### Sprint 4: Producto Enriquecido (COMPLETADO 100% — 2026-05-18)
+### Sprint 4: Producto Enriquecido (✅ COMPLETADO 100% — 2026-05-18 14:00 UTC)
 
 #### Implementación Completa:
 - ✅ **CategoriaProducto** (catalogo.CategoriasProducto) — Domain self-ref, DTOs (3), Interfaces, Services, ValidatorServices, Configurations, Controllers (8 endpoints), SQL
@@ -142,12 +142,21 @@ PROYECTO TOTAL               █████████████████
 #### Características:
 - ✅ AutoMapper Profiles: 2/2 (CategoriaProductoProfile, MarcaProductoProfile)
 - ✅ Program.cs: +4 DI registrations (2 services + 2 validators)
+- ✅ AppDbContext.cs: +2 DbSets (CategoriasProducto, MarcasProducto)
 - ✅ SQL DDL: 2 tablas (13_CategoriasProducto, 14_MarcasProducto) + 15_AddProductoFKs.sql + seed (12_InitCategoriasProductoMarcasProducto)
 - ✅ **CQRS Pattern:** 8 Commands (record) + 8 Handlers + 4 Validators
-- ✅ **Self-Reference:** CategoriaProducto con DeleteBehavior.Restrict (previene borrados en cascada)
+- ✅ **Self-Reference:** CategoriaProducto con DeleteBehavior.Restrict → NO ACTION (SQL Server compatible)
 - ✅ **Validación Profundidad:** Máximo 3 niveles (application rule en CrearHandler)
 - ✅ **Prevención Ciclos:** EsDescendienteDeAsync() en ActualizarHandler
 - ✅ **Migración Segura:** FKs NULLABLE + script idempotente + IF NOT EXISTS
+- ✅ **SQL Scripts Ejecutados:** 4 scripts ejecutados exitosamente (13, 14, 15, seed)
+- ✅ **Smoke Testing:** 14+ endpoints validados correctamente
+- ✅ **Duración Real:** ~3.5 horas (1.5-2.5 horas MEJOR que estimado)
+
+#### Archivos:
+- **Creados:** 42 nuevos
+- **Modificados:** 10 (Domain/Producto, DTOs/Producto, Commands/Producto, ProductoProfile, Program.cs, DbContext)
+- **Scripts SQL:** 4 (2 tablas + 1 migration + 1 seed)
 
 ---
 
@@ -169,16 +178,24 @@ PROYECTO TOTAL               █████████████████
 
 ## 🐛 Scripts Ejecutados
 
-**Todos ejecutados exitosamente (2026-05-16):**
+**Todos ejecutados exitosamente (2026-05-18):**
 
 ```
 ✅ 01_Schemas.sql                           — Creados catalogo + organizacion + configuracion
 ✅ 02_Tablas/01-05.sql                     — 5 tablas base (Sprint 1) creadas
-✅ 02_Tablas/07_Empresas.sql               — Organización (Sprint 2) ✅ Corregido TipoDocumentos
-✅ 02_Tablas/08_Sucursales.sql             — Organización (Sprint 2) ✅
-✅ 02_Tablas/09_Almacenes.sql              — Organización (Sprint 2) ✅
-✅ 03_Seeds/01-06.sql                      — 5 seeds base (Sprint 1) ✅
-✅ 03_Seeds/07_InitEmpresaSucursalAlmacen.sql — Seed Organización (Sprint 2) ✅
+✅ 02_Tablas/07_Empresas.sql               — Organización (Sprint 2)
+✅ 02_Tablas/08_Sucursales.sql             — Organización (Sprint 2)
+✅ 02_Tablas/09_Almacenes.sql              — Organización (Sprint 2)
+✅ 02_Tablas/10_TiposImpuesto.sql          — Fiscal (Sprint 3)
+✅ 02_Tablas/11_TiposComprobante.sql       — Fiscal (Sprint 3)
+✅ 02_Tablas/12_SeriesDocumento.sql        — Fiscal (Sprint 3)
+✅ 02_Tablas/13_CategoriasProducto.sql     — Producto (Sprint 4) — SQL syntax fixed (NO ACTION)
+✅ 02_Tablas/14_MarcasProducto.sql         — Producto (Sprint 4)
+✅ 02_Tablas/15_AddProductoFKs.sql         — Producto (Sprint 4) MIGRATION SCRIPT — Safe execution
+✅ 03_Seeds/01-06.sql                      — 5 seeds base (Sprint 1)
+✅ 03_Seeds/07_InitEmpresaSucursalAlmacen.sql — Seed Organización (Sprint 2)
+✅ 03_Seeds/08_InitTipoImpuestoComprobanteSerieDocumento.sql — Seed Fiscal (Sprint 3)
+✅ 03_Seeds/12_InitCategoriasProductoMarcasProducto.sql — Seed Producto (Sprint 4)
 ✅ Indices + constraints                   — Completados
 ```
 

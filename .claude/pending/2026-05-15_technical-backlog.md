@@ -1,8 +1,32 @@
 # Technical Backlog & Pending Decisions — Nexus-ERP
 
-**Última actualización:** 2026-05-17 (Sprint 3 completado)  
+**Última actualización:** 2026-05-18 (Sprint 4 completado)  
 **Tipo:** Backlog técnico + arquitectónico + funcional  
-**Estado:** Sprint 3 ✅ completado — Sprint 4 listo — Sprint 5 pendiente decisión PD-02
+**Estado:** Sprint 1-4 ✅ completados — Sprint 5 próximo — Decisión pendiente: PD-02 (ListaPrecioDetalle)
+
+---
+
+## ✅ SPRINT 4 — COMPLETADO (2026-05-18)
+
+**Estado:** ✅ Todas las decisiones del backlog para Sprint 4 implementadas
+
+**Decisiones ejecutadas:**
+- ✅ PD-05: ALTER TABLE Productos Migration Strategy — IMPLEMENTADA
+  - Decisión: Columnas nullable + script idempotente con IF NOT EXISTS
+  - Razón: Migración segura, productos existentes no afectados
+  - Implementación: 15_AddProductoFKs.sql ejecutado exitosamente
+  - Resultado: ✅ 3 FKs (UnidadMedidaId, CategoriaProductoId, MarcaProductoId) agregadas sin romper datos
+
+**Hallazgos nuevos (descubiertos durante Sprint 4):**
+- **PD-15:** CQRS Commands Missing DTO Fields
+  - Problema: `ActualizarProductoCommand` record faltaban 3 parámetros que sí tenía el DTO
+  - Síntoma: AutoMapper silently pierde datos cuando Command record no tiene los parámetros
+  - Solución: Sincronizar parámetros Command ↔ DTO + explicit ForMember mappings
+  - Impacto: CRÍTICO — AutoMapper no valida en compilación
+  - Documentación: COMMON_ISSUES_AND_FIXES.md sección 11
+  - Aplicación: TODOS los Commands deben matchear estructura DTO
+
+**Problemas documentados:** 3 (SQL syntax, script numbering, CQRS sync)
 
 ---
 
@@ -208,28 +232,32 @@ Sprint 3 implementará `SerieDocumento.NumeroActual` con incremento automático.
 
 ---
 
-### PD-05: ALTER TABLE Productos — Migration Strategy
+### ✅ PD-05: ALTER TABLE Productos — Migration Strategy
 **Prioridad:** ALTO  
+**Estado:** ✅ COMPLETADO (2026-05-18)  
 **Contexto:**  
-Sprint 4 agregará 3 FKs nullable a tabla existente `Productos`:
+Sprint 4 agregó 3 FKs nullable a tabla existente `Productos`:
 - UnidadMedidaId
 - CategoriaProductoId
 - MarcaProductoId
 
-**Riesgo:** Si ALTER ejecuta fuera de transacción, puede romper datos.
+**Estrategia implementada:**
+1. ✅ Agregadas 3 columnas con DEFAULT NULL
+2. ✅ Script migration: `15_AddProductoFKs.sql` (renumerado de FIX_AddProductoFKs.sql)
+3. ✅ Script idempotente con IF NOT EXISTS check
+4. ✅ Ejecutado exitosamente en BD
 
-**Estrategia:**
-1. Agregar 3 columnas con DEFAULT NULL
-2. Crear migration script: `FIX_AddProductoFKs.sql`
-3. Script idempotente (si columnas existen, no error)
-4. Ejecutar ANTES de nuevo deployment
+**Resultado:**
+- ✅ Migración segura: productos existentes NO fueron afectados
+- ✅ Ejecución: 0 errores
+- ✅ Validación: Productos existentes retienen NULL en nuevas FKs
+- ✅ PUT/POST productos ahora soportan 3 nuevos campos opcionales
 
-**Próximos pasos:**  
-- [ ] Crear script en Sprint 4
-- [ ] Testear en BD de desarrollo
-- [ ] Documentar roll-back plan
+**Documentación:**
+- History Changed: 20260518_T1400_feat_Sprint4ProductoEnriquecido_COMPLETADO.md
+- COMMON_ISSUES_AND_FIXES.md: Sección 11 (CQRS Commands)
 
-**Responsable:** Claude Code (script) + Miguel (QA)
+**Bloqueante para Sprint 5:** ❌ NO — Completado y validado
 
 ---
 
@@ -358,19 +386,20 @@ Alternativa: IRepository<T> genérico.
 
 ## 📊 Summary
 
-| ID | Asunto | Prioridad | Estado | Responsable |
-|----|--------|-----------|--------|------------|
-| PD-01 | TipoDocumentoEnum | 🔴 CRÍTICO | ✅ RESUELTO | Miguel |
-| PD-02 | ListaPrecioDetalle | 🔴 CRÍTICO | ⏳ Decidir antes Sprint 5 | Miguel |
+| ID | Asunto | Prioridad | Estado | Sprint |
+|----|--------|-----------|--------|--------|
+| PD-01 | TipoDocumentoEnum | 🔴 CRÍTICO | ✅ RESUELTO | Sprint 1 |
+| PD-02 | ListaPrecioDetalle | 🔴 CRÍTICO | ⏳ Decidir antes Sprint 5 | Sprint 5 |
 | **PD-02.5** | **SingleTenant Guard en Empresa** | **🟡 ALTO** | **✅ IMPLEMENTADO** | **Sprint 2** |
-| PD-03 | Smoke Testing Sprint 1 | 🟡 ALTO | ✅ COMPLETADO | Miguel |
-| PD-04 | SerieDocumento Concurrency | 🟡 ALTO | ✅ IMPLEMENTADO (Sprint 3) | Sprint 3 |
-| PD-05 | ALTER Productos Migration | 🟡 ALTO | ⏳ Sprint 4 | Next |
+| PD-03 | Smoke Testing Sprint 1 | 🟡 ALTO | ✅ COMPLETADO | Sprint 1-2 |
+| PD-04 | SerieDocumento Concurrency | 🟡 ALTO | ✅ IMPLEMENTADO | Sprint 3 |
+| PD-05 | ALTER Productos Migration | 🟡 ALTO | ✅ COMPLETADO | Sprint 4 |
 | **PD-13** | **SQL Server Syntax Compatibility** | **🟡 ALTO** | **✅ DOCUMENTADO** | **Sprint 3** |
 | **PD-14** | **FromSqlInterpolated Materialization** | **🟡 ALTO** | **✅ DOCUMENTADO** | **Sprint 3** |
+| **PD-15** | **CQRS Commands Missing DTO Fields** | **🔴 CRÍTICO** | **✅ DOCUMENTADO** | **Sprint 4** |
 | PD-06 | Audit Trail | 🟢 MEDIO | ⏳ Sprint 6+ | Future |
 | PD-07 | Testing Infrastructure | 🟢 MEDIO | ⏳ Post-Sprint 5 | Future |
-| PD-08 | API Documentation | 🟢 MEDIO | ⏳ Sprint 4-5 | Future |
+| PD-08 | API Documentation | 🟢 MEDIO | ⏳ Sprint 5+ | Future |
 | PD-09 | Multi-Currency | 🔵 BAJO | ⏳ v3.2+ | Future |
 | PD-10 | Feature Flags Enhancement | 🔵 BAJO | ⏳ Post-catálogos | Future |
 | PD-11 | Soft Delete Global Filter | 🔵 BAJO | ✅ RESUELTO (ADR-003) | Sprint 1 |
@@ -378,9 +407,25 @@ Alternativa: IRepository<T> genérico.
 
 ---
 
-**Próximos pasos:**
-1. Resolver PD-01 (TipoDocumentoEnum) antes Sprint 2
-2. Ejecutar smoke tests (PD-03) antes Sprint 2
-3. Confirmar ListaPrecioDetalle en Sprint 5 (PD-02)
-4. Planificar Sprint 6 (PD-06, PD-07)
+## 🚀 PRÓXIMOS PASOS
+
+### Inmediato (Hoy — Sprint 4 completado)
+1. ✅ PD-05: ALTER Productos completado y testeado
+2. ✅ PD-15: CQRS Commands sync documentado
+3. ⏳ Push a develop (cuando SSH disponible)
+
+### Antes de Sprint 5
+1. ⏳ **CRÍTICO:** Confirmar PD-02 (ListaPrecioDetalle) — ¿incluir en Sprint 5 o deferred a Ventas?
+   - Impacto: +1 tabla + CRUD + 2-3 horas si se incluye
+   - Recomendación: Incluir para completar catálogos
+2. ⏳ Consultar alcance final con Miguel
+
+### Después de Catálogos (Sprint 5 completo)
+1. Planificar Sprint 6: PD-06 (Audit Trail) + PD-07 (Testing)
+2. Evaluación: PD-08 (Swagger/API Docs) — ¿ahora o post-Sprint 5?
+
+### Futuro (No bloqueante)
+1. PD-09: Multi-Currency conversion (v3.2+)
+2. PD-10: Feature Flags middleware enhancement (post-catálogos)
+3. PD-12: Repository pattern revisit (si cambio BD)
 
