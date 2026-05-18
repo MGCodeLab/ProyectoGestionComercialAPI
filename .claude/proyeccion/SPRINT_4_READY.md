@@ -241,7 +241,7 @@ Solución: Hacer FKs NULLABLE
 
 #### SQL Migration Script
 
-**Archivo:** `Database/02_Tablas/FIX_AddProductoFKs.sql`
+**Archivo:** `Database/02_Tablas/15_AddProductoFKs.sql`
 
 ```sql
 -- Safe idempotent migration: Agregar FKs a Productos
@@ -434,9 +434,9 @@ GestionComercial/Controllers/
 └── MarcasProductoController.cs
 
 Database/02_Tablas/
-├── 12_CategoriasProducto.sql (NEW)
-├── 13_MarcasProducto.sql (NEW)
-└── FIX_AddProductoFKs.sql (MIGRATION - ejecutar al final)
+├── 13_CategoriasProducto.sql (NEW)
+├── 14_MarcasProducto.sql (NEW)
+└── 15_AddProductoFKs.sql (MIGRATION - ejecutar al final)
 
 Database/03_Seeds/
 └── 12_InitCategoriasProductoMarcasProducto.sql (NEW)
@@ -635,7 +635,7 @@ public class CategoriaProductoProfile : Profile
 - [ ] Verificar Infrastructure/Repository existe
 - [ ] Verificar Database/02_Tablas, 03_Seeds existen
 - [ ] Crear backup de base de datos (antes ALTER TABLE)
-- [ ] Script FIX_AddProductoFKs.sql listo para ejecutar
+- [ ] Script 15_AddProductoFKs.sql listo para ejecutar
 
 ---
 
@@ -680,9 +680,9 @@ public class CategoriaProductoProfile : Profile
 **Fase 7: Database**
 - [ ] CategoriaProductoConfiguration.cs (con self-ref setup)
 - [ ] MarcaProductoConfiguration.cs
-- [ ] Database/02_Tablas/12_CategoriasProducto.sql
-- [ ] Database/02_Tablas/13_MarcasProducto.sql
-- [ ] Database/02_Tablas/FIX_AddProductoFKs.sql (migration script)
+- [ ] Database/02_Tablas/13_CategoriasProducto.sql
+- [ ] Database/02_Tablas/14_MarcasProducto.sql
+- [ ] Database/02_Tablas/15_AddProductoFKs.sql (migration script)
 - [ ] Database/03_Seeds/12_InitCategoriasProductoMarcasProducto.sql
 
 **Fase 8: API & Controllers**
@@ -760,9 +760,9 @@ pending/2026-05-15_technical-backlog.md
 ## 📝 POST-BUILD ACTIONS
 
 1. [ ] Ejecutar SQL scripts en orden:
-   - `Database/02_Tablas/12_CategoriasProducto.sql`
-   - `Database/02_Tablas/13_MarcasProducto.sql`
-   - `Database/02_Tablas/FIX_AddProductoFKs.sql` (CRÍTICO - último)
+   - `Database/02_Tablas/13_CategoriasProducto.sql`
+   - `Database/02_Tablas/14_MarcasProducto.sql`
+   - `Database/02_Tablas/15_AddProductoFKs.sql` (CRÍTICO - último)
    - `Database/03_Seeds/12_InitCategoriasProductoMarcasProducto.sql`
 
 2. [ ] Update `execution-status/catalogo-base-status.md`

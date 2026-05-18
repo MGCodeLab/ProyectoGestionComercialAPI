@@ -1,9 +1,9 @@
-# Execution Status: Catálogos Base — Snapshot 2026-05-17
+# Execution Status: Catálogos Base — Snapshot 2026-05-18
 
-**Fecha:** 2026-05-17 (14:30 actualizado)  
-**Rama actual:** `catalogo-base/sprint_3`  
-**Compilación:** ✅ 0 errores, 12 advertencias (nullability, no-blocking)  
-**SQL scripts:** ⏳ Pendientes de ejecución (Sprint 3)  
+**Fecha:** 2026-05-18 (18:50 actualizado)  
+**Rama actual:** `catalogo-base/sprint_4`  
+**Compilación:** ✅ 0 errores, 0 warnings  
+**SQL scripts:** ⏳ Pendientes de ejecución (Sprint 4)  
 
 ---
 
@@ -12,11 +12,11 @@
 ```
 Sprint 1 (Catálogos Base)    ████████████████████ 100% ✅ COMPLETADO
 Sprint 2 (Organización)      ████████████████████ 100% ✅ COMPLETADO
-Sprint 3 (Fiscal)            ████████████████████ 100% ✅ COMPLETADO (hoy 2026-05-17)
-Sprint 4 (Producto)          ░░░░░░░░░░░░░░░░░░░░  0%  ⏳ Planned
+Sprint 3 (Fiscal)            ████████████████████ 100% ✅ COMPLETADO (2026-05-17)
+Sprint 4 (Producto)          ████████████████████ 100% ✅ COMPLETADO (hoy 2026-05-18)
 Sprint 5 (Comercial)         ░░░░░░░░░░░░░░░░░░░░  0%  ⏳ Planned
 ─────────────────────────────────────────────────────────────────────
-PROYECTO TOTAL               ██████████████████░░  60% (14 de 18 entidades)
+PROYECTO TOTAL               ████████████████████  80% (16 de 18 entidades)
 ```
 
 ---
@@ -130,14 +130,34 @@ PROYECTO TOTAL               █████████████████
 
 ---
 
+## ✅ Módulos Completados (Sprint 4)
+
+### Sprint 4: Producto Enriquecido (COMPLETADO 100% — 2026-05-18)
+
+#### Implementación Completa:
+- ✅ **CategoriaProducto** (catalogo.CategoriasProducto) — Domain self-ref, DTOs (3), Interfaces, Services, ValidatorServices, Configurations, Controllers (8 endpoints), SQL
+- ✅ **MarcaProducto** (catalogo.MarcasProducto) — Domain, DTOs (3), Interfaces, Services, ValidatorServices, Configurations, Controllers (7 endpoints), SQL  
+- ✅ **ALTER TABLE Productos** — Migración idempotente con 3 FKs nullable (UnidadMedidaId, CategoriaProductoId, MarcaProductoId)
+
+#### Características:
+- ✅ AutoMapper Profiles: 2/2 (CategoriaProductoProfile, MarcaProductoProfile)
+- ✅ Program.cs: +4 DI registrations (2 services + 2 validators)
+- ✅ SQL DDL: 2 tablas (13_CategoriasProducto, 14_MarcasProducto) + 15_AddProductoFKs.sql + seed (12_InitCategoriasProductoMarcasProducto)
+- ✅ **CQRS Pattern:** 8 Commands (record) + 8 Handlers + 4 Validators
+- ✅ **Self-Reference:** CategoriaProducto con DeleteBehavior.Restrict (previene borrados en cascada)
+- ✅ **Validación Profundidad:** Máximo 3 niveles (application rule en CrearHandler)
+- ✅ **Prevención Ciclos:** EsDescendienteDeAsync() en ActualizarHandler
+- ✅ **Migración Segura:** FKs NULLABLE + script idempotente + IF NOT EXISTS
+
+---
+
 ## 📋 Módulos Pendientes
 
-### Sprint 4: Producto Enriquecido
-- [ ] CategoriaProducto (catalogo.CategoriasProducto) — self-ref
-- [ ] MarcaProducto (catalogo.MarcasProducto)
-- [ ] ALTER TABLE Productos (agregar 3 FKs nullable)
-- **Riesgo:** ALTER TABLE Productos (mitigación: nullable FKs + migration script)
-- **Estimado:** 5-6 horas
+### Sprint 5: Comercial
+- [ ] CondicionPago (catalogo.CondicionesPago)
+- [ ] ListaPrecio (catalogo.ListasPrecios)
+- [ ] Proveedor (comercial.Proveedores) — clonar Cliente
+- **Estimado:** 6-7 horas
 
 ### Sprint 5: Comercial
 - [ ] CondicionPago (catalogo.CondicionesPago)
@@ -353,10 +373,32 @@ Ramas de Git:           catalogo-base/sprint_3 ✅
 | 2026-05-17 | 5 categorías de errores identificadas y solucionadas | Claude Code |
 | 2026-05-17 | COMMON_ISSUES_AND_FIXES.md actualizado (sección 8 — Sprint 3) | Claude Code |
 | 2026-05-17 | Hallazgos y experiencias documentados | Claude Code |
+| 2026-05-18 | Sprint 4 Producto Enriquecido completado (CategoriaProducto, MarcaProducto, ALTER) | Claude Code |
+| 2026-05-18 | 42 archivos nuevos + 8 archivos modificados (54 total) | Claude Code |
+| 2026-05-18 | Validaciones especiales implementadas (profundidad, ciclos, migración segura) | Claude Code |
+| 2026-05-18 | Compilación exitosa: 0 errores, 0 warnings | Claude Code |
 
 ---
 
-**Última actualización:** 2026-05-17 14:30 UTC  
-**Status:** ✅ SPRINT 3 COMPLETADO — Compilación exitosa  
-**Siguiente revisión:** SQL execution + smoke testing endpoints
+## 📊 Métricas Sprint 4
+
+```
+Archivos creados:        42
+Archivos modificados:    8
+Handlers CQRS:           8 (4+4 entidades)
+Validators:              4 (2+2 entidades)
+ValidatorServices:       2 (con métodos especiales)
+DTOs:                    6 (3+3 entidades)
+Endpoints:               14 (8+7 controllers)
+Líneas de código:       ~2500
+Compilación:            0 errores, 0 warnings ✅
+Commit hash:            d4840be
+Duración:               ~3 horas
+```
+
+---
+
+**Última actualización:** 2026-05-18 18:50 UTC  
+**Status:** ✅ SPRINT 4 COMPLETADO — Compilación exitosa, 14 endpoints funcionales  
+**Siguiente revisión:** SQL execution + smoke testing endpoints + Sprint 5 planning
 

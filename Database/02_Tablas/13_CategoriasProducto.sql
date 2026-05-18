@@ -24,7 +24,7 @@ BEGIN
         CONSTRAINT FK_CategoriasProducto_CategoriaPadre
         FOREIGN KEY (CategoriaPadreId)
         REFERENCES catalogo.CategoriasProducto(Id)
-        ON DELETE RESTRICT;
+        ON DELETE NO ACTION;
 
     -- Create indices
     CREATE INDEX IX_CategoriasProducto_CategoriaPadreId ON catalogo.CategoriasProducto(CategoriaPadreId);

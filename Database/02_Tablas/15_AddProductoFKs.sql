@@ -15,24 +15,24 @@ BEGIN
         CategoriaProductoId INT NULL,
         MarcaProductoId     INT NULL;
 
-    -- Add foreign key constraints with RESTRICT (no cascades)
+    -- Add foreign key constraints with NO ACTION (no cascades - SQL Server compatible)
     ALTER TABLE catalogo.Productos ADD
         CONSTRAINT FK_Productos_UnidadMedida
         FOREIGN KEY (UnidadMedidaId)
         REFERENCES catalogo.UnidadesMedida(Id)
-        ON DELETE RESTRICT;
+        ON DELETE NO ACTION;
 
     ALTER TABLE catalogo.Productos ADD
         CONSTRAINT FK_Productos_CategoriaProducto
         FOREIGN KEY (CategoriaProductoId)
         REFERENCES catalogo.CategoriasProducto(Id)
-        ON DELETE RESTRICT;
+        ON DELETE NO ACTION;
 
     ALTER TABLE catalogo.Productos ADD
         CONSTRAINT FK_Productos_MarcaProducto
         FOREIGN KEY (MarcaProductoId)
         REFERENCES catalogo.MarcasProducto(Id)
-        ON DELETE RESTRICT;
+        ON DELETE NO ACTION;
 
     -- Create indices for lookup performance
     CREATE INDEX IX_Productos_UnidadMedidaId ON catalogo.Productos(UnidadMedidaId);
