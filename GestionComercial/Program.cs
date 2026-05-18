@@ -51,6 +51,11 @@ builder.Services.AddScoped<ISucursalValidatorService, SucursalValidatorService>(
 builder.Services.AddScoped<IAlmacenService, AlmacenService>();
 builder.Services.AddScoped<IAlmacenValidatorService, AlmacenValidatorService>();
 
+// Sprint 3 - Catalogo Fiscal
+builder.Services.AddScoped<ITipoImpuestoService, TipoImpuestoService>();
+builder.Services.AddScoped<ITipoComprobanteService, TipoComprobanteService>();
+builder.Services.AddScoped<ISerieDocumentoService, SerieDocumentoService>();
+
 var jwtKey = builder.Configuration["Jwt:Key"]!;
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

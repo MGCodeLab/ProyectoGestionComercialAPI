@@ -683,5 +683,497 @@ Inconsistencia de convención: algunas tablas fueron creadas en plural (`TipoDoc
 
 ---
 
-**Última revisión:** 2026-05-16  
-**Próxima revisión:** Después de smoke testing SQL scripts
+---
+
+### 8. (2026-05-17) Sprint 3 Fiscal Entities — Compilation Fixes — **RESUELTO**
+
+**ENCONTRADO EN:** Sprint 3 Catálogos Fiscales (TipoImpuesto, TipoComprobante, SerieDocumento)  
+**ESTADO:** ✅ RESUELTO (2026-05-17 14:30) — **Compilación exitosa con 0 errores**
+
+#### 8a. Missing AuditableEntity Using Statement
+
+**Síntoma:**
+```
+CS0246: El nombre del tipo o del espacio de nombres 'AuditableEntity' no se encontró
+```
+
+**Problema:**
+Domain entities (TipoImpuesto, TipoComprobante, SerieDocumento) creados sin la declaración `using Domain.Common;`:
+```csharp
+// ❌ INCORRECTO
+namespace Domain.Catalogo;
+
+public class TipoImpuesto : AuditableEntity  // AuditableEntity no está en scope
+{
+    // ...
+}
+```
+
+**Solución:**
+```csharp
+// ✅ CORRECTO
+using Domain.Common;
+
+namespace Domain.Catalogo;
+
+public class TipoImpuesto : AuditableEntity
+{
+    // Hereda: PublicId, Activo, FechaRegistro, FechaActualizacion
+}
+```
+
+**Archivos corregidos:**
+- `Domain/Catalogo/TipoImpuesto.cs` ✅
+- `Domain/Catalogo/TipoComprobante.cs` ✅
+- `Domain/Catalogo/SerieDocumento.cs` ✅
+
+---
+
+#### 8b. Clean Architecture Violation: Handlers Injecting Infrastructure ValidatorServices
+
+**Síntoma:**
+```
+CS0246: El nombre del tipo o del espacio de nombres 'TipoImpuestoValidatorService' no se encontró
+(Handlers en Application layer no pueden referenciar Infrastructure.Repository)
+```
+
+**Problema:**
+Inicial: Intenté inyectar ValidatorServices directamente en Handlers:
+```csharp
+// ❌ INCORRECTO (violación Clean Architecture)
+using Infrastructure.Repository;  // Application NO debe referenciar Infrastructure
+
+public class CrearTipoImpuestoHandler : IRequestHandler<CrearTipoImpuestoCommand, int>
+{
+    private readonly TipoImpuestoValidatorService _validatorService;
+    // Application layer no puede conocer implementaciones de Infrastructure
+}
+```
+
+**Causa:**
+Clean Architecture requiere que Application sea agnóstica de detalles de persistencia. Application comunica SOLO a través de interfaces; Infrastructure implementa esas interfaces.
+
+**Solución Implementada (2026-05-17):**
+
+1. **Patrón correcto: Application layer → Service interface → Infrastructure implementation**
+   ```csharp
+   // ✅ CORRECTO en Handler
+   using Application.Interfaces;  // Application solo conoce interfaces
+   
+   public class CrearTipoImpuestoHandler : IRequestHandler<CrearTipoImpuestoCommand, int>
+   {
+       private readonly ITipoImpuestoService _service;
+       
+       public async Task<int> Handle(CrearTipoImpuestoCommand command, CancellationToken ct)
+       {
+           var entidad = new TipoImpuesto 
+           { 
+               Nombre = command.Nombre,
+               Codigo = command.Codigo,
+               Porcentaje = command.Porcentaje,
+               EsIncluido = command.EsIncluido,
+               Activo = true
+           };
+           
+           await _service.Crear(entidad);  // Service valida y persiste
+           return entidad.Id;
+       }
+   }
+   ```
+
+2. **Validación moveada a Service layer:**
+   ```csharp
+   // ✅ EN INFRASTRUCTURE (ITipoImpuestoService implementation)
+   public class TipoImpuestoService : ITipoImpuestoService
+   {
+       private readonly AppDbContext _context;
+       private readonly ILogger<TipoImpuestoService> _logger;
+       
+       public async Task Crear(TipoImpuesto entidad)
+       {
+           // Validación única AQUÍ (en Infrastructure)
+           if (await _context.TiposImpuesto.AnyAsync(t => t.Codigo == entidad.Codigo))
+               throw new InvalidOperationException($"Código {entidad.Codigo} ya existe");
+           
+           _context.TiposImpuesto.Add(entidad);
+           await _context.SaveChangesAsync();
+           _logger.LogInformation("TipoImpuesto creado: {Id}", entidad.Id);
+       }
+   }
+   ```
+
+3. **Archivos creados/modificados:**
+   - `Application/Features/Catalogo/TipoImpuesto/Crear/CrearTipoImpuestoHandler.cs` ✅
+   - `Application/Features/Catalogo/TipoComprobante/Crear/CrearTipoComprobanteHandler.cs` ✅
+   - `Application/Features/Catalogo/SerieDocumento/Crear/CrearSerieDocumentoHandler.cs` ✅
+   - (+ 6 handlers más para Actualizar, ActualizarEstado, Eliminar)
+   - `Infrastructure/Repository/TipoImpuestoService.cs` ✅
+   - `Infrastructure/Repository/TipoComprobanteService.cs` ✅
+   - `Infrastructure/Repository/SerieDocumentoService.cs` ✅
+
+**Patrón de Referencia:**
+```
+Catalogo (Sprint 1-2) → Patrón correcto a seguir desde ahora
+Fiscal (Sprint 3) → Implementación limpia sin violaciones de capas
+```
+
+---
+
+#### 8c. Ambiguous Type Name: SerieDocumento (Namespace vs Class)
+
+**Síntoma:**
+```
+CS0118: 'SerieDocumento' es espacio de nombres pero se usa como tipo
+```
+
+**Problema:**
+Namespace `Application.Features.Catalogo.SerieDocumento.Crear` conflictúa con tipo `SerieDocumento`:
+```csharp
+// ❌ INCORRECTO
+var serie = new SerieDocumento  // Compiler confunde: ¿namespace o clase?
+{
+    TipoComprobanteId = command.TipoComprobanteId,
+    // ...
+};
+```
+
+**Causa:**
+C# confunde el namespace `SerieDocumento.Crear` con la clase entity `SerieDocumento` cuando intenta instanciar sin fully qualified name.
+
+**Solución:**
+```csharp
+// ✅ CORRECTO: Fully qualified type name
+var serie = new Domain.Catalogo.SerieDocumento
+{
+    TipoComprobanteId = command.TipoComprobanteId,
+    SucursalId = command.SucursalId,
+    Serie = command.Serie,
+    NumeroActual = 0,
+    NumeroMaximo = command.NumeroMaximo,
+    Activo = true
+};
+```
+
+**Archivos corregidos:**
+- `Application/Features/Catalogo/SerieDocumento/Crear/CrearSerieDocumentoHandler.cs` ✅
+
+**Regla Para Futuro:**
+- Si la clase entity tiene namespace con mismo nombre: usar fully qualified name
+- Patrón: `new Domain.<Contexto>.<EntidadClass>` es siempre seguro
+- C# resolverá primero namespaces antes de tipos, causando ambigüedad
+
+---
+
+#### 8d. File-Scoped Namespace Syntax Mismatch
+
+**Síntoma:**
+```
+CS0103: 'OkResponse' no existe en el contexto actual
+```
+
+**Problema:**
+Controllers creados con namespace tradicional (braces) en lugar de file-scoped syntax:
+```csharp
+// ❌ INCORRECTO
+namespace API.GestionComercial.Controllers
+{
+    [ApiController]
+    public class TiposImpuestoController : ControllerBase
+    {
+        // ... pero extensions requieren file-scoped namespace
+    }
+}
+```
+
+**Causa:**
+Existing controllers en el proyecto usan file-scoped namespace (`namespace API.GestionComercial.Controllers;`), y la extensión `using API.GestionComercial.Extensions;` espera ese patrón.
+
+**Solución:**
+```csharp
+// ✅ CORRECTO: File-scoped namespace (semicolon, no braces)
+using API.GestionComercial.Extensions;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+
+namespace API.GestionComercial.Controllers;
+
+[ApiController]
+[Route("api/v1/[controller]")]
+public class TiposImpuestoController : ControllerBase
+{
+    // Ahora OkResponse extension está en scope
+}
+```
+
+**Archivos corregidos:**
+- `GestionComercial/Controllers/TiposImpuestoController.cs` ✅
+- `GestionComercial/Controllers/TiposComprobanteController.cs` ✅
+- `GestionComercial/Controllers/SeriesDocumentoController.cs` ✅
+
+**Patrón:**
+- C# 10+: file-scoped namespace es el estándar moderno
+- Ventaja: menos indentación, más clara
+- Síntaxis: `namespace Name;` (con punto y coma) vs `namespace Name { ... }`
+
+---
+
+#### 8e. Generic Type Inference Failure: OkResponse<T> with Null Parameters
+
+**Síntoma:**
+```
+CS0411: Los argumentos de tipo para el método 'ControllerExtensions.OkResponse<T>...' 
+        no se pueden inferir a partir del uso
+```
+
+**Problema:**
+Endpoints UPDATE/PATCH/DELETE retornan `OkResponse(null, "mensaje")`, pero el generic type `T` no puede ser inferido de `null`:
+```csharp
+// ❌ INCORRECTO
+return this.OkResponse(null, "TipoImpuesto actualizado correctamente");
+// Compiler no puede inferir T cuando primer parámetro es null
+```
+
+**Causa:**
+El método `OkResponse<T>(T data, string message)` necesita tipo explícito cuando `data` es `null`. C# no puede infer `T` de `null`.
+
+**Solución:**
+Proporcionar tipo explícito cuando retornas null:
+```csharp
+// ✅ CORRECTO: Type explicit
+return this.OkResponse<object>(null, "TipoImpuesto actualizado correctamente");
+```
+
+**Patrón general:**
+```csharp
+// GET (data existe)
+public async Task<IActionResult> Obtener(int id)
+{
+    var dato = await _service.ObtenerPorIdAsync(id);
+    return this.OkResponse(dato);  // ✅ Type inferred from dato
+}
+
+// PUT/PATCH/DELETE (no retornas data)
+public async Task<IActionResult> Actualizar(int id, [FromBody] ActualizarDto dto)
+{
+    await _service.Actualizar(...);
+    return this.OkResponse<object>(null, "mensaje");  // ✅ Type explicit
+}
+
+// POST (retornas ID o identificador)
+public async Task<IActionResult> Crear([FromBody] CrearDto dto)
+{
+    var id = await _mediator.Send(command);
+    return this.CreatedResponse(nameof(Obtener), new { id }, id);  // ✅ Type inferred
+}
+```
+
+**Archivos corregidos (replace_all):**
+- `GestionComercial/Controllers/TiposImpuestoController.cs` — 4 ocurrencias ✅
+- `GestionComercial/Controllers/TiposComprobanteController.cs` — 4 ocurrencias ✅
+- `GestionComercial/Controllers/SeriesDocumentoController.cs` — 4 ocurrencias ✅
+- **Total: 12 líneas corregidas con tipo explícito `<object>`**
+
+**Regla Para Futuro:**
+- Si llamas `OkResponse(null, ...)` → **SIEMPRE usa `OkResponse<object>(null, ...)`**
+- Esto aplica a: PUT, PATCH, DELETE que no retornan data
+- Si retornas data (GET, POST): el tipo se infiere automáticamente
+
+---
+
+## 📊 Resumen Estadístico Sprint 3
+
+| Métrica | Valor |
+|---------|-------|
+| Entidades nuevas | 3 (TipoImpuesto, TipoComprobante, SerieDocumento) |
+| Archivos creados | 24+ |
+| Handlers totales | 9 (3 entidades × 3 operaciones) |
+| Controllers creados | 3 |
+| Errores iniciales | 5 categorías |
+| Errores finales | 0 |
+| Advertencias (nullability) | 12 (warnings, no errores) |
+| Estado compilación final | ✅ **EXITOSA** |
+| Tiempo de resolución | ~2 horas |
+
+---
+
+### 9. (2026-05-17) SQL Server FOREIGN KEY Syntax — ON DELETE RESTRICT vs NO ACTION — **RESUELTO**
+
+**ENCONTRADO EN:** Sprint 3 SQL Scripts (12_SeriesDocumento.sql)  
+**ESTADO:** ✅ RESUELTO (2026-05-17 14:45)
+
+**Síntoma:**
+```
+Incorrect syntax near the keyword 'RESTRICT'.
+```
+
+**Problema:**
+Script SQL creado con sintaxis estándar SQL (ANSI), pero SQL Server no reconoce `ON DELETE RESTRICT`:
+
+```sql
+-- ❌ INCORRECTO en SQL Server
+CONSTRAINT [FK_SeriesDocumento_TiposComprobante] FOREIGN KEY ([TipoComprobanteId])
+    REFERENCES [catalogo].[TiposComprobante]([Id]) ON DELETE RESTRICT,
+```
+
+**Causa:**
+`RESTRICT` es sintaxis estándar SQL pero **SQL Server NO la soporta**. SQL Server requiere `NO ACTION` (comportamiento equivalente).
+
+**Diferencia:**
+- `RESTRICT` → estándar ANSI SQL (funciona en PostgreSQL, MySQL, MariaDB)
+- `NO ACTION` → específico de SQL Server (sintaxis equivalente a RESTRICT)
+
+Ambos previenen eliminar registros referenciados, pero la sintaxis varía por base de datos.
+
+**Solución Implementada (2026-05-17):**
+
+1. **Cambio en Script:**
+   ```sql
+   -- ✅ CORRECTO para SQL Server
+   CONSTRAINT [FK_SeriesDocumento_TiposComprobante] FOREIGN KEY ([TipoComprobanteId])
+       REFERENCES [catalogo].[TiposComprobante]([Id]) ON DELETE NO ACTION,
+   CONSTRAINT [FK_SeriesDocumento_Sucursales] FOREIGN KEY ([SucursalId])
+       REFERENCES [organizacion].[Sucursales]([Id]) ON DELETE NO ACTION,
+   ```
+
+2. **Archivo corregido:**
+   - `Database/02_Tablas/12_SeriesDocumento.sql` ✅ (2 cambios)
+
+3. **Verificación:**
+   ```powershell
+   grep -n "ON DELETE RESTRICT" Database/02_Tablas/*.sql
+   # (sin resultados — problema resuelto)
+   ```
+
+**Regla Para Futuro:**
+- **SQL Server keywords para foreign keys:**
+  - ❌ `ON DELETE RESTRICT` → no soportado
+  - ✅ `ON DELETE NO ACTION` → previene delete (estándar SQL Server)
+  - ✅ `ON DELETE CASCADE` → elimina registros dependientes
+  - ✅ `ON DELETE SET NULL` → asigna NULL a FK
+  - ✅ `ON DELETE SET DEFAULT` → asigna valor default a FK
+
+- **Checklist para scripts SQL:**
+  1. ¿Usas `RESTRICT`? → Cambiar a `NO ACTION`
+  2. ¿Verificas sintaxis antes de ejecutar?
+  3. ¿Testeas en SQL Server antes de commit?
+
+- **Si necesitas trabajar multi-BD (PostgreSQL + SQL Server):**
+  - Usar `NO ACTION` (compatible con ambas)
+  - O generar scripts específicos por BD
+  - Documentar incompatibilidades en README
+
+**Referencia SQL Server:**
+- [MS Docs: FOREIGN KEY Constraints](https://learn.microsoft.com/en-us/sql/t-sql/statements/alter-table-table-constraint-transact-sql)
+- Delete actions: RESTRICT no listado → usar NO ACTION equivalente
+
+---
+
+### 10. (2026-05-17) FromSqlInterpolated Non-Composable with UPDATE — **RESUELTO**
+
+**ENCONTRADO EN:** Sprint 3 (SerieDocumentoService.ObtenerProximoNumeroAsync)  
+**ESTADO:** ✅ RESUELTO (2026-05-17 15:00)
+
+**Síntoma:**
+```
+System.InvalidOperationException: 'FromSql' or 'SqlQuery' was called with non-composable SQL 
+and with a query composing over it. Consider calling 'AsEnumerable' after the method to 
+perform the composition on the client side.
+```
+
+**Problema:**
+`FromSqlInterpolated` con UPDATE statements es non-composable. EF Core no permite llamar `.FirstOrDefaultAsync()` directamente después:
+
+```csharp
+// ❌ INCORRECTO
+var serie = await _context.SeriesDocumento
+    .FromSqlInterpolated($@"
+        UPDATE catalogo.SeriesDocumento ...
+        SELECT * FROM catalogo.SeriesDocumento ...
+    ")
+    .FirstOrDefaultAsync(ct);  // Error: intenta componer LINQ sobre raw SQL
+```
+
+**Causa:**
+Cuando `FromSqlInterpolated` contiene UPDATE (no solo SELECT), el resultado es non-composable. EF Core no puede aplicar `.FirstOrDefaultAsync()` porque:
+1. UPDATE statements no son component queries
+2. EF Core requiere materializaralización explícita antes de aplicar LINQ
+
+**Solución Implementada (2026-05-17):**
+
+1. **Materializar primero con `.ToListAsync()`:**
+   ```csharp
+   // ✅ CORRECTO
+   var resultado = await _context.SeriesDocumento
+       .FromSqlInterpolated($@"
+           UPDATE catalogo.SeriesDocumento WITH (ROWLOCK, UPDLOCK)
+           SET NumeroActual = NumeroActual + 1
+           WHERE Id = {serieDocumentoId}
+               AND (NumeroMaximo IS NULL OR NumeroActual < NumeroMaximo)
+           
+           SELECT * FROM catalogo.SeriesDocumento
+           WHERE Id = {serieDocumentoId}
+       ")
+       .ToListAsync(ct);  // Materializa el resultado async
+   
+   var serie = resultado.FirstOrDefault();  // Luego filtra en memory
+   ```
+
+2. **Archivo corregido:**
+   - `Infrastructure/Repository/SerieDocumentoService.cs` (línea 66-68) ✅
+
+3. **Verificación:**
+   ```powershell
+   dotnet build
+   # → ✅ 0 errores, compilación exitosa
+   ```
+
+**Patrón de Referencia:**
+- Siempre que usas `FromSqlInterpolated` con sentencias complejas (UPDATE, DELETE), materializa primero
+- Para queries puras (SELECT), puedes componer directamente sin `.ToListAsync()`
+
+**Regla Para Futuro:**
+- **Raw SQL + LINQ composition:**
+  - ❌ `.FromSqlInterpolated(...).FirstOrDefaultAsync()`
+  - ✅ `.FromSqlInterpolated(...).ToListAsync()` → `.FirstOrDefault()`
+  
+- **Cuándo aplicar:**
+  - Queries complejas con UPDATE/DELETE
+  - Cuando necesitas aplicar filtros adicionales post-ejecución
+  
+- **Alternativa:** Si el filtro es simple, incluirlo en el SQL directo en lugar de LINQ
+
+---
+
+## 🎯 Hallazgos Clave y Experiencias (Sprint 3)
+
+### 1. **Importancia de Using Statements en Entity Base Classes**
+Cada entity que hereda `AuditableEntity` DEBE tener `using Domain.Common;`. Esto es fácil de olvidar cuando generan múltiples archivos a la vez. **Solución:** Template o checklist para creación de entidades.
+
+### 2. **Clean Architecture No Es Negociable**
+La violación de capas (Application inyectando Infrastructure) es tentadora cuando "solo quieres validar algo", pero rompe la arquitectura. **Lección:** Validación pertenece a Service layer, nunca a Handler. Handlers solo usan Services.
+
+### 3. **Namespace Conflicts Con Entidades**
+Cuando creas feature folder con nombre igual a la entidad, pueden surgir ambigüedades. **Solución:** Fully qualified names (`Domain.Catalogo.NombreTipo`) son siempre seguros.
+
+### 4. **File-Scoped Namespace Es Estándar en el Proyecto**
+Todos los controllers existentes usan `namespace X;` (C# 10+). Mantener consistencia es crítico para que extensions funcionen. **Regla:** Copiar patrón exacto de archivo existente.
+
+### 5. **Generic Type Inference y Null**
+C# no puede infer tipo genérico de `null`. Parece obvio en retrospectiva, pero es fácil olvidar cuando retorna muchos endpoints. **Solución:** IDE warnings son amigos — escuchalos.
+
+### 6. **Concurrencia en SerieDocumento Requiere SERIALIZABLE + ROWLOCK**
+El handler `ObtenerProximoNumero` usa transaction isolation y SQL hints para evitar race conditions. **Patrón:** Copiar exactamente para cualquier operación atómica futura.
+
+---
+
+## 🔗 Referencias Relacionadas
+
+- **IMPLEMENTATION_PATTERNS.md** — Patrones para entidades, handlers, servicios
+- **VALIDATOR_SERVICE_PATTERN.md** — Dónde y cómo validar
+- **DATABASE_SETUP_INSTRUCTIONS.md** — Scripts y ejecución
+- **COMMON_ISSUES_AND_FIXES.md** (este archivo) — Soluciones rápidas
+
+---
+
+**Última revisión:** 2026-05-17 (Sprint 3 completado)  
+**Próxima revisión:** Después de smoke testing SQL scripts y API endpoints

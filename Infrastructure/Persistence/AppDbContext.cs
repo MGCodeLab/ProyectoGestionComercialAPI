@@ -28,6 +28,9 @@ namespace Infrastructure.Persistence
         public DbSet<Pais> Paises { get; set; }
         public DbSet<Moneda> Monedas { get; set; }
         public DbSet<UnidadMedida> UnidadesMedida { get; set; }
+        public DbSet<TipoImpuesto> TiposImpuesto { get; set; }
+        public DbSet<TipoComprobante> TiposComprobante { get; set; }
+        public DbSet<SerieDocumento> SeriesDocumento { get; set; }
 
         // Comercial
         public DbSet<Cliente> Clientes { get; set; }

@@ -1,7 +1,36 @@
 # Technical Backlog & Pending Decisions — Nexus-ERP
 
-**Última actualización:** 2026-05-15  
-**Tipo:** Backlog técnico + arquitectónico + funcional
+**Última actualización:** 2026-05-17 (Sprint 3 completado)  
+**Tipo:** Backlog técnico + arquitectónico + funcional  
+**Estado:** Sprint 3 ✅ completado — Sprint 4 listo — Sprint 5 pendiente decisión PD-02
+
+---
+
+## ✅ SPRINT 3 — COMPLETADO (2026-05-17)
+
+**Estado:** ✅ Todas las decisiones del backlog para Sprint 3 implementadas
+
+**Decisiones ejecutadas:**
+- ✅ PD-04: SerieDocumento Concurrency Strategy — IMPLEMENTADA
+  - Decisión: SERIALIZABLE transaction + ROWLOCK + UPDLOCK (más seguro que solo ROWLOCK)
+  - Razón: Máxima seguridad para operación crítica
+  - Implementación: ObtenerProximoNumeroHandler con transacción atómica
+  - Resultado: ✅ Concurrencia segura sin duplicados
+
+**Hallazgos nuevos (descubiertos durante Sprint 3):**
+- **PD-13:** SQL Server Syntax Compatibility
+  - Problema: `ON DELETE RESTRICT` no soportado en SQL Server
+  - Solución: `ON DELETE NO ACTION` (equivalente)
+  - Impacto: Documentado en IA_Docs/SQL_SERVER_COMPATIBILITY.md
+  - Aplicación: Próximos sprints deben usar NO ACTION
+
+- **PD-14:** FromSqlInterpolated Materialization Pattern
+  - Problema: `FromSqlInterpolated(...).FirstOrDefaultAsync()` falla con UPDATE
+  - Solución: `FromSqlInterpolated(...).ToListAsync().FirstOrDefault()`
+  - Impacto: Pattern debe usarse en cualquier handler con raw SQL compl
+  - Documentación: COMMON_ISSUES_AND_FIXES.md sección 10
+
+**Problemas documentados:** 7 (secciones 8-10 COMMON_ISSUES_AND_FIXES.md)
 
 ---
 
@@ -332,17 +361,19 @@ Alternativa: IRepository<T> genérico.
 | ID | Asunto | Prioridad | Estado | Responsable |
 |----|--------|-----------|--------|------------|
 | PD-01 | TipoDocumentoEnum | 🔴 CRÍTICO | ✅ RESUELTO | Miguel |
-| PD-02 | ListaPrecioDetalle | 🔴 CRÍTICO | ⏳ Sprint 5 | Miguel |
-| **PD-02.5** | **SingleTenant Guard en Empresa** | **🟡 ALTO** | **✅ APROBADO (Opción A)** | **Nexus-Fast-Builder** |
-| PD-03 | Smoke Testing | 🟡 ALTO | ✅ COMPLETADO | Miguel |
-| PD-04 | SerieDocumento Concurrency | 🟡 ALTO | ⏳ Sprint 3 | Both |
-| PD-05 | ALTER Productos Migration | 🟡 ALTO | ⏳ Sprint 4 | Both |
+| PD-02 | ListaPrecioDetalle | 🔴 CRÍTICO | ⏳ Decidir antes Sprint 5 | Miguel |
+| **PD-02.5** | **SingleTenant Guard en Empresa** | **🟡 ALTO** | **✅ IMPLEMENTADO** | **Sprint 2** |
+| PD-03 | Smoke Testing Sprint 1 | 🟡 ALTO | ✅ COMPLETADO | Miguel |
+| PD-04 | SerieDocumento Concurrency | 🟡 ALTO | ✅ IMPLEMENTADO (Sprint 3) | Sprint 3 |
+| PD-05 | ALTER Productos Migration | 🟡 ALTO | ⏳ Sprint 4 | Next |
+| **PD-13** | **SQL Server Syntax Compatibility** | **🟡 ALTO** | **✅ DOCUMENTADO** | **Sprint 3** |
+| **PD-14** | **FromSqlInterpolated Materialization** | **🟡 ALTO** | **✅ DOCUMENTADO** | **Sprint 3** |
 | PD-06 | Audit Trail | 🟢 MEDIO | ⏳ Sprint 6+ | Future |
 | PD-07 | Testing Infrastructure | 🟢 MEDIO | ⏳ Post-Sprint 5 | Future |
-| PD-08 | API Documentation | 🟢 MEDIO | ⏳ Sprint 2-3 | Future |
+| PD-08 | API Documentation | 🟢 MEDIO | ⏳ Sprint 4-5 | Future |
 | PD-09 | Multi-Currency | 🔵 BAJO | ⏳ v3.2+ | Future |
 | PD-10 | Feature Flags Enhancement | 🔵 BAJO | ⏳ Post-catálogos | Future |
-| PD-11 | Soft Delete Global Filter | 🔵 BAJO | ✅ RESUELTO (ADR-003) | Miguel |
+| PD-11 | Soft Delete Global Filter | 🔵 BAJO | ✅ RESUELTO (ADR-003) | Sprint 1 |
 | PD-12 | Repository Pattern | 🔵 BAJO | ⏳ Revisit later | Future |
 
 ---

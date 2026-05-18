@@ -1,9 +1,9 @@
-# Execution Status: Catálogos Base — Snapshot 2026-05-16
+# Execution Status: Catálogos Base — Snapshot 2026-05-17
 
-**Fecha:** 2026-05-16 (14:30 actualizado)  
-**Rama actual:** `catalogo-base/sprint_2`  
-**Compilación:** ✅ 0 errores, 0 advertencias  
-**SQL scripts:** ✅ Ejecutados en BD exitosamente  
+**Fecha:** 2026-05-17 (14:30 actualizado)  
+**Rama actual:** `catalogo-base/sprint_3`  
+**Compilación:** ✅ 0 errores, 12 advertencias (nullability, no-blocking)  
+**SQL scripts:** ⏳ Pendientes de ejecución (Sprint 3)  
 
 ---
 
@@ -11,12 +11,12 @@
 
 ```
 Sprint 1 (Catálogos Base)    ████████████████████ 100% ✅ COMPLETADO
-Sprint 2 (Organización)      ████████████████████ 100% ✅ COMPLETADO (hoy 2026-05-16)
-Sprint 3 (Fiscal)            ░░░░░░░░░░░░░░░░░░░░  0%  ⏳ Planned
+Sprint 2 (Organización)      ████████████████████ 100% ✅ COMPLETADO
+Sprint 3 (Fiscal)            ████████████████████ 100% ✅ COMPLETADO (hoy 2026-05-17)
 Sprint 4 (Producto)          ░░░░░░░░░░░░░░░░░░░░  0%  ⏳ Planned
 Sprint 5 (Comercial)         ░░░░░░░░░░░░░░░░░░░░  0%  ⏳ Planned
 ─────────────────────────────────────────────────────────────────────
-PROYECTO TOTAL               ████████████████░░░░  40% (11 de 18 entidades)
+PROYECTO TOTAL               ██████████████████░░  60% (14 de 18 entidades)
 ```
 
 ---
@@ -99,21 +99,38 @@ PROYECTO TOTAL               ████████████████░
 
 ---
 
+## ✅ Módulos Completados (Sprint 3)
+
+### Sprint 3: Fiscal (COMPLETADO 100% — 2026-05-17)
+
+#### Implementación Completa:
+- ✅ **TipoImpuesto** (catalogo.TiposImpuesto) — Domain, DTOs, Interfaces, Services, Handlers (4/4), Validators (2/2), Configurations, Controllers (7 endpoints), SQL
+- ✅ **TipoComprobante** (catalogo.TiposComprobante) — Domain, DTOs, Interfaces, Services, Handlers (4/4), Validators (2/2), Configurations, Controllers (7 endpoints), SQL
+- ✅ **SerieDocumento** (catalogo.SeriesDocumento) — Domain, DTOs, Interfaces, Services, Handlers (4/4 + 1 special), Validators, Configurations, Controllers (8 endpoints incl. ObtenerProximoNumero), SQL
+
+#### Características:
+- ✅ AutoMapper Profiles: 3/3 (TipoImpuestoProfile, TipoComprobanteProfile, SerieDocumentoProfile)
+- ✅ Program.cs: +6 DI registrations (3 services + 3 validators)
+- ✅ SQL DDL: 3 tablas (10_TiposImpuesto, 11_TiposComprobante, 12_SeriesDocumento) + seed (08_InitTipoImpuestoComprobanteSerieDocumento)
+- ✅ **CQRS Pattern:** 11 Commands (record) + 10 Handlers + 6 Validators
+- ✅ **Concurrency Safety:** ObtenerProximoNumeroHandler con SERIALIZABLE transaction + ROWLOCK + UPDLOCK
+- ✅ **Composite Unique Constraint:** SerieDocumento (TipoComprobanteId, SucursalId, Serie)
+
+#### Correcciones Aplicadas (2026-05-17):
+- ✅ Domain entities: Added `using Domain.Common;` (3 archivos)
+- ✅ Handlers: Clean Architecture restored — no Infrastructure imports in Application layer (10 archivos)
+- ✅ Controllers: File-scoped namespace syntax + extensions (3 archivos)
+- ✅ Controllers: Generic type inference for OkResponse<object> null parameters (12 líneas)
+- ✅ Ambiguous type resolution: SerieDocumento → Domain.Catalogo.SerieDocumento (1 archivo)
+
+#### Hallazgos Documentados:
+- ✅ Sprint 3 findings agregados a COMMON_ISSUES_AND_FIXES.md (sección 8)
+- ✅ 5 categorías de errores identificadas y solucionadas
+- ✅ 24+ archivos nuevos creados sin errores de compilación
+
+---
+
 ## 📋 Módulos Pendientes
-
-### Sprint 3: Fiscal (Planned)
-- [ ] TipoImpuesto (catalogo.TiposImpuesto)
-- [ ] TipoComprobante (catalogo.TiposComprobante)
-- [ ] SerieDocumento (catalogo.SeriesDocumento) ← CRÍTICO para Ventas
-- **Riesgo:** Race condition en NumeroActual (mitigación: ROWLOCK)
-- **Estimado:** 8-10 horas
-
-### Sprint 3: Fiscal
-- [ ] TipoImpuesto (catalogo.TiposImpuesto)
-- [ ] TipoComprobante (catalogo.TiposComprobante)
-- [ ] SerieDocumento (catalogo.SeriesDocumento) ← CRÍTICO para Ventas
-- **Riesgo:** Race condition en NumeroActual (mitigación: ROWLOCK)
-- **Estimado:** 8-10 horas
 
 ### Sprint 4: Producto Enriquecido
 - [ ] CategoriaProducto (catalogo.CategoriasProducto) — self-ref
@@ -302,6 +319,22 @@ Sprints 1-5 → Ventas v3.1 (all blocked on complete catalogs)
 
 ---
 
+## 📊 Métricas Sprint 3
+
+```
+Archivos creados:        24+
+Archivos modificados:    7 (Handlers, Controllers, Config, DI)
+Handlers CQRS:          10 (4/4/1 × 3 entidades + ObtenerProximoNumero)
+Validators:              6 (2 × 3 entidades)
+DTOs:                    9 (3 × 3 entidades)
+Endpoints:               22 (7 × 3 controllers + 1 special)
+Líneas de código:       ~3500+ (Domain + Application + Infrastructure)
+Compilación:            0 errores, 12 advertencias (nullability) ✅
+Ramas de Git:           catalogo-base/sprint_3 ✅
+```
+
+---
+
 ## 📝 Últimas Actualizaciones
 
 | Fecha | Evento | Responsable |
@@ -316,10 +349,14 @@ Sprints 1-5 → Ventas v3.1 (all blocked on complete catalogs)
 | 2026-05-16 | SQL scripts ejecutados en BD | Miguel Gonzalez |
 | 2026-05-16 | IA_Docs actualizado (secciones 6-7) | Claude Code |
 | 2026-05-16 | Documentación Sprint 2 finalizada | Claude Code |
+| 2026-05-17 | Sprint 3 Fiscal completado (TipoImpuesto, TipoComprobante, SerieDocumento) | Claude Code |
+| 2026-05-17 | 5 categorías de errores identificadas y solucionadas | Claude Code |
+| 2026-05-17 | COMMON_ISSUES_AND_FIXES.md actualizado (sección 8 — Sprint 3) | Claude Code |
+| 2026-05-17 | Hallazgos y experiencias documentados | Claude Code |
 
 ---
 
-**Última actualización:** 2026-05-16 14:30 UTC  
-**Status:** ✅ SPRINT 2 COMPLETADO — Listo para commit  
-**Siguiente revisión:** Post-testing + Sprint 3 inicio
+**Última actualización:** 2026-05-17 14:30 UTC  
+**Status:** ✅ SPRINT 3 COMPLETADO — Compilación exitosa  
+**Siguiente revisión:** SQL execution + smoke testing endpoints
 

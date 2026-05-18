@@ -24,6 +24,7 @@
 |-----------|-------------|---------------|
 | **DATABASE_ARCHITECTURE.md** | Schema SQL, constraints, patrones | Modificas base de datos |
 | **COMMON_ISSUES_AND_FIXES.md** | Problemas resueltos, troubleshooting | Encuentra un error, aquí está la solución |
+| **SQL_SERVER_COMPATIBILITY.md** | Diferencias SQL estándar vs SQL Server | Escribes scripts SQL, errores de sintaxis |
 | **PROJECT_KNOWLEDGE_BASE.md** | Context para IAs, estructura técnica | Necesitas entender cómo funciona todo |
 
 ---
@@ -75,6 +76,7 @@ IA_Docs/
 ├── 🔧 TÉCNICO
 │   ├── DATABASE_ARCHITECTURE.md     (Schema + patrones SQL)
 │   ├── COMMON_ISSUES_AND_FIXES.md   (Troubleshooting)
+│   ├── SQL_SERVER_COMPATIBILITY.md  (Diferencias sintaxis SQL)
 │   └── PROJECT_KNOWLEDGE_BASE.md    (Context general)
 │
 └── 📋 REFERENCIA
@@ -119,8 +121,9 @@ IA_Docs/
 ### "Tengo que modificar la base de datos"
 **Lectura obligatoria:**
 1. `DATABASE_ARCHITECTURE.md` — Patrones, constraints, índices
-2. Sección "Schema Versioning Strategy" — Cómo versionar cambios
-3. `COMMON_ISSUES_AND_FIXES.md` — Problemas evitables
+2. `SQL_SERVER_COMPATIBILITY.md` — Diferencias sintaxis SQL estándar vs SQL Server
+3. Sección "Schema Versioning Strategy" — Cómo versionar cambios
+4. `COMMON_ISSUES_AND_FIXES.md` — Problemas evitables
 
 **Checklist antes de hacer cambios:**
 - [ ] ¿Sigo el patrón AuditableEntity?
@@ -196,12 +199,13 @@ IA_Docs/
 | Versión | Fecha | Cambios |
 |---------|-------|---------|
 | 3.0.0 | 2026-04-30 | Base lista: Productos, Clientes, Auth. SQL constraint fixed. Documentación completa. |
+| 3.0.1 | 2026-05-17 | Sprint 3 Catálogos Fiscales: TipoImpuesto, TipoComprobante, SerieDocumento (CQRS completo). SQL_SERVER_COMPATIBILITY.md agregado. COMMON_ISSUES_AND_FIXES.md secciones 8-9. |
 | 3.1.0 | TBD | Módulo Ventas |
 | 3.2.0 | TBD | Módulo Compras |
 | 3.3.0 | TBD | Módulo Inventario |
 
 ---
 
-**Última actualización:** 2026-04-30  
-**Estado:** ✅ Documentación completa y actual  
-**Próxima revisión:** Después de implementar Ventas
+**Última actualización:** 2026-05-17  
+**Estado:** ✅ Sprint 3 completado — Documentación y código sincronizados  
+**Próxima revisión:** SQL script execution + smoke testing endpoints
