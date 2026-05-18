@@ -1144,6 +1144,162 @@ Cuando `FromSqlInterpolated` contiene UPDATE (no solo SELECT), el resultado es n
 
 ---
 
+### 11. (2026-05-18) CQRS Commands Missing DTO Fields — **RESUELTO**
+
+**ENCONTRADO EN:** Sprint 4 (CrearProductoCommand, ActualizarProductoCommand)  
+**ESTADO:** ✅ RESUELTO (2026-05-18 19:30)
+
+**Síntoma:**
+```
+Valores del DTO no llegan al backend (null).
+PUT /api/v1/productos/{id} envía:
+{
+  "unidadMedidaId": 1,
+  "categoriaProductoId": 2,
+  "marcaProductoId": 1
+}
+Pero en el handler recibe todo como null.
+```
+
+**Problema:**
+Cuando se agregan nuevos campos a un DTO (ej: `ActualizarProductoDto`), la correspondencia CQRS command TAMBIÉN debe actualizarse. Si el command record no tiene los campos, AutoMapper los mapea como null aunque el DTO los tenga:
+
+```csharp
+// ❌ INCORRECTO — Command incompleto
+public record ActualizarProductoCommand(
+    string Nombre,
+    string? Descripcion,
+    decimal Precio,
+    int Id = 0
+) : IRequest<Unit>;
+// Campos Sprint 4 FALTANTES
+
+// ✅ DTO tiene los campos
+public class ActualizarProductoDto
+{
+    public string Nombre { get; set; }
+    public string? Descripcion { get; set; }
+    public decimal Precio { get; set; }
+    public int? UnidadMedidaId { get; set; }      // ← Aquí están
+    public int? CategoriaProductoId { get; set; }  // ← Aquí están
+    public int? MarcaProductoId { get; set; }      // ← Aquí están
+}
+```
+
+Cuando AutoMapper intenta mapear `ActualizarProductoDto` → `ActualizarProductoCommand`:
+- Los parámetros nuevos **NO EXISTEN** en el command record
+- AutoMapper ignora silenciosamente los valores que no tienen destino
+- Los valores llegan como null al handler
+
+**Causa Raíz:**
+En C# records, los parámetros del constructor definen las propiedades. Si no están en el constructor, no existen como propiedades del record. AutoMapper no puede mapear a propiedades que no existen.
+
+**Solución Implementada (2026-05-18):**
+
+1. **Agregar parámetros faltantes al record:**
+   ```csharp
+   // ✅ CORRECTO — Command completo
+   public record ActualizarProductoCommand(
+       string Nombre,
+       string? Descripcion,
+       decimal Precio,
+       int? UnidadMedidaId = null,        // ← Agregado
+       int? CategoriaProductoId = null,   // ← Agregado
+       int? MarcaProductoId = null,       // ← Agregado
+       int Id = 0
+   ) : IRequest<Unit>;
+   ```
+
+2. **Agregar mappings explícitos en AutoMapper:**
+   ```csharp
+   CreateMap<ActualizarProductoDto, ActualizarProductoCommand>()
+       .ForMember(d => d.UnidadMedidaId, opt => opt.MapFrom(s => s.UnidadMedidaId))
+       .ForMember(d => d.CategoriaProductoId, opt => opt.MapFrom(s => s.CategoriaProductoId))
+       .ForMember(d => d.MarcaProductoId, opt => opt.MapFrom(s => s.MarcaProductoId));
+   ```
+
+3. **Archivos corregidos:**
+   - `Application/Features/Productos/Actualizar/ActualizarProductoCommand.cs` ✅
+   - `Application/Features/Productos/Crear/CrearProductoCommand.cs` ✅
+   - `Application/Mappings/Productos/ProductoProfile.cs` ✅
+
+4. **Verificación post-fix:**
+   ```
+   PUT /api/v1/productos/{id} con:
+   { "unidadMedidaId": 1, "categoriaProductoId": 2, "marcaProductoId": 1 }
+   ✅ Valores ahora llegan correctamente al handler
+   ```
+
+**Regla Para Futuro — CRÍTICA:**
+
+Cuando agregas nuevos campos a un DTO, **SIEMPRE actualiza los Commands correspondientes:**
+
+**Checklist de sincronización DTO ↔ Command:**
+
+1. **DTO agregó nuevos campos:**
+   ```csharp
+   public class CrearProductoDto
+   {
+       public string Nombre { get; set; }
+       // ... campos existentes ...
+       public int? UnidadMedidaId { get; set; }  // ← NUEVO
+   }
+   ```
+
+2. **Command DEBE tener esos parámetros:**
+   ```csharp
+   public record CrearProductoCommand(
+       string Nombre,
+       // ... parámetros existentes ...
+       int? UnidadMedidaId = null  // ← DEBE AGREGARSE AQUÍ
+   ) : IRequest<int>;
+   ```
+
+3. **AutoMapper DEBE mapearlos explícitamente:**
+   ```csharp
+   CreateMap<CrearProductoDto, CrearProductoCommand>()
+       .ForMember(d => d.UnidadMedidaId, opt => opt.MapFrom(s => s.UnidadMedidaId));
+   ```
+
+4. **Handler usa el campo del Command:**
+   ```csharp
+   var producto = _mapper.Map<Producto>(request);
+   // producto.UnidadMedidaId ya tiene el valor
+   ```
+
+**Anti-patrón: Silenciosa pérdida de datos**
+
+Este problema es silencioso porque:
+- ✅ Compilación exitosa (sin errores)
+- ✅ Valores enviados por cliente (request válido)
+- ❌ Datos no llegan al handler (null inesperado)
+- ❌ Testing manual lo descubre (no compilación)
+
+**Prevención:**
+
+1. **Integración test:** Verificar que todos los campos del DTO se propagan
+   ```csharp
+   [Test]
+   public void ActualizarProductoCommand_MapsAllDtoFields()
+   {
+       var dto = new ActualizarProductoDto { UnidadMedidaId = 1 };
+       var command = _mapper.Map<ActualizarProductoCommand>(dto);
+       Assert.That(command.UnidadMedidaId, Is.EqualTo(1));
+   }
+   ```
+
+2. **Code Review checklist:**
+   - ¿El DTO tiene nuevos campos?
+   - ¿El Command record también los tiene?
+   - ¿El AutoMapper mapping está actualizado?
+
+3. **Architecture rule:**
+   - **DTO → Command:** Campo a campo (1:1)
+   - **Command → Entity:** Campo a campo (1:1)
+   - Si falta un campo en cualquier etapa, el dato se pierde
+
+---
+
 ## 🎯 Hallazgos Clave y Experiencias (Sprint 3)
 
 ### 1. **Importancia de Using Statements en Entity Base Classes**
@@ -1166,6 +1322,28 @@ El handler `ObtenerProximoNumero` usa transaction isolation y SQL hints para evi
 
 ---
 
+## 🎯 Hallazgos Clave y Experiencias (Sprint 4)
+
+### 1. **CQRS Command Records Deben Ser Sincronizados con DTOs**
+Cuando se agregan campos a un DTO, el Command record correspondiente DEBE actualizarse también. Si no, AutoMapper los mapea como null sin error de compilación. **Lección:** La arquitectura CQRS requiere sincronización manual entre DTO y Command — no hay validación automática.
+
+### 2. **AutoMapper Mappings Son Silenciosamente Lenientes**
+Si el campo no existe en el record, AutoMapper ignora el valor del DTO sin advertencia. Esto pasa desapercibido hasta testing manual. **Solución:** Mappings explícitos (`.ForMember()`) son mejor práctica que confiar en property matching automático.
+
+### 3. **SQL Server Syntax Requiere Revisión de Documentation**
+`ON DELETE RESTRICT` no funciona en SQL Server; requiere `NO ACTION`. Esto es fácil olvidar si escribes scripts basados en ANSI SQL estándar (PostgreSQL/MySQL). **Regla:** Siempre verificar sintaxis con SQL_SERVER_COMPATIBILITY.md antes de crear scripts.
+
+### 4. **Self-Reference Foreign Keys Funcionan Correctamente con EF Core**
+Configurar self-ref FK con DeleteBehavior.Restrict es directo. El patrón: `navigation.Padre` y `navigation.Subcategorias` se configura igual que FK normal. **Patrón:** Copiar exacto de CategoriaProductoConfiguration.
+
+### 5. **Validación de Profundidad (Hierarchical Depth Limits) Va en Application, No en Database**
+Limitar a 3 niveles jerárquicos no es un constraint de BD; es una rule de aplicación en el Handler/Validator. **Patrón:** CalcularProfundidadAsync() en Service, MustAsync() en Validator.
+
+### 6. **Prevención de Ciclos en Self-Reference Requiere Graph Traversal**
+No es trivial: necesitas `EsDescendienteDeAsync()` que recorre el árbol. **Patrón:** Implementar en Service, llamar desde ActualizarHandler antes de permitir cambio de padre.
+
+---
+
 ## 🔗 Referencias Relacionadas
 
 - **IMPLEMENTATION_PATTERNS.md** — Patrones para entidades, handlers, servicios
@@ -1175,5 +1353,5 @@ El handler `ObtenerProximoNumero` usa transaction isolation y SQL hints para evi
 
 ---
 
-**Última revisión:** 2026-05-17 (Sprint 3 completado)  
-**Próxima revisión:** Después de smoke testing SQL scripts y API endpoints
+**Última revisión:** 2026-05-18 (Sprint 4 en progreso)  
+**Próxima revisión:** Después de smoke testing SQL scripts y API endpoints + validación campos DTO→Command
