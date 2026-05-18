@@ -36,5 +36,20 @@ namespace Application.Dtos.Producto
         /// Indica si el producto está activo (true) o inactivo (false).
         /// </summary>
         public bool Activo { get; set; }
+
+        /// <summary>
+        /// Sprint 4: Identificador de la unidad de medida (opcional)
+        /// </summary>
+        public int? UnidadMedidaId { get; set; }
+
+        /// <summary>
+        /// Sprint 4: Identificador de la categoría del producto (opcional)
+        /// </summary>
+        public int? CategoriaProductoId { get; set; }
+
+        /// <summary>
+        /// Sprint 4: Identificador de la marca del producto (opcional)
+        /// </summary>
+        public int? MarcaProductoId { get; set; }
     }
 }

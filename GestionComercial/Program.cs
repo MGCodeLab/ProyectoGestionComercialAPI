@@ -56,6 +56,12 @@ builder.Services.AddScoped<ITipoImpuestoService, TipoImpuestoService>();
 builder.Services.AddScoped<ITipoComprobanteService, TipoComprobanteService>();
 builder.Services.AddScoped<ISerieDocumentoService, SerieDocumentoService>();
 
+// Sprint 4 - Producto Enriquecido (CategoriaProducto, MarcaProducto)
+builder.Services.AddScoped<ICategoriaProductoService, CategoriaProductoService>();
+builder.Services.AddScoped<ICategoriaProductoValidatorService, CategoriaProductoValidatorService>();
+builder.Services.AddScoped<IMarcaProductoService, MarcaProductoService>();
+builder.Services.AddScoped<IMarcaProductoValidatorService, MarcaProductoValidatorService>();
+
 var jwtKey = builder.Configuration["Jwt:Key"]!;
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

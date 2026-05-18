@@ -32,6 +32,10 @@ namespace Infrastructure.Persistence
         public DbSet<TipoComprobante> TiposComprobante { get; set; }
         public DbSet<SerieDocumento> SeriesDocumento { get; set; }
 
+        // Sprint 4: Catalogo Enriquecido
+        public DbSet<CategoriaProducto> CategoriasProducto { get; set; }
+        public DbSet<MarcaProducto> MarcasProducto { get; set; }
+
         // Comercial
         public DbSet<Cliente> Clientes { get; set; }
 

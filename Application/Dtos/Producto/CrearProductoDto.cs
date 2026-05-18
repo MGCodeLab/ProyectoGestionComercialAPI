@@ -26,5 +26,20 @@ namespace Application.Dtos.Producto
         /// </summary>
         [Range(typeof(decimal), "0.01", "999999.99", ErrorMessage = "El precio debe estar entre 0.01 y 999999.99")]
         public decimal Precio { get; set; }
+
+        /// <summary>
+        /// Sprint 4: Identificador de la unidad de medida (opcional)
+        /// </summary>
+        public int? UnidadMedidaId { get; set; }
+
+        /// <summary>
+        /// Sprint 4: Identificador de la categoría del producto (opcional)
+        /// </summary>
+        public int? CategoriaProductoId { get; set; }
+
+        /// <summary>
+        /// Sprint 4: Identificador de la marca del producto (opcional)
+        /// </summary>
+        public int? MarcaProductoId { get; set; }
     }
 }
