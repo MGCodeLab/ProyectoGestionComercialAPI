@@ -36,8 +36,13 @@ namespace Infrastructure.Persistence
         public DbSet<CategoriaProducto> CategoriasProducto { get; set; }
         public DbSet<MarcaProducto> MarcasProducto { get; set; }
 
+        // Sprint 5: Catalogo Comercial
+        public DbSet<CondicionPago> CondicionesPago { get; set; }
+        public DbSet<ListaPrecio> ListasPrecios { get; set; }
+
         // Comercial
         public DbSet<Cliente> Clientes { get; set; }
+        public DbSet<Proveedor> Proveedores { get; set; }
 
         // Organizacion
         public DbSet<Empresa> Empresas { get; set; }
