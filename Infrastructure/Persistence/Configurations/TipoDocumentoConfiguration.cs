@@ -10,7 +10,7 @@ namespace Infrastructure.Persistence.Configurations
         {
             base.Configure(builder);
 
-            builder.ToTable("TipoDocumento", schema: "catalogo");
+            builder.ToTable("TipoDocumentos", schema: "catalogo");
 
             builder.Property(e => e.Codigo)
                 .IsRequired()
