@@ -1344,6 +1344,28 @@ No es trivial: necesitas `EsDescendienteDeAsync()` que recorre el árbol. **Patr
 
 ---
 
+## 🎯 Hallazgos Clave y Experiencias (Sprint 5)
+
+### 1. **Filtered Unique Indices para Correos Nullable en Proveedor**
+Sprint 5 implementó Proveedor con `Correo NVARCHAR(150) NULL` y necesita permitir múltiples registros sin correo, pero mantener unicidad si existe valor. **Solución implementada:** Filtered unique index con `WHERE Correo IS NOT NULL` en SQL + `.HasFilter($"[Correo] IS NOT NULL")` en EF Configuration. **Patrón:** Reutilizar este mismo patrón para cualquier campo nullable que sea único (Cliente lo tiene también).
+
+### 2. **Entity Configuration Naming Consistency Crítica**
+Durante testing: la tabla fue creada como `TipoDocumentos` en SQL pero la configuración puede olvidar la 's' final fácilmente. **Lección:** Verificar siempre que `builder.ToTable("NombrePlural")` en Configuration coincida exactamente con el CREATE TABLE en SQL script. **Solución:** Template checklist post-creación de entidades: "Verificar ToTable() naming matches SQL CREATE TABLE".
+
+### 3. **ListaPrecio EsDefault Validation en Handler vs ValidatorService**
+Implementación: cuando `EsDefault = true` en CrearListaPrecioHandler, desactivar otros defaults en el mismo Handler. **Decisión:** NOT en ValidatorService (que solo valida en DB), porque la lógica de negocio (desactivar existentes) es responsabilidad del Handler. **Patrón:** Lógica de negocio transaccional → Handler. Validaciones de BD/uniqueness → ValidatorService.
+
+### 4. **Proveedor Clone Pattern Confirma Reutilización**
+Proveedor es exacto clon de Cliente (TipoDocumentoId, NumeroDocumento, RazonSocial, PaisId, Correo, Telefono, Direccion). **Hallazgo:** Cuando patrón está validado, clonar es correcto y rápido. NO requiere abstracción genérica; la duplicación es intencionada para mantener cada contexto (Comercial/Clientes vs Comercial/Proveedores) desacoplado.
+
+### 5. **SQL Script Numbering Importa para Ejecución Ordenada**
+Sprint 5: semilla inicialmente nombrada `10_InitCondicion...` pero debía ser `13_InitCondicion...` (siguiente en secuencia após `12_InitCategoriasProducto...`). **Solución:** Verificar último número en `Database/03_Seeds/` antes de crear nuevo script. **Regla:** Script number = último número + 1, nunca reutilizar números.
+
+### 6. **ProveedorDto Necesita Código TipoDocumento, No Nombre**
+Testing encontró: TipoDocumento entidad tiene `Codigo` (RUC, DNI, PASSPORT), NO `Nombre`. ProveedorProfile mapeaba a `TipoDocumentoNombre` (inexistente) en lugar de `TipoDocumentoCodigo`. **Fix:** Cambiar mapping a `.ForMember(dest => dest.TipoDocumentoCodigo, opt => opt.MapFrom(src => src.TipoDocumento.Codigo))`. **Lección:** Verificar propiedades de entidades relacionadas antes de mapear en Profiles.
+
+---
+
 ## 🔗 Referencias Relacionadas
 
 - **IMPLEMENTATION_PATTERNS.md** — Patrones para entidades, handlers, servicios
