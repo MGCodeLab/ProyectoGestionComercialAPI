@@ -92,7 +92,7 @@
 
 | Aspecto | Convención | Ejemplo |
 |---------|-----------|---------|
-| **Endpoints** | `/api/v1/{recurso}` | `/api/v1/paises`, `/api/v1/empresas` |
+| **Endpoints** | `/api/v1/{recurso}` | `/api/v1/Paises`, `/api/v1/Empresas` |
 | **HTTP Methods** | CRUD estándar | GET, POST, PUT, DELETE |
 | **Response** | Wrapper + TraceId | `{ success, data, message, traceId }` |
 | **Validation** | FluentValidation + DB | POST/PUT valida entrada |
@@ -260,13 +260,13 @@ GET    /api/v1/{recurso}/status/{status} → Listar por estado
 #### Paises
 
 ```
-POST   /api/v1/paises
-GET    /api/v1/paises/{id}
-GET    /api/v1/paises?skip=0&take=10
-PUT    /api/v1/paises/{id}
-DELETE /api/v1/paises/{id}
-PUT    /api/v1/paises/{id}/estado
-GET    /api/v1/paises/status/{status}
+POST   /api/v1/Paises
+GET    /api/v1/Paises/{id}
+GET    /api/v1/Paises?skip=0&take=10
+PUT    /api/v1/Paises/{id}
+DELETE /api/v1/Paises/{id}
+PUT    /api/v1/Paises/{id}/estado
+GET    /api/v1/Paises/status/{status}
 ```
 
 **Request POST (CrearPaisDto):**
@@ -296,13 +296,13 @@ GET    /api/v1/paises/status/{status}
 #### Monedas
 
 ```
-POST   /api/v1/monedas
-GET    /api/v1/monedas/{id}
-GET    /api/v1/monedas?skip=0&take=10
-PUT    /api/v1/monedas/{id}
-DELETE /api/v1/monedas/{id}
-PUT    /api/v1/monedas/{id}/estado
-GET    /api/v1/monedas/status/{status}
+POST   /api/v1/Monedas
+GET    /api/v1/Monedas/{id}
+GET    /api/v1/Monedas?skip=0&take=10
+PUT    /api/v1/Monedas/{id}
+DELETE /api/v1/Monedas/{id}
+PUT    /api/v1/Monedas/{id}/estado
+GET    /api/v1/Monedas/status/{status}
 ```
 
 **Request POST (CrearMonedaDto):**
@@ -334,13 +334,13 @@ GET    /api/v1/monedas/status/{status}
 #### UnidadesMedida
 
 ```
-POST   /api/v1/unidades-medida
-GET    /api/v1/unidades-medida/{id}
-GET    /api/v1/unidades-medida?skip=0&take=10
-PUT    /api/v1/unidades-medida/{id}
-DELETE /api/v1/unidades-medida/{id}
-PUT    /api/v1/unidades-medida/{id}/estado
-GET    /api/v1/unidades-medida/status/{status}
+POST   /api/v1/UnidadesMedida
+GET    /api/v1/UnidadesMedida/{id}
+GET    /api/v1/UnidadesMedida?skip=0&take=10
+PUT    /api/v1/UnidadesMedida/{id}
+DELETE /api/v1/UnidadesMedida/{id}
+PUT    /api/v1/UnidadesMedida/{id}/estado
+GET    /api/v1/UnidadesMedida/status/{status}
 ```
 
 **Request POST (CrearUnidadMedidaDto):**
@@ -361,13 +361,13 @@ GET    /api/v1/unidades-medida/status/{status}
 #### ModulosSistema
 
 ```
-POST   /api/v1/modulos-sistema
-GET    /api/v1/modulos-sistema/{id}
-GET    /api/v1/modulos-sistema?skip=0&take=10
-PUT    /api/v1/modulos-sistema/{id}
-DELETE /api/v1/modulos-sistema/{id}
-PUT    /api/v1/modulos-sistema/{id}/estado
-GET    /api/v1/modulos-sistema/status/{status}
+POST   /api/v1/ModulosSistema
+GET    /api/v1/ModulosSistema/{id}
+GET    /api/v1/ModulosSistema?skip=0&take=10
+PUT    /api/v1/ModulosSistema/{id}
+DELETE /api/v1/ModulosSistema/{id}
+PUT    /api/v1/ModulosSistema/{id}/estado
+GET    /api/v1/ModulosSistema/status/{status}
 ```
 
 **Request POST (CrearModuloSistemaDto):**
@@ -387,12 +387,12 @@ GET    /api/v1/modulos-sistema/status/{status}
 #### ParametrosSistema
 
 ```
-POST   /api/v1/parametros-sistema
-GET    /api/v1/parametros-sistema/{id}
-GET    /api/v1/parametros-sistema?skip=0&take=10
-PUT    /api/v1/parametros-sistema/{id}
-DELETE /api/v1/parametros-sistema/{id}
-GET    /api/v1/parametros-sistema/clave/{clave}  [EXTRA]
+POST   /api/v1/ParametrosSistema
+GET    /api/v1/ParametrosSistema/{id}
+GET    /api/v1/ParametrosSistema?skip=0&take=10
+PUT    /api/v1/ParametrosSistema/{id}
+DELETE /api/v1/ParametrosSistema/{id}
+GET    /api/v1/ParametrosSistema/clave/{clave}  [EXTRA]
 ```
 
 **Request POST (CrearParametroSistemaDto):**
@@ -418,13 +418,13 @@ GET    /api/v1/parametros-sistema/clave/{clave}  [EXTRA]
 #### Empresas
 
 ```
-POST   /api/v1/empresas              [ÚNICA CREACIÓN]
-GET    /api/v1/empresas/{id}
-GET    /api/v1/empresas              [Retorna siempre 1]
-PUT    /api/v1/empresas/{id}
-DELETE /api/v1/empresas/{id}
-PUT    /api/v1/empresas/{id}/estado
-GET    /api/v1/empresas/status/{status}
+POST   /api/v1/Empresas              [ÚNICA CREACIÓN]
+GET    /api/v1/Empresas/{id}
+GET    /api/v1/Empresas              [Retorna siempre 1]
+PUT    /api/v1/Empresas/{id}
+DELETE /api/v1/Empresas/{id}
+PUT    /api/v1/Empresas/{id}/estado
+GET    /api/v1/Empresas/status/{status}
 ```
 
 **Request POST (CrearEmpresaDto):**
@@ -452,13 +452,13 @@ GET    /api/v1/empresas/status/{status}
 #### Sucursales
 
 ```
-POST   /api/v1/sucursales
-GET    /api/v1/sucursales/{id}
-GET    /api/v1/sucursales?skip=0&take=10
-PUT    /api/v1/sucursales/{id}
-DELETE /api/v1/sucursales/{id}
-PUT    /api/v1/sucursales/{id}/estado
-GET    /api/v1/sucursales/status/{status}
+POST   /api/v1/Sucursales
+GET    /api/v1/Sucursales/{id}
+GET    /api/v1/Sucursales?skip=0&take=10
+PUT    /api/v1/Sucursales/{id}
+DELETE /api/v1/Sucursales/{id}
+PUT    /api/v1/Sucursales/{id}/estado
+GET    /api/v1/Sucursales/status/{status}
 ```
 
 **Request POST (CrearSucursalDto):**
@@ -483,13 +483,13 @@ GET    /api/v1/sucursales/status/{status}
 #### Almacenes
 
 ```
-POST   /api/v1/almacenes
-GET    /api/v1/almacenes/{id}
-GET    /api/v1/almacenes?skip=0&take=10
-PUT    /api/v1/almacenes/{id}
-DELETE /api/v1/almacenes/{id}
-PUT    /api/v1/almacenes/{id}/estado
-GET    /api/v1/almacenes/status/{status}
+POST   /api/v1/Almacenes
+GET    /api/v1/Almacenes/{id}
+GET    /api/v1/Almacenes?skip=0&take=10
+PUT    /api/v1/Almacenes/{id}
+DELETE /api/v1/Almacenes/{id}
+PUT    /api/v1/Almacenes/{id}/estado
+GET    /api/v1/Almacenes/status/{status}
 ```
 
 **Request POST (CrearAlmacenDto):**
@@ -510,13 +510,13 @@ GET    /api/v1/almacenes/status/{status}
 #### TiposImpuesto
 
 ```
-POST   /api/v1/tipos-impuesto
-GET    /api/v1/tipos-impuesto/{id}
-GET    /api/v1/tipos-impuesto?skip=0&take=10
-PUT    /api/v1/tipos-impuesto/{id}
-DELETE /api/v1/tipos-impuesto/{id}
-PUT    /api/v1/tipos-impuesto/{id}/estado
-GET    /api/v1/tipos-impuesto/status/{status}
+POST   /api/v1/TiposImpuesto
+GET    /api/v1/TiposImpuesto/{id}
+GET    /api/v1/TiposImpuesto?skip=0&take=10
+PUT    /api/v1/TiposImpuesto/{id}
+DELETE /api/v1/TiposImpuesto/{id}
+PUT    /api/v1/TiposImpuesto/{id}/estado
+GET    /api/v1/TiposImpuesto/status/{status}
 ```
 
 **Request POST (CrearTipoImpuestoDto):**
@@ -542,13 +542,13 @@ GET    /api/v1/tipos-impuesto/status/{status}
 #### TiposComprobante
 
 ```
-POST   /api/v1/tipos-comprobante
-GET    /api/v1/tipos-comprobante/{id}
-GET    /api/v1/tipos-comprobante?skip=0&take=10
-PUT    /api/v1/tipos-comprobante/{id}
-DELETE /api/v1/tipos-comprobante/{id}
-PUT    /api/v1/tipos-comprobante/{id}/estado
-GET    /api/v1/tipos-comprobante/status/{status}
+POST   /api/v1/TiposComprobante
+GET    /api/v1/TiposComprobante/{id}
+GET    /api/v1/TiposComprobante?skip=0&take=10
+PUT    /api/v1/TiposComprobante/{id}
+DELETE /api/v1/TiposComprobante/{id}
+PUT    /api/v1/TiposComprobante/{id}/estado
+GET    /api/v1/TiposComprobante/status/{status}
 ```
 
 **Request POST (CrearTipoComprobanteDto):**
@@ -571,14 +571,14 @@ GET    /api/v1/tipos-comprobante/status/{status}
 #### SeriesDocumento
 
 ```
-POST   /api/v1/series-documento
-GET    /api/v1/series-documento/{id}
-GET    /api/v1/series-documento?skip=0&take=10
-PUT    /api/v1/series-documento/{id}
-DELETE /api/v1/series-documento/{id}
-PUT    /api/v1/series-documento/{id}/estado
-GET    /api/v1/series-documento/status/{status}
-GET    /api/v1/series-documento/generar-numero  [EXTRA - INTERNO]
+POST   /api/v1/SeriesDocumento
+GET    /api/v1/SeriesDocumento/{id}
+GET    /api/v1/SeriesDocumento?skip=0&take=10
+PUT    /api/v1/SeriesDocumento/{id}
+DELETE /api/v1/SeriesDocumento/{id}
+PUT    /api/v1/SeriesDocumento/{id}/estado
+GET    /api/v1/SeriesDocumento/status/{status}
+GET    /api/v1/SeriesDocumento/generar-numero  [EXTRA - INTERNO]
 ```
 
 **Request POST (CrearSerieDocumentoDto):**
@@ -597,7 +597,7 @@ GET    /api/v1/series-documento/generar-numero  [EXTRA - INTERNO]
 - Serie formato: F001, B001, etc.
 
 **CRÍTICO PARA VENTAS:**
-- Endpoint interno: GET `/api/v1/series-documento/generar-numero?tipoComprobanteId=X&sucursalId=Y`
+- Endpoint interno: GET `/api/v1/SeriesDocumento/generar-numero?tipoComprobanteId=X&sucursalId=Y`
 - Retorna: `{ numeroGenerado: 1, serie: "F001" }`
 - Handler de Venta usa esto ANTES de crear documento
 - Concurrencia: ROWLOCK evita duplicados
@@ -609,13 +609,13 @@ GET    /api/v1/series-documento/generar-numero  [EXTRA - INTERNO]
 #### CategoriasProducto
 
 ```
-POST   /api/v1/categorias-producto
-GET    /api/v1/categorias-producto/{id}
-GET    /api/v1/categorias-producto?skip=0&take=10
-PUT    /api/v1/categorias-producto/{id}
-DELETE /api/v1/categorias-producto/{id}
-PUT    /api/v1/categorias-producto/{id}/estado
-GET    /api/v1/categorias-producto/status/{status}
+POST   /api/v1/CategoriasProducto
+GET    /api/v1/CategoriasProducto/{id}
+GET    /api/v1/CategoriasProducto?skip=0&take=10
+PUT    /api/v1/CategoriasProducto/{id}
+DELETE /api/v1/CategoriasProducto/{id}
+PUT    /api/v1/CategoriasProducto/{id}/estado
+GET    /api/v1/CategoriasProducto/status/{status}
 ```
 
 **Request POST (CrearCategoriaProductoDto):**
@@ -644,13 +644,13 @@ Electrónica (id=1)
 #### MarcasProducto
 
 ```
-POST   /api/v1/marcas-producto
-GET    /api/v1/marcas-producto/{id}
-GET    /api/v1/marcas-producto?skip=0&take=10
-PUT    /api/v1/marcas-producto/{id}
-DELETE /api/v1/marcas-producto/{id}
-PUT    /api/v1/marcas-producto/{id}/estado
-GET    /api/v1/marcas-producto/status/{status}
+POST   /api/v1/MarcasProducto
+GET    /api/v1/MarcasProducto/{id}
+GET    /api/v1/MarcasProducto?skip=0&take=10
+PUT    /api/v1/MarcasProducto/{id}
+DELETE /api/v1/MarcasProducto/{id}
+PUT    /api/v1/MarcasProducto/{id}/estado
+GET    /api/v1/MarcasProducto/status/{status}
 ```
 
 **Request POST (CrearMarcaProductoDto):**
@@ -669,13 +669,13 @@ GET    /api/v1/marcas-producto/status/{status}
 ```
 [Existentes + modificados con nuevos campos]
 
-POST   /api/v1/productos
-GET    /api/v1/productos/{id}
-GET    /api/v1/productos?skip=0&take=10
-PUT    /api/v1/productos/{id}
-DELETE /api/v1/productos/{id}
-PUT    /api/v1/productos/{id}/estado
-GET    /api/v1/productos/status/{status}
+POST   /api/v1/Productos
+GET    /api/v1/Productos/{id}
+GET    /api/v1/Productos?skip=0&take=10
+PUT    /api/v1/Productos/{id}
+DELETE /api/v1/Productos/{id}
+PUT    /api/v1/Productos/{id}/estado
+GET    /api/v1/Productos/status/{status}
 ```
 
 **Request POST (CrearProductoDto - ACTUALIZADO):**
@@ -705,13 +705,13 @@ GET    /api/v1/productos/status/{status}
 #### CondicionesPago
 
 ```
-POST   /api/v1/condiciones-pago
-GET    /api/v1/condiciones-pago/{id}
-GET    /api/v1/condiciones-pago?skip=0&take=10
-PUT    /api/v1/condiciones-pago/{id}
-DELETE /api/v1/condiciones-pago/{id}
-PUT    /api/v1/condiciones-pago/{id}/estado
-GET    /api/v1/condiciones-pago/status/{status}
+POST   /api/v1/CondicionesPago
+GET    /api/v1/CondicionesPago/{id}
+GET    /api/v1/CondicionesPago?skip=0&take=10
+PUT    /api/v1/CondicionesPago/{id}
+DELETE /api/v1/CondicionesPago/{id}
+PUT    /api/v1/CondicionesPago/{id}/estado
+GET    /api/v1/CondicionesPago/status/{status}
 ```
 
 **Request POST (CrearCondicionPagoDto):**
@@ -734,13 +734,13 @@ GET    /api/v1/condiciones-pago/status/{status}
 #### ListasPrecios
 
 ```
-POST   /api/v1/listas-precios
-GET    /api/v1/listas-precios/{id}
-GET    /api/v1/listas-precios?skip=0&take=10
-PUT    /api/v1/listas-precios/{id}
-DELETE /api/v1/listas-precios/{id}
-PUT    /api/v1/listas-precios/{id}/estado
-GET    /api/v1/listas-precios/status/{status}
+POST   /api/v1/ListasPrecios
+GET    /api/v1/ListasPrecios/{id}
+GET    /api/v1/ListasPrecios?skip=0&take=10
+PUT    /api/v1/ListasPrecios/{id}
+DELETE /api/v1/ListasPrecios/{id}
+PUT    /api/v1/ListasPrecios/{id}/estado
+GET    /api/v1/ListasPrecios/status/{status}
 ```
 
 **Request POST (CrearListaPrecioDto):**
@@ -764,13 +764,13 @@ GET    /api/v1/listas-precios/status/{status}
 #### Proveedores
 
 ```
-POST   /api/v1/proveedores
-GET    /api/v1/proveedores/{id}
-GET    /api/v1/proveedores?skip=0&take=10
-PUT    /api/v1/proveedores/{id}
-DELETE /api/v1/proveedores/{id}
-PUT    /api/v1/proveedores/{id}/estado
-GET    /api/v1/proveedores/status/{status}
+POST   /api/v1/Proveedores
+GET    /api/v1/Proveedores/{id}
+GET    /api/v1/Proveedores?skip=0&take=10
+PUT    /api/v1/Proveedores/{id}
+DELETE /api/v1/Proveedores/{id}
+PUT    /api/v1/Proveedores/{id}/estado
+GET    /api/v1/Proveedores/status/{status}
 ```
 
 **Request POST (CrearProveedorDto):**
@@ -851,7 +851,7 @@ public class XXXDto
 ### Flujo 1: Crear Empresa (Simplest - No deps)
 
 ```
-Frontend: POST /api/v1/empresas
+Frontend: POST /api/v1/Empresas
 ├─ CrearEmpresaDto validada (FluentValidation)
 │
 Backend Handler:
@@ -868,7 +868,7 @@ Response: { success: true, data: EmpresaDto, ... }
 ### Flujo 2: Crear Producto Enriquecido (Con 3 FKs)
 
 ```
-Frontend: POST /api/v1/productos
+Frontend: POST /api/v1/Productos
 ├─ CrearProductoDto:
 │  ├─ Nombre, Descripcion, PrecioUnitario (requeridos)
 │  ├─ UnidadMedidaId (nullable)
@@ -905,7 +905,7 @@ Frontend: POST /api/v1/ventas
 Backend Handler:
 ├─ Validaciones: Cliente, Sucursal, Moneda, CondicionPago existen
 ├─ SerieDocumento critical:
-│  ├─ GET /api/v1/series-documento/generar-numero?tipo=1&sucursal=1
+│  ├─ GET /api/v1/SeriesDocumento/generar-numero?tipo=1&sucursal=1
 │  ├─ Retorna: { numeroGenerado: 1, serie: "F001" }
 │  └─ [ATOMIC con ROWLOCK en BD]
 │
@@ -1028,7 +1028,7 @@ El frontend debe **espejear** la arquitectura backend:
 - [ ] Components: PaisesTable, MonedasTable, UnidadesMedidaTable
 - [ ] Forms: CrearPais, ActualizarPais, etc.
 - [ ] Validations: FluentValidator espejo de backend
-- [ ] API routing: `/api/v1/paises`, etc.
+- [ ] API routing: `/api/v1/Paises`, etc.
 
 **Salidas esperadas:**
 - ✅ 5 tablas CRUD funcionales
@@ -1079,7 +1079,7 @@ El frontend debe **espejear** la arquitectura backend:
 - [ ] Service: TipoImpuestoService, TipoComprobanteService, SerieDocumentoService
 - [ ] Components: TiposImpuestoTable, TiposComprobanteTable, SeriesDocumentoTable
 - [ ] **CRITICAL:** SerieGeneratorWidget
-  - [ ] Call: `GET /api/v1/series-documento/generar-numero?tipo=X&sucursal=Y`
+  - [ ] Call: `GET /api/v1/SeriesDocumento/generar-numero?tipo=X&sucursal=Y`
   - [ ] Display: "Próximo número: F001-000042"
   - [ ] Real-time update
 - [ ] Validations: Serie format (F001, B001, etc.)
