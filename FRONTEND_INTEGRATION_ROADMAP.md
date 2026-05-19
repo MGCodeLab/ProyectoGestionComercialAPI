@@ -41,7 +41,7 @@
 ✅ **Catálogos Base 100% Completados** (Sprint 1-5)  
 ✅ **Master Data lista** para construir Ventas  
 ✅ **Arquitectura escalable** (multi-país, multi-moneda, multi-sucursal)  
-✅ **Gobernanza documentada** (History Changed + USUARIO_DOCS + planes)  
+✅ **Este documento es autosuficiente** — Todo lo necesario para frontend está aquí  
 
 ### Próxima Fase: Ventas v3.1
 
@@ -1395,16 +1395,8 @@ search$ = this.searchTerm$.pipe(
 
 ---
 
-### Documentación Asociada
-
-- **IA_Docs:** Convenciones, patrones, arquitectura
-- **History Changed:** Decisiones técnicas por sprint
-- **USUARIO_DOCS:** Resúmenes funcionales
-- **Plans:** Roadmap detallado
-
----
-
 **Documento versión:** v1.0  
 **Fecha:** 2026-05-18  
 **Autor:** Backend Architect (Nexus-ERP)  
 **Para:** Frontend Senior Architect  
+**Autosuficiente:** ✅ Sí — toda la información necesaria está en este documento  
