@@ -8,6 +8,30 @@ Este directorio mantiene un historial detallado de todos los cambios arquitectó
 
 ## 📋 Cambios Registrados
 
+### ✅ 20260518_T1400_feat_Sprint5Comercial_COMPLETADO
+
+**Estatus:** ✅ Completado  
+**Build:** ✅ Exitoso (0 errores, 0 advertencias)  
+**Commits:** Múltiples durante sprint (~8-10)
+
+**Resumen Ejecutivo:**
+Sprint 5 — Comercial completado: 3 entidades (CondicionPago, ListaPrecio, Proveedor) que sustentan módulos Ventas y Compras. 70+ archivos, ~1,827 LOC, 21 endpoints. Todas las dependencias de catálogos base (18/18) completadas.
+
+**Archivos:**
+- `SUMMARY.md` - Documentación completa + problemas resueltos + testing
+- Referencia de todos los 70+ archivos creados en la carpeta
+
+**Impacto:**
+- ✅ Catálogos base: 100% completados (18 entidades)
+- ✅ Módulo Ventas v3.1: Desbloqueado (sin dependencias pendientes)
+- ✅ Proveedor: Patrón Cliente clonado y validado exitosamente
+- ✅ ListaPrecio: Regla de negocio (EsDefault único) implementada en Handler
+- ✅ TipoDocumentoConfiguration: Corregido naming (singular→plural)
+
+**Dependencias:** Sprint 1-4 ✅ (todas completadas)
+
+---
+
 ### ✅ 20260425_T1445_SoftDeleteGlobalFilter
 
 **Estatus:** Completado  
@@ -52,9 +76,23 @@ Estandarización de configuración de entidades auditables mediante creación de
 
 ---
 
+---
+
+### 🎊 CATÁLOGOS BASE COMPLETADOS (100% — 2026-05-18)
+
+**Hito:** Todas las 18 entidades de catálogos base implementadas y testeadas.
+
+**Entidades por Sprint:**
+- Sprint 1 (5): Pais, Moneda, UnidadMedida, ModuloSistema, ParametroSistema
+- Sprint 2 (3): Empresa, Sucursal, Almacen
+- Sprint 3 (3): TipoImpuesto, TipoComprobante, SerieDocumento
+- Sprint 4 (2+migración): CategoriaProducto, MarcaProducto, +ALTER Productos
+- Sprint 5 (3): CondicionPago, ListaPrecio, Proveedor
+
 **Próximos:**
-- Iteración 3: Completar Módulo Cliente
-- Post-Iteraciones: Reevaluar Repository/UnitOfWork según Ventas
+- Módulo Ventas v3.1: Todas las dependencias completadas ✅
+- Módulo Compras v3.1: Ready (Proveedor implementado)
+- Post-Catálogos: Reevaluar Repository/UnitOfWork según necesidades Ventas
 
 ---
 
@@ -119,5 +157,6 @@ Use `CHANGES.md` como documentación de patrones arquitectónicos implementados.
 
 ---
 
-**Última actualización:** 2026-04-25 14:30  
-**Próxima iteración:** Soft Delete Global Filter (estimado: 2026-04-26)
+**Última actualización:** 2026-05-18 14:00 UTC  
+**Catálogos Base:** ✅ 100% Completados (18 entidades, 5 sprints)  
+**Próximo:** Módulo Ventas v3.1 (sin bloqueos de dependencias)

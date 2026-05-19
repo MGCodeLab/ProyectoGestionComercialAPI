@@ -32,6 +32,43 @@ builder.Services.AddScoped<IProductoService, ProductoService>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IPaisService, PaisService>();
+builder.Services.AddScoped<IMonedaService, MonedaService>();
+builder.Services.AddScoped<IUnidadMedidaService, UnidadMedidaService>();
+builder.Services.AddScoped<IModuloSistemaService, ModuloSistemaService>();
+builder.Services.AddScoped<IParametroSistemaService, ParametroSistemaService>();
+builder.Services.AddScoped<IPaisValidatorService, PaisValidatorService>();
+builder.Services.AddScoped<IMonedaValidatorService, MonedaValidatorService>();
+builder.Services.AddScoped<IUnidadMedidaValidatorService, UnidadMedidaValidatorService>();
+builder.Services.AddScoped<IModuloSistemaValidatorService, ModuloSistemaValidatorService>();
+builder.Services.AddScoped<IParametroSistemaValidatorService, ParametroSistemaValidatorService>();
+
+// Organizacion
+builder.Services.AddScoped<IEmpresaService, EmpresaService>();
+builder.Services.AddScoped<IEmpresaValidatorService, EmpresaValidatorService>();
+builder.Services.AddScoped<ISucursalService, SucursalService>();
+builder.Services.AddScoped<ISucursalValidatorService, SucursalValidatorService>();
+builder.Services.AddScoped<IAlmacenService, AlmacenService>();
+builder.Services.AddScoped<IAlmacenValidatorService, AlmacenValidatorService>();
+
+// Sprint 3 - Catalogo Fiscal
+builder.Services.AddScoped<ITipoImpuestoService, TipoImpuestoService>();
+builder.Services.AddScoped<ITipoComprobanteService, TipoComprobanteService>();
+builder.Services.AddScoped<ISerieDocumentoService, SerieDocumentoService>();
+
+// Sprint 4 - Producto Enriquecido (CategoriaProducto, MarcaProducto)
+builder.Services.AddScoped<ICategoriaProductoService, CategoriaProductoService>();
+builder.Services.AddScoped<ICategoriaProductoValidatorService, CategoriaProductoValidatorService>();
+builder.Services.AddScoped<IMarcaProductoService, MarcaProductoService>();
+builder.Services.AddScoped<IMarcaProductoValidatorService, MarcaProductoValidatorService>();
+
+// Sprint 5 - Catalogo Comercial (CondicionPago, ListaPrecio, Proveedor)
+builder.Services.AddScoped<ICondicionPagoService, CondicionPagoService>();
+builder.Services.AddScoped<ICondicionPagoValidatorService, CondicionPagoValidatorService>();
+builder.Services.AddScoped<IListaPrecioService, ListaPrecioService>();
+builder.Services.AddScoped<IListaPrecioValidatorService, ListaPrecioValidatorService>();
+builder.Services.AddScoped<IProveedorService, ProveedorService>();
+builder.Services.AddScoped<IProveedorValidatorService, ProveedorValidatorService>();
 
 var jwtKey = builder.Configuration["Jwt:Key"]!;
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

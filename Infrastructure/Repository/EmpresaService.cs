@@ -1,0 +1,52 @@
+using Application.Interfaces;
+using Domain.Organizacion;
+using Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+
+namespace Infrastructure.Repository
+{
+    public class EmpresaService : IEmpresaService
+    {
+        private readonly AppDbContext _context;
+
+        public EmpresaService(AppDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<Empresa?> ObtenerPorId(int id, bool tracking = false)
+            => tracking
+                ? await _context.Empresas.FirstOrDefaultAsync(x => x.Id == id)
+                : await _context.Empresas.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+
+        public async Task<Empresa?> ObtenerPrimera()
+            => await _context.Empresas.FirstOrDefaultAsync();
+
+        public async Task<List<Empresa>> ObtenerTodos()
+            => await _context.Empresas.ToListAsync();
+
+        public async Task<int> Crear(Empresa empresa)
+        {
+            _context.Empresas.Add(empresa);
+            await _context.SaveChangesAsync();
+            return empresa.Id;
+        }
+
+        public async Task Actualizar(Empresa empresa)
+        {
+            empresa.FechaActualizacion = DateTime.UtcNow;
+            _context.Empresas.Update(empresa);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task Eliminar(int id)
+        {
+            var empresa = await _context.Empresas.FindAsync(id);
+            if (empresa != null)
+            {
+                _context.Empresas.Remove(empresa);
+                await _context.SaveChangesAsync();
+            }
+        }
+    }
+}

@@ -10,7 +10,12 @@ namespace Application.Mappings.Productos
     {
         public ProductoProfile()
         {
-            CreateMap<Producto, ProductoDto>().ReverseMap();
+            // Sprint 4: Include new FK and navigation properties
+            CreateMap<Producto, ProductoDto>()
+                .ForMember(d => d.UnidadMedidaId, opt => opt.MapFrom(s => s.UnidadMedidaId))
+                .ForMember(d => d.CategoriaProductoId, opt => opt.MapFrom(s => s.CategoriaProductoId))
+                .ForMember(d => d.MarcaProductoId, opt => opt.MapFrom(s => s.MarcaProductoId))
+                .ReverseMap();
 
             CreateMap<CrearProductoDto, CrearProductoCommand>();
             CreateMap<CrearProductoDto, Producto>();
@@ -18,7 +23,10 @@ namespace Application.Mappings.Productos
                 .ForMember(dest => dest.Activo, opt => opt.MapFrom(_ => true));
 
             CreateMap<ActualizarProductoDto, Producto>();
-            CreateMap<ActualizarProductoDto, ActualizarProductoCommand>();
+            CreateMap<ActualizarProductoDto, ActualizarProductoCommand>()
+                .ForMember(d => d.UnidadMedidaId, opt => opt.MapFrom(s => s.UnidadMedidaId))
+                .ForMember(d => d.CategoriaProductoId, opt => opt.MapFrom(s => s.CategoriaProductoId))
+                .ForMember(d => d.MarcaProductoId, opt => opt.MapFrom(s => s.MarcaProductoId));
             CreateMap<ActualizarProductoCommand, Producto>().ReverseMap();
         }
     }

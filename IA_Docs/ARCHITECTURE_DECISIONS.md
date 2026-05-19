@@ -201,4 +201,62 @@ El frontend Angular todavía está en proceso de cambiar de MockAuthService a Ap
 
 ---
 
-**Última actualización:** 2026-04-25
+## ADR-011: ListaPrecioDetalle — Abstracción Simple por ProductoId, Presentaciones Deferred
+
+**Fecha:** 2026-05-18  
+**Estado:** ✅ Activo
+
+**Decisión:**
+- `ListaPrecio` se implementa en Sprint 5 como catálogo simple
+- `ListaPrecioDetalle(ListaPrecioId, ProductoId, Precio)` se diferirá al módulo Ventas (Sprint 6+)
+- Sin tabla `ProductoPresentacion` en fase inicial
+- Abstracción: precios por `ProductoId` solamente
+- Escalabilidad futura: Si negocio requiere presentaciones (tamaños, variantes), introducir `ProductoPresentacion` como entidad separada sin romper `ListaPrecioDetalle`
+
+**Descartado:**
+- Implementar `ProductoPresentacion` ahora (especulación de requisitos)
+- Crear arquitectura multi-presentación sin validación funcional
+
+**Razón:**
+1. **YAGNI:** No anticipar requisitos inciertos. Las presentaciones son especulación hasta que el negocio las pida explícitamente.
+2. **Velocidad de entrega:** Opción A simple completa catálogos en Sprint 5. Opción B (con presentaciones) añade 3-4 horas de complejidad innecesaria.
+3. **Escalabilidad sin acoplamiento:** Si `ProductoPresentacion` es necesario futuro:
+   - Se crea como entidad independiente
+   - `ListaPrecioDetalle` se refactoriza a `(ListaPrecioId, ProductoPresentacionId, Precio)`
+   - Cero breaking changes en lógica actual de catálogos
+4. **Validación funcional real:** Presentaciones se necesitan cuando usuario lo demande en Ventas, no antes.
+
+**Implementación:**
+```sql
+-- Sprint 5: Crear solo ListaPrecio
+CREATE TABLE catalogo.ListasPrecios (
+    Id INT IDENTITY PRIMARY KEY,
+    Nombre NVARCHAR(150) NOT NULL,
+    MonedaId INT NOT NULL,
+    EsDefault BIT DEFAULT 0,
+    ...
+);
+
+-- Sprint 6+ (Ventas): Crear ListaPrecioDetalle
+CREATE TABLE catalogo.ListaPrecioDetalle (
+    Id INT IDENTITY PRIMARY KEY,
+    ListaPrecioId INT NOT NULL,
+    ProductoId INT NOT NULL,
+    Precio DECIMAL(18,2) NOT NULL,
+    UNIQUE (ListaPrecioId, ProductoId)
+);
+
+-- Futuro (si se necesita): Crear ProductoPresentacion
+-- Refactorizar ListaPrecioDetalle: (ProductoPresentacionId en lugar de ProductoId)
+```
+
+**Condición de revisión:** Cuando módulo Ventas requiera presentaciones explícitamente, evaluar introducción de `ProductoPresentacion`.
+
+**Impacto:** 
+- Sprint 5: Catálogos completados sin `ListaPrecioDetalle`
+- Sprint 6+: `ListaPrecioDetalle` implementada en Ventas (2-3 horas)
+- Futuro: `ProductoPresentacion` si negocio lo solicita (refactor reversible)
+
+---
+
+**Última actualización:** 2026-05-18
