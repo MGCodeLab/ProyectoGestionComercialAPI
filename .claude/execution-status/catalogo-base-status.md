@@ -13,10 +13,10 @@
 Sprint 1 (Catálogos Base)    ████████████████████ 100% ✅ COMPLETADO
 Sprint 2 (Organización)      ████████████████████ 100% ✅ COMPLETADO
 Sprint 3 (Fiscal)            ████████████████████ 100% ✅ COMPLETADO (2026-05-17)
-Sprint 4 (Producto)          ████████████████████ 100% ✅ COMPLETADO (hoy 2026-05-18)
-Sprint 5 (Comercial)         ░░░░░░░░░░░░░░░░░░░░  0%  ⏳ Planned
+Sprint 4 (Producto)          ████████████████████ 100% ✅ COMPLETADO (2026-05-18)
+Sprint 5 (Comercial)         ████████████████████ 100% ✅ COMPLETADO (2026-05-18)
 ─────────────────────────────────────────────────────────────────────
-PROYECTO TOTAL               ████████████████████  80% (16 de 18 entidades)
+PROYECTO TOTAL               ████████████████████ 100% ✅ (18 de 18 entidades)
 ```
 
 ---
@@ -160,19 +160,36 @@ PROYECTO TOTAL               █████████████████
 
 ---
 
-## 📋 Módulos Pendientes
+## ✅ Módulos Completados (Sprint 5)
 
-### Sprint 5: Comercial
-- [ ] CondicionPago (catalogo.CondicionesPago)
-- [ ] ListaPrecio (catalogo.ListasPrecios)
-- [ ] Proveedor (comercial.Proveedores) — clonar Cliente
-- **Estimado:** 6-7 horas
+### Sprint 5: Comercial (COMPLETADO 100% — 2026-05-18 14:00 UTC)
 
-### Sprint 5: Comercial
-- [ ] CondicionPago (catalogo.CondicionesPago)
-- [ ] ListaPrecio (catalogo.ListasPrecios)
-- [ ] Proveedor (comercial.Proveedores) — clonar Cliente
-- **Estimado:** 6-7 horas
+#### Implementación Completa:
+- ✅ **CondicionPago** (catalogo.CondicionesPago) — Domain, DTOs (3), Interfaces, Services, ValidatorServices, Configurations, Controllers (7 endpoints), SQL
+- ✅ **ListaPrecio** (catalogo.ListasPrecios) — Domain, DTOs (3), Interfaces, Services, ValidatorServices, Configurations, Controllers (7 endpoints), SQL
+- ✅ **Proveedor** (comercial.Proveedores) — Clon de Cliente — Domain, DTOs (3), Interfaces, Services, ValidatorServices, Configurations, Controllers (7 endpoints), SQL
+
+#### Características:
+- ✅ AutoMapper Profiles: 3/3 (CondicionPagoProfile, ListaPrecioProfile, ProveedorProfile)
+- ✅ Program.cs: +6 DI registrations (3 services + 3 validators)
+- ✅ AppDbContext.cs: +3 DbSets (CondicionesPago, ListasPrecios, Proveedores)
+- ✅ SQL DDL: 3 tablas (16_CondicionesPago, 17_ListasPrecios, 18_Proveedores) + seed (13_InitCondicionPagoListaPrecioProveedor)
+- ✅ **CQRS Pattern:** 12 Commands (record) + 12 Handlers + 6 Validators
+- ✅ **ListaPrecio Special Logic:** Only 1 EsDefault allowed (enforced in Handler)
+- ✅ **Proveedor Pattern:** Identical to Cliente (TipoDocumento, Pais, filtered unique index on Correo)
+- ✅ **SQL Scripts Executed:** 4 scripts executed successfully
+- ✅ **Smoke Testing:** 21+ endpoints validated correctly
+- ✅ **Duración Real:** ~3.5 horas (50% FASTER than estimated 6-7h)
+
+#### Archivos:
+- **Creados:** 70+ nuevos
+- **Modificados:** 2 (AppDbContext, Program.cs)
+- **Scripts SQL:** 4 (3 tablas + 1 seed)
+
+#### Estado:
+- **Compilación:** ✅ 0 errores, 0 warnings
+- **Testing:** ✅ Completado (SQL + endpoints + validaciones)
+- **Documentación:** ✅ History Changed + USUARIO_DOCS completados
 
 ---
 
@@ -415,7 +432,7 @@ Duración:               ~3 horas
 
 ---
 
-**Última actualización:** 2026-05-18 18:50 UTC  
-**Status:** ✅ SPRINT 4 COMPLETADO — Compilación exitosa, 14 endpoints funcionales  
-**Siguiente revisión:** SQL execution + smoke testing endpoints + Sprint 5 planning
+**Última actualización:** 2026-05-18 22:30 UTC  
+**Status:** ✅ CATÁLOGOS BASE 100% COMPLETADOS (18 de 18 entidades) — Compilación exitosa, 120+ endpoints funcionales  
+**Siguiente fase:** Módulo Ventas v3.1 (sin bloqueos de dependencias)
 

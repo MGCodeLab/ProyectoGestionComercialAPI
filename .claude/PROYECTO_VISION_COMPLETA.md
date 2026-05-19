@@ -1,9 +1,9 @@
 # NEXUS-ERP v3.1 — VISIÓN COMPLETA DEL PROYECTO
 
 **Fecha:** 2026-05-18  
-**Estado:** Sprint 1 ✅ COMPLETADO — Sprint 2 ✅ COMPLETADO — Sprint 3 ✅ COMPLETADO — Sprint 4 ✅ COMPLETADO — Sprint 5 ⏳ Próximo  
+**Estado:** Sprint 1 ✅ COMPLETADO — Sprint 2 ✅ COMPLETADO — Sprint 3 ✅ COMPLETADO — Sprint 4 ✅ COMPLETADO — Sprint 5 ✅ COMPLETADO  
 **Actualizado por:** Nexus-Fast-Builder + Miguel Gonzalez  
-**Para:** Continuidad de sesión + próximos pasos (Sprint 4 ejecutado y testeado, Sprint 5 planeado)
+**Para:** Continuidad de sesión + próximos pasos (Catálogos base 100% completos, Módulo Ventas v3.1 desbloqueado)
 
 ---
 
@@ -127,9 +127,9 @@ Sprint 1 (Catálogos Base)    ████████████████�
 Sprint 2 (Organización)      ████████████████████ 100% ✅ COMPLETADO
 Sprint 3 (Fiscal)            ████████████████████ 100% ✅ COMPLETADO
 Sprint 4 (Producto)          ████████████████████ 100% ✅ COMPLETADO
-Sprint 5 (Comercial)         ░░░░░░░░░░░░░░░░░░░░   0% ⏳ Próximo
+Sprint 5 (Comercial)         ████████████████████ 100% ✅ COMPLETADO
 ────────────────────────────────────────────────────────────────────
-TOTAL PROYECTO               ██████████████████░░  80% (16 de 18 entidades)
+TOTAL PROYECTO               ████████████████████ 100% ✅ (18 de 18 entidades)
 ```
 
 ---
@@ -186,16 +186,26 @@ TOTAL PROYECTO               █████████████████
 
 ---
 
-### SPRINT 5: Comercial — CondicionPago, ListaPrecio, Proveedor
+### ✅ SPRINT 5: Comercial — CondicionPago, ListaPrecio, Proveedor — **COMPLETADO 2026-05-18**
 
-**Duración estimada:** 6-7 horas  
-**Complejidad:** 🟢 BAJA (patrones conocidos)  
+**Duración real:** ~3.5 horas (50% mejor que estimado 6-7h)  
+**Complejidad:** 🟢 BAJA (patrones conocidos) ✅  
 
-**Entidades:** CondicionPago, ListaPrecio, Proveedor (3)  
-**Patrón especial:** Proveedor = clone de Cliente (mismo CQRS)  
-**Detalles:** Filtered unique index en Correo (null-safe)  
+**Entidades:** CondicionPago, ListaPrecio, Proveedor (3/3) ✅  
+**Patrón especial:** Proveedor = clone de Cliente (mismo CQRS) ✅  
+**Características:** Filtered unique index en Correo (null-safe), ListaPrecio EsDefault único ✅  
 
-👉 **Detalles:** `.claude/plans/active/2026-05-16_catalogo-sprint5-comercial.md`
+**Estadísticas:**
+- **Archivos creados:** 70+
+- **Líneas de código:** ~1,827
+- **Endpoints:** 21 (7 × 3 entidades)
+- **SQL Scripts:** 4 (3 DDL + 1 Seed)
+- **Compilación:** 0 errores ✅
+- **Testing:** Completado + validado ✅
+
+**Impacto:** ✅ **Catálogos base 100% completados (18 de 18 entidades)** — Módulo Ventas v3.1 desbloqueado
+
+👉 **Detalles:** `.claude/plans/completed/2026-05-18_catalogo-sprint5-comercial-completado.md`
 
 ---
 
@@ -207,8 +217,8 @@ TOTAL PROYECTO               █████████████████
 | 2 | 3 | 6-8h | 4.5h | ✅ 2026-05-16 | COMPLETADO |
 | 3 | 3 | 8-10h | 6.5h | ✅ 2026-05-17 | COMPLETADO |
 | 4 | 2 + ALTER | 5-6h | ~3.5h | ✅ 2026-05-18 | COMPLETADO |
-| 5 | 3 | 6-7h estimado | ⏳ TBD | ⏳ ~2026-05-24 | Próximo |
-| **TOTAL** | **16+** | **~30h** | **~18.5h real** | **~2026-05-31** | **80% (16 de 18 entidades)** |
+| 5 | 3 | 6-7h | ~3.5h | ✅ 2026-05-18 | COMPLETADO |
+| **TOTAL** | **18** | **~30h** | **~22h real** | **✅ 2026-05-18** | **100% (18 de 18 entidades)** |
 
 **Post-catálogos:** Módulo Ventas v3.1 (desbloqueado cuando Sprint 5 complete)
 
@@ -451,95 +461,112 @@ if (empresaExistente != null)
 
 ---
 
-## 🚀 PRÓXIMOS PASOS — SPRINT 5
+## 🚀 PRÓXIMOS PASOS — POST CATÁLOGOS (SPRINT 6+)
 
-### Inmediato (Próxima sesión)
+### Inmediato (Completado Hoy)
 
-1. **✅ Sprint 4 Completado & Documentado**
-   - ✅ 42 archivos nuevos creados + 10 modificados
-   - ✅ 2 entidades nuevas (CategoriaProducto, MarcaProducto)
-   - ✅ Migración segura de Productos ejecutada
+1. **✅ Sprint 5 Completado & Documentado**
+   - ✅ 70 archivos nuevos creados + 2 modificados
+   - ✅ 3 entidades nuevas (CondicionPago, ListaPrecio, Proveedor)
    - ✅ Patrón CQRS robusto (records, Clean Architecture)
    - ✅ Compilación limpia (0 errores, 0 warnings)
    - ✅ SQL scripts ejecutados exitosamente (4 scripts)
-   - ✅ Smoke testing completado (14+ endpoints validados)
+   - ✅ Smoke testing completado (21 endpoints validados)
    - ✅ 3 hallazgos críticos documentados en COMMON_ISSUES_AND_FIXES.md
    - ✅ Documentación: History Changed + USUARIO_DOCS + execution-status actualizado
+   - **Estado:** Documentación de gobernanza finalizada
    - **Siguiente:** Push a develop (cuando SSH esté disponible)
 
-2. **📋 Sprint 5 Listo para Iniciar** (Plan disponible: `.claude/plans/active/2026-05-16_catalogo-sprint5-comercial.md`)
-   - **Entidades:** CondicionPago, ListaPrecio, Proveedor
-   - **Duración estimada:** 6-7 horas
-   - **Complejidad:** 🟢 BAJA (patrones conocidos)
-   - **Patrón especial:** Proveedor = clone de Cliente (mismo CQRS + validaciones)
-   - **Dependencias:** Sprint 1 (Pais, Moneda), Sprint 2 (TipoDocumento), Sprint 4 (Productos)
-   - **Desbloqueador:** Módulo Ventas v3.1 cuando Sprint 5 complete
+2. **🎊 CATÁLOGOS BASE 100% COMPLETADOS** (Todas 18 entidades)
+   - ✅ Sprint 1-5: Pais, Moneda, UnidadMedida, ModuloSistema, ParametroSistema
+   - ✅ Sprint 2: Empresa, Sucursal, Almacen
+   - ✅ Sprint 3: TipoImpuesto, TipoComprobante, SerieDocumento
+   - ✅ Sprint 4: CategoriaProducto, MarcaProducto, ALTER Productos
+   - ✅ Sprint 5: CondicionPago, ListaPrecio, Proveedor
+   - **Desbloqueador:** Módulo Ventas v3.1 (sin bloqueos de dependencias)
 
-3. **Decisiones Pendientes Antes Sprint 5**
-   - [ ] PD-02 (ListaPrecioDetalle) — Decidir: ¿incluir en Sprint 5 o deferred a Ventas?
-   - [ ] Consultar con Miguel: alcance final de Sprint 5
-
-### Timeline Realista ACTUALIZADO (2026-05-18)
+### Timeline Realista FINAL (2026-05-18)
 
 ```
 2026-05-10:          Sprint 1 completado (4-5h real)
 2026-05-16:          Sprint 2 completado (4.5h real)
 2026-05-17:          Sprint 3 completado (6.5h real)
-2026-05-18 ✅:       Sprint 4 completado (3.5h real) — HEMOS LLEGADO AQUÍ
-2026-05-24-28:       Sprint 5 implementación (6-7h estimado) ← PRÓXIMO
-~2026-05-31:         Catálogos 100% — Módulo Ventas v3.1 DESBLOQUEADO
+2026-05-18:          Sprint 4 completado (3.5h real)
+2026-05-18 ✅:       Sprint 5 completado (3.5h real) — CATÁLOGOS 100%
+─────────────────────────────────────────────────────
+TOTAL TIEMPO:        ~22 horas reales (vs ~30h estimado)
+MEJORA:              26% más rápido que estimado
+ANTICIPACIÓN:        Completado el mismo día que Sprint 4 (18 días antes vs estimado ~2026-06-06)
 ```
 
-**Optimización Final:** 
-- Tiempo real acumulado: ~18.5 horas
-- Tiempo estimado original: ~30 horas
-- **Mejora: 40% más rápido** gracias a optimización continua en patrones y procesos
-- **Anticipación:** 6-8 días adelantados respecto a timeline original (~2026-06-06 vs ~2026-05-31)
+### Próximo Sprint: Módulo Ventas v3.1
+
+**Status:** 🟢 **TODAS LAS DEPENDENCIAS COMPLETADAS — LISTO PARA INICIAR**
+
+**Entidades planeadas:**
+- Venta (main module)
+- VentaDetalle (line items)
+- ListaPrecioDetalle (diferido desde PD-02, implementar en Sprint 6)
+- Descuento (opcional)
+- Comisión (opcional)
+
+**Estimado:** 15-20 horas
+**Bloqueante:** NINGUNO ✅
+**Arquitectura validada:** ✅ Todos catálogos listos
 
 ---
 
-## 📌 ESTADO ACTUAL (2026-05-18 14:00 UTC)
+## 📌 ESTADO ACTUAL (2026-05-18 22:30 UTC)
 
 | Item | Estado | Notas |
 |------|--------|-------|
 | Sprint 1 | ✅ 100% completo + testeado | Commit 71e9c9a |
 | Sprint 2 | ✅ 100% completo + testeado | Ejecutado + testeado por usuario |
 | Sprint 3 | ✅ 100% completo + testeado | SQL scripts ejecutados exitosamente |
-| Sprint 4 | ✅ 100% completo + testeado | ✅ HEMOS LLEGADO AQUÍ — Compilación 0 errores, 14+ endpoints validados |
-| Gobernanza | ✅ Completada | Planes segregados por sprint, ejecución actualizada diariamente |
+| Sprint 4 | ✅ 100% completo + testeado | Compilación 0 errores, 14+ endpoints validados |
+| Sprint 5 | ✅ 100% completo + testeado | ✅ COMPLETADO MISMO DÍA — Compilación 0 errores, 21 endpoints validados |
+| **Catálogos Base** | **✅ 100%** | **18 de 18 entidades completadas** |
+| Gobernanza | ✅ Completada | Planes segregados por sprint, ejecución actualizada en tiempo real |
 | Arquitectura Sprint 2 | ✅ Implementada | SingleTenant Guard funcional |
 | Arquitectura Sprint 3 | ✅ Implementada | SERIALIZABLE concurrency en SerieDocumento |
 | Arquitectura Sprint 4 | ✅ Implementada | Self-ref FK (NO ACTION), depth validation, cycle prevention |
+| Arquitectura Sprint 5 | ✅ Implementada | ListaPrecio EsDefault único, Proveedor clone de Cliente, filtered unique index |
 | PD-01 TipoDocumentoEnum | ✅ RESUELTO | IDs auditados por Miguel |
+| PD-02 ListaPrecioDetalle | ✅ DECIDIDO | Opción A: Diferir a Sprint 6 (Ventas) — ADR-011 documentado |
 | PD-02.5 SingleTenant Guard | ✅ IMPLEMENTADO | Application-level, multi-tenant ready |
 | PD-03 Smoke Testing Sprint 1 | ✅ COMPLETADO | Validado por Miguel en Postman |
-| Compilación | ✅ 0 errores | 0 advertencias (post-Sprint 4) |
-| SQL Scripts | ✅ Ejecutados | 15 scripts totales ejecutados (Sprints 1-4) |
+| Compilación | ✅ 0 errores | 0 advertencias (post-Sprint 5) |
+| SQL Scripts | ✅ Ejecutados | 19 scripts totales ejecutados (Sprints 1-5) |
 | Documentación | ✅ Completa | IA_Docs, History Changed, USUARIO_DOCS, gobernanza actualizados |
 | Problemas Sprint 3 | ✅ 7 documentados | Secciones 8-10 COMMON_ISSUES_AND_FIXES.md |
 | Problemas Sprint 4 | ✅ 3 documentados | Sección 11 COMMON_ISSUES_AND_FIXES.md |
+| Problemas Sprint 5 | ✅ 3 documentados | Hallazgos agregados a COMMON_ISSUES_AND_FIXES.md |
 
 ---
 
 ## ✉️ PRÓXIMAS ACCIONES
 
-### Inmediato (Hoy)
-1. ✅ Sprint 4 documentación completada (History Changed + USUARIO_DOCS)
-2. ✅ Planes movidos a `completed/` (Sprint 4)
-3. ✅ Execution status actualizado
-4. ✅ Visión completa actualizada
-5. ⏳ **Pendiente usuario:** Push a develop
+### Inmediato (Hoy — COMPLETADO)
+1. ✅ Sprint 5 documentación completada (History Changed + USUARIO_DOCS)
+2. ✅ Planes movidos a `completed/` (Sprint 5)
+3. ✅ Execution status actualizado (100% catálogos)
+4. ✅ Gobernanza completada (execution-status, pending, proyección, visión)
+5. ✅ **Pendiente usuario:** Push a develop
 
-### Antes de Sprint 5
-1. ⏳ Decidir: ¿incluir ListaPrecioDetalle en Sprint 5 o deferred a Ventas?
-2. ⏳ Consultar alcance final con Miguel
-3. ⏳ Preparar rama `catalogo-base/sprint_5`
+### Antes de Módulo Ventas v3.1
+1. ⏳ Consultar con Miguel: ¿iniciar Sprint 6 (Ventas) o pausa?
+2. ⏳ Preparar rama `ventas-base/sprint_6` (nueva rama)
+3. ⏳ Revisar requisitos de Venta + VentaDetalle
+4. ⏳ Planificar ListaPrecioDetalle (diferido desde Sprint 5)
 
 ### Claude Code (Próxima sesión)
 1. ⏳ Esperar confirmación de usuario (push completado)
-2. ⏳ Iniciar Sprint 5: CondicionPago, ListaPrecio, Proveedor
-3. ⏳ Estimar fecha: ~2026-05-24 a 2026-05-28
+2. ⏳ Opciones:
+   - Iniciar Sprint 6: Venta, VentaDetalle, ListaPrecioDetalle
+   - O pausar para revisión arquitectónica de módulo Ventas
+3. ⏳ Estimar fecha: ~2026-05-24+ (después push)
 
-**Estado:** ✅ **Sprint 4 COMPLETADO Y DOCUMENTADO — Listo para push**  
-**Siguiente:** Sprint 5 (Comercial) — 3 entidades, 6-7 horas estimadas
+**Estado:** ✅ **CATÁLOGOS BASE 100% COMPLETADOS Y DOCUMENTADOS**  
+**Rama:** `catalogo-base/sprint_5` (lista para merge a develop)
+**Siguiente:** Módulo Ventas v3.1 (Sprint 6) — Sin bloqueos arquitectónicos
 

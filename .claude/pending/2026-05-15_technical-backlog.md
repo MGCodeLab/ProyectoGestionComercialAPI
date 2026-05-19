@@ -1,8 +1,8 @@
 # Technical Backlog & Pending Decisions — Nexus-ERP
 
-**Última actualización:** 2026-05-18 (PD-02 decidido)  
+**Última actualización:** 2026-05-18 22:30 UTC (Sprint 5 completado)  
 **Tipo:** Backlog técnico + arquitectónico + funcional  
-**Estado:** Sprint 1-4 ✅ completados — Sprint 5 ready — ✅ PD-02 decidido (Opción A: Diferir a Ventas)
+**Estado:** Sprint 1-5 ✅ completados — ✅ Catálogos base 100% — ✅ PD-02 decidido (Opción A: Diferir a Ventas)
 
 ---
 
