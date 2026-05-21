@@ -46,4 +46,30 @@ public class PaisService : IPaisService
         _context.Paises.Remove(entity);
         await _context.SaveChangesAsync(token);
     }
+
+    public async Task<bool> TieneDependencias(Pais pais, CancellationToken token)
+    {
+        // Empresa.PaisId
+        var existeEnEmpresas = await _context.Empresas
+            .AsNoTracking()
+            .AnyAsync(e => e.PaisId == pais.Id, token);
+
+        if (existeEnEmpresas)
+            return true;
+
+        // Sucursal.PaisId
+        var existeEnSucursales = await _context.Sucursales
+            .AsNoTracking()
+            .AnyAsync(s => s.PaisId == pais.Id, token);
+
+        if (existeEnSucursales)
+            return true;
+
+        // Proveedor.PaisId
+        var existeEnProveedores = await _context.Proveedores
+            .AsNoTracking()
+            .AnyAsync(p => p.PaisId == pais.Id, token);
+
+        return existeEnProveedores;
+    }
 }

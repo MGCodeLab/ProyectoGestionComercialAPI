@@ -5,6 +5,7 @@ public interface IUnidadMedidaService {
     Task<UnidadMedida?> ObtenerPorId(int id, bool isAsTracking, CancellationToken token); 
     Task<int> Crear(UnidadMedida entity, CancellationToken token); 
     Task Actualizar(CancellationToken token);
-    Task Eliminar(UnidadMedida entity, CancellationToken token); 
+    Task Eliminar(UnidadMedida entity, CancellationToken token);
+    Task<bool> TieneDependencias(UnidadMedida entity, CancellationToken token);
 }
 

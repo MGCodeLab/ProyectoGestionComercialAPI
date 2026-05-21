@@ -1,13 +1,14 @@
-using AutoMapper;
-using MediatR;
-using Microsoft.AspNetCore.Mvc;
+using API.GestionComercial.Extensions;
 using Application.Dtos.Catalogo;
 using Application.Features.Catalogo.Pais.Actualizar;
 using Application.Features.Catalogo.Pais.ActualizarEstado;
 using Application.Features.Catalogo.Pais.Crear;
 using Application.Features.Catalogo.Pais.Eliminar;
 using Application.Interfaces;
-using API.GestionComercial.Extensions;
+using AutoMapper;
+using Domain.Catalogo;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace API.GestionComercial.Controllers;
 
@@ -83,9 +84,6 @@ public class PaisesController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Eliminar(int id, CancellationToken token)
     {
-        var pais = await _service.ObtenerPorId(id, false, token);
-        if (pais == null)
-            return this.NotFoundResponse("País no encontrado");
         var command = new EliminarPaisCommand(id);
         await _mediator.Send(command, token);
         return this.OkResponse<string?>(null, "País eliminado exitosamente");

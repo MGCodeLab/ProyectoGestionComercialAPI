@@ -9,4 +9,5 @@ public interface IPaisService
     Task<int> Crear(Pais entity, CancellationToken token);
     Task Actualizar(CancellationToken token);
     Task Eliminar(Pais entity, CancellationToken token);
+    Task<bool> TieneDependencias(Pais pais, CancellationToken token);
 }

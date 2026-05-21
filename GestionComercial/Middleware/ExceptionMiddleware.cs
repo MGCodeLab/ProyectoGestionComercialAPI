@@ -44,6 +44,14 @@ namespace API.GestionComercial.Middleware
 
                 await WriteResponse(context, HttpStatusCode.Unauthorized, response);
             }
+            catch (BadRequestException ex)
+            {
+                _logger.LogWarning(ex, "Error de validación de negocio");
+
+                var response = ApiResponse<string>.Fail(ex.Message);
+
+                await WriteResponse(context, HttpStatusCode.BadRequest, response);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error no controlado");

@@ -31,4 +31,12 @@ public class UnidadMedidaService : IUnidadMedidaService
         await _context.SaveChangesAsync(token); 
     }
 
+    public async Task<bool> TieneDependencias(UnidadMedida entity, CancellationToken token)
+    {
+        var existeProducto = await _context.Productos
+            .AsNoTracking()
+            .AnyAsync(e => e.UnidadMedidaId == entity.Id, token);
+
+        return existeProducto;
+    }
 }

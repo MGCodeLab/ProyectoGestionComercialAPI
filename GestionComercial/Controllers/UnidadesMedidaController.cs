@@ -83,9 +83,6 @@ public class UnidadesMedidaController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Eliminar(int id, CancellationToken token)
     {
-        var unidad = await _service.ObtenerPorId(id, false, token);
-        if (unidad == null)
-            return this.NotFoundResponse("Unidad de medida no encontrada");
         var command = new EliminarUnidadMedidaCommand(id);
         await _mediator.Send(command, token);
         return this.OkResponse<string?>(null, "Unidad de medida eliminada exitosamente");

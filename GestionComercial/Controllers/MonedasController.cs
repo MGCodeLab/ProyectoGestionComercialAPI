@@ -83,16 +83,6 @@ public class MonedasController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Eliminar(int id, CancellationToken token)
     {
-        var moneda = await _service.ObtenerPorId(id, false, token);
-        if (moneda == null)
-            return this.NotFoundResponse("Moneda no encontrada");
-
-        var tieneDependencias = await _service.TieneDependencias(moneda, token);
-        if (tieneDependencias)
-        {
-            return BadRequest("Moneda en uso en países o empresas. Solo se permite deshabilitar mediante PATCH /inactivar");
-        }
-
         var command = new EliminarMonedaCommand(id);
         await _mediator.Send(command, token);
         return this.OkResponse<string?>(null, "Moneda eliminada exitosamente");
