@@ -17,7 +17,6 @@ public class MonedaService : IMonedaService
 
     public async Task<bool> TieneDependencias(Moneda moneda, CancellationToken token)
     {
-        // Verificar si la moneda está vinculada en Paises (por CodigoMoneda)
         var existeEnPaises = await _context.Paises
             .AsNoTracking()
             .AnyAsync(p => p.CodigoMoneda == moneda.CodigoISO, token);
@@ -25,11 +24,17 @@ public class MonedaService : IMonedaService
         if (existeEnPaises)
             return true;
 
-        // Verificar si la moneda es moneda base en alguna Empresa
         var existeEnEmpresas = await _context.Empresas
             .AsNoTracking()
             .AnyAsync(e => e.MonedaBaseId == moneda.Id, token);
 
-        return existeEnEmpresas;
+        if (existeEnEmpresas)
+            return true;
+
+        var existeEnListaPrecio = await _context.ListasPrecios
+            .AsNoTracking()
+            .AnyAsync(e => e.MonedaId == moneda.Id, token);
+
+        return existeEnListaPrecio;
     }
 }
