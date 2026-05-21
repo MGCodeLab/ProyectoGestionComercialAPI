@@ -9,5 +9,5 @@ public interface IMonedaService
     Task<int> Crear(Moneda entity, CancellationToken token);
     Task Actualizar(CancellationToken token);
     Task Eliminar(Moneda entity, CancellationToken token);
-    Task<bool> TieneDependencias(int monedaId, CancellationToken token);
+    Task<bool> TieneDependencias(Moneda moneda, CancellationToken token);
 }

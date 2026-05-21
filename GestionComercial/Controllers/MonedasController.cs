@@ -87,7 +87,7 @@ public class MonedasController : ControllerBase
         if (moneda == null)
             return this.NotFoundResponse("Moneda no encontrada");
 
-        var tieneDependencias = await _service.TieneDependencias(id, token);
+        var tieneDependencias = await _service.TieneDependencias(moneda, token);
         if (tieneDependencias)
         {
             return BadRequest("Moneda en uso en países o empresas. Solo se permite deshabilitar mediante PATCH /inactivar");
