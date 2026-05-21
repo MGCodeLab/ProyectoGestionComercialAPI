@@ -50,9 +50,14 @@ public class PaisesController : ControllerBase
     {
         var command = _mapper.Map<CrearPaisCommand>(dto);
         var id = await _mediator.Send(command, token);
-        var pais = await _service.ObtenerPorId(id, false, token);
-        var paisDto = _mapper.Map<PaisDto>(pais);
-        return this.CreatedResponse(nameof(ObtenerPorId), new { id }, paisDto, "País creado exitosamente");
+        var result = new PaisDto
+        {
+            Id = id,
+            Nombre = dto.Nombre,
+            Codigo = dto.Codigo,
+            CodigoMoneda = dto.CodigoMoneda
+        };
+        return this.CreatedResponse(nameof(ObtenerPorId), new { id }, result, "País creado exitosamente");
     }
 
     [HttpPut("{id}")]
@@ -60,9 +65,7 @@ public class PaisesController : ControllerBase
     {
         var command = new ActualizarPaisCommand(id, dto.Nombre, dto.Codigo, dto.CodigoMoneda);
         await _mediator.Send(command, token);
-        var pais = await _service.ObtenerPorId(id, false, token);
-        var paisDto = _mapper.Map<PaisDto>(pais);
-        return this.OkResponse(paisDto, "País actualizado exitosamente");
+        return this.OkResponse(string.Empty, "País actualizado exitosamente");
     }
 
     [HttpPatch("{id}/activar")]

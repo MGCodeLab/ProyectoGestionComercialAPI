@@ -49,9 +49,14 @@ public class UnidadesMedidaController : ControllerBase
     {
         var command = _mapper.Map<CrearUnidadMedidaCommand>(dto);
         var id = await _mediator.Send(command, token);
-        var unidad = await _service.ObtenerPorId(id, false, token);
-        var unidadDto = _mapper.Map<UnidadMedidaDto>(unidad);
-        return this.CreatedResponse(nameof(ObtenerPorId), new { id }, unidadDto, "Unidad de medida creada exitosamente");
+        var result = new UnidadMedidaDto
+        {
+            Id = id,
+            Nombre = dto.Nombre,
+            Simbolo = dto.Simbolo,
+            Codigo = dto.Codigo
+        };
+        return this.CreatedResponse(nameof(ObtenerPorId), new { id }, result, "Unidad de medida creada exitosamente");
     }
 
     [HttpPut("{id}")]
@@ -59,9 +64,7 @@ public class UnidadesMedidaController : ControllerBase
     {
         var command = new ActualizarUnidadMedidaCommand(id, dto.Nombre, dto.Simbolo, dto.Codigo);
         await _mediator.Send(command, token);
-        var unidad = await _service.ObtenerPorId(id, false, token);
-        var unidadDto = _mapper.Map<UnidadMedidaDto>(unidad);
-        return this.OkResponse(unidadDto, "Unidad de medida actualizada exitosamente");
+        return this.OkResponse(string.Empty, "Unidad de medida actualizada exitosamente");
     }
 
     [HttpPatch("{id}/activar")]
