@@ -37,7 +37,7 @@ public class ProveedoresController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> ObtenerPorId(int id, CancellationToken token)
     {
-        var proveedor = await _service.ObtenerPorId(id, token);
+        var proveedor = await _service.ObtenerPorId(id, isAsTracking: false, token);
         if (proveedor == null)
             return this.NotFoundResponse("Proveedor no encontrado");
         var proveedorDto = _mapper.Map<ProveedorDto>(proveedor);
@@ -49,7 +49,7 @@ public class ProveedoresController : ControllerBase
     {
         var command = _mapper.Map<CrearProveedorCommand>(dto);
         var id = await _mediator.Send(command, token);
-        var proveedor = await _service.ObtenerPorId(id, token);
+        var proveedor = await _service.ObtenerPorId(id, isAsTracking: false,  token);
         var proveedorDto = _mapper.Map<ProveedorDto>(proveedor);
         return this.CreatedResponse(nameof(ObtenerPorId), new { id }, proveedorDto, "Proveedor creado exitosamente");
     }
@@ -60,7 +60,7 @@ public class ProveedoresController : ControllerBase
         var command = new ActualizarProveedorCommand(id, dto.TipoDocumentoId, dto.NumeroDocumento, dto.RazonSocial,
             dto.NombreComercial, dto.PaisId, dto.Correo, dto.Telefono, dto.Direccion);
         await _mediator.Send(command, token);
-        var proveedor = await _service.ObtenerPorId(id, token);
+        var proveedor = await _service.ObtenerPorId(id, isAsTracking: false, token);
         var proveedorDto = _mapper.Map<ProveedorDto>(proveedor);
         return this.OkResponse(proveedorDto, "Proveedor actualizado exitosamente");
     }
@@ -84,7 +84,7 @@ public class ProveedoresController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Eliminar(int id, CancellationToken token)
     {
-        var proveedor = await _service.ObtenerPorId(id, token);
+        var proveedor = await _service.ObtenerPorId(id, isAsTracking: false, token);
         if (proveedor == null)
             return this.NotFoundResponse("Proveedor no encontrado");
         var command = new EliminarProveedorCommand(id);

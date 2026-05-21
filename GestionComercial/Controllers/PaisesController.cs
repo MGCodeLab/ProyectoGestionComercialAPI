@@ -83,7 +83,7 @@ public class PaisesController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Eliminar(int id, CancellationToken token)
     {
-        var pais = await _service.ObtenerPorId(id, true, token);
+        var pais = await _service.ObtenerPorId(id, false, token);
         if (pais == null)
             return this.NotFoundResponse("País no encontrado");
         var command = new EliminarPaisCommand(id);

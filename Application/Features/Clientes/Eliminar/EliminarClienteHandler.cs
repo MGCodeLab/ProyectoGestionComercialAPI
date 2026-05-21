@@ -22,7 +22,7 @@ namespace Application.Features.Clientes.Eliminar
         {
             _logger.LogInformation("Eliminando cliente {Id}", request.Id);
 
-            var cliente = await _service.ObtenerPorId(request.Id, isAsTracking: true, cancellationToken);
+            var cliente = await _service.ObtenerPorId(request.Id, isAsTracking: false, cancellationToken);
 
             if (cliente == null)
                 throw new NotFoundException($"Cliente con id {request.Id} no encontrado");
