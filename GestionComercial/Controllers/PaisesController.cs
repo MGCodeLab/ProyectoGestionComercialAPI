@@ -1,13 +1,14 @@
-using AutoMapper;
-using MediatR;
-using Microsoft.AspNetCore.Mvc;
+using API.GestionComercial.Extensions;
 using Application.Dtos.Catalogo;
 using Application.Features.Catalogo.Pais.Actualizar;
 using Application.Features.Catalogo.Pais.ActualizarEstado;
 using Application.Features.Catalogo.Pais.Crear;
 using Application.Features.Catalogo.Pais.Eliminar;
 using Application.Interfaces;
-using API.GestionComercial.Extensions;
+using AutoMapper;
+using Domain.Catalogo;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace API.GestionComercial.Controllers;
 
@@ -49,9 +50,14 @@ public class PaisesController : ControllerBase
     {
         var command = _mapper.Map<CrearPaisCommand>(dto);
         var id = await _mediator.Send(command, token);
-        var pais = await _service.ObtenerPorId(id, false, token);
-        var paisDto = _mapper.Map<PaisDto>(pais);
-        return this.CreatedResponse(nameof(ObtenerPorId), new { id }, paisDto, "País creado exitosamente");
+        var result = new PaisDto
+        {
+            Id = id,
+            Nombre = dto.Nombre,
+            Codigo = dto.Codigo,
+            CodigoMoneda = dto.CodigoMoneda
+        };
+        return this.CreatedResponse(nameof(ObtenerPorId), new { id }, result, "País creado exitosamente");
     }
 
     [HttpPut("{id}")]
@@ -59,9 +65,7 @@ public class PaisesController : ControllerBase
     {
         var command = new ActualizarPaisCommand(id, dto.Nombre, dto.Codigo, dto.CodigoMoneda);
         await _mediator.Send(command, token);
-        var pais = await _service.ObtenerPorId(id, false, token);
-        var paisDto = _mapper.Map<PaisDto>(pais);
-        return this.OkResponse(paisDto, "País actualizado exitosamente");
+        return this.OkResponse(string.Empty, "País actualizado exitosamente");
     }
 
     [HttpPatch("{id}/activar")]
@@ -83,9 +87,6 @@ public class PaisesController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Eliminar(int id, CancellationToken token)
     {
-        var pais = await _service.ObtenerPorId(id, true, token);
-        if (pais == null)
-            return this.NotFoundResponse("País no encontrado");
         var command = new EliminarPaisCommand(id);
         await _mediator.Send(command, token);
         return this.OkResponse<string?>(null, "País eliminado exitosamente");

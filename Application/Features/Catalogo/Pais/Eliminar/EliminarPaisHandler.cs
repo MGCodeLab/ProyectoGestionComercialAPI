@@ -22,6 +22,10 @@ public class EliminarPaisHandler : IRequestHandler<EliminarPaisCommand, Unit>
         if (pais == null)
             throw new NotFoundException($"País con id {request.Id} no encontrado");
 
+        var tieneDependencias = await _service.TieneDependencias(pais, cancellationToken);
+        if (tieneDependencias)
+            throw new BadRequestException("País en uso en empresas, sucursales o proveedores. Solo se permite deshabilitar mediante PATCH /inactivar");
+
         await _service.Eliminar(pais, cancellationToken);
         _logger.LogInformation("País eliminado: {PaisId}", request.Id);
         return Unit.Value;

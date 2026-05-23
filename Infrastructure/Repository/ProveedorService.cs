@@ -14,8 +14,20 @@ public class ProveedorService : IProveedorService
     public async Task<List<Proveedor>> ObtenerTodos(CancellationToken token)
         => await _context.Proveedores.Include(x => x.TipoDocumento).Include(x => x.Pais).ToListAsync(token);
 
-    public async Task<Proveedor?> ObtenerPorId(int id, CancellationToken token)
-        => await _context.Proveedores.Include(x => x.TipoDocumento).Include(x => x.Pais).FirstOrDefaultAsync(x => x.Id == id, token);
+    public async Task<Proveedor?> ObtenerPorId(int id, bool isAsTracking, CancellationToken token)
+       => (isAsTracking) ?
+        await _context.Proveedores.FirstOrDefaultAsync(x => x.Id == id, token) :
+        await _context.Proveedores.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, token);
+
+    public async Task<Proveedor?> ObtenerPorIdConRelaciones(int id, CancellationToken token)
+    {
+        return await _context.Proveedores
+            .AsNoTracking()
+            .Include(x => x.TipoDocumento)
+            .Include(x => x.Pais)
+            .FirstOrDefaultAsync(x => x.Id == id, token);
+    }
+
 
     public async Task<int> Crear(Proveedor entity, CancellationToken token)
     {

@@ -14,4 +14,27 @@ public class MonedaService : IMonedaService
     public async Task<int> Crear(Moneda entity, CancellationToken token) { _context.Monedas.Add(entity); await _context.SaveChangesAsync(token); return entity.Id; }
     public async Task Actualizar(CancellationToken token) => await _context.SaveChangesAsync(token);
     public async Task Eliminar(Moneda entity, CancellationToken token) { _context.Monedas.Remove(entity); await _context.SaveChangesAsync(token); }
+
+    public async Task<bool> TieneDependencias(Moneda moneda, CancellationToken token)
+    {
+        var existeEnPaises = await _context.Paises
+            .AsNoTracking()
+            .AnyAsync(p => p.CodigoMoneda == moneda.CodigoISO, token);
+
+        if (existeEnPaises)
+            return true;
+
+        var existeEnEmpresas = await _context.Empresas
+            .AsNoTracking()
+            .AnyAsync(e => e.MonedaBaseId == moneda.Id, token);
+
+        if (existeEnEmpresas)
+            return true;
+
+        var existeEnListaPrecio = await _context.ListasPrecios
+            .AsNoTracking()
+            .AnyAsync(e => e.MonedaId == moneda.Id, token);
+
+        return existeEnListaPrecio;
+    }
 }

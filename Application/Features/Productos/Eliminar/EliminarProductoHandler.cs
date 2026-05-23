@@ -21,7 +21,7 @@ namespace Application.Features.Productos.Eliminar.Commands
 
         public async Task<Unit> Handle(EliminarProductoCommand request, CancellationToken cancellationToken)
         {
-            var producto = await _service.ObtenerPorId(request.Id, isAsTracking: true, cancellationToken);
+            var producto = await _service.ObtenerPorId(request.Id, isAsTracking: false, cancellationToken);
 
             if (producto == null)
                 throw new NotFoundException("Producto no encontrado");

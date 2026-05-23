@@ -22,6 +22,10 @@ public class EliminarMonedaHandler : IRequestHandler<EliminarMonedaCommand, Unit
         if (moneda == null)
             throw new NotFoundException($"Moneda con id {request.Id} no encontrada");
 
+        var tieneDependencias = await _service.TieneDependencias(moneda, cancellationToken);
+        if (tieneDependencias)
+            throw new BadRequestException("Moneda en uso en países o empresas. Solo se permite deshabilitar mediante PATCH /inactivar");
+
         await _service.Eliminar(moneda, cancellationToken);
         _logger.LogInformation("Moneda eliminada: {MonedaId}", request.Id);
         return Unit.Value;

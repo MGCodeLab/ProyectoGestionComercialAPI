@@ -49,9 +49,15 @@ public class MonedasController : ControllerBase
     {
         var command = _mapper.Map<CrearMonedaCommand>(dto);
         var id = await _mediator.Send(command, token);
-        var moneda = await _service.ObtenerPorId(id, false, token);
-        var monedaDto = _mapper.Map<MonedaDto>(moneda);
-        return this.CreatedResponse(nameof(ObtenerPorId), new { id }, monedaDto, "Moneda creada exitosamente");
+        var result = new MonedaDto
+        {
+            Id = id,
+            Nombre = dto.Nombre,
+            Simbolo = dto.Simbolo,
+            CodigoISO = dto.CodigoISO,
+            EsMonedaBase = dto.EsMonedaBase
+        };
+        return this.CreatedResponse(nameof(ObtenerPorId), new { id }, result, "Moneda creada exitosamente");
     }
 
     [HttpPut("{id}")]
@@ -59,9 +65,7 @@ public class MonedasController : ControllerBase
     {
         var command = new ActualizarMonedaCommand(id, dto.Nombre, dto.Simbolo, dto.CodigoISO, dto.EsMonedaBase);
         await _mediator.Send(command, token);
-        var moneda = await _service.ObtenerPorId(id, false, token);
-        var monedaDto = _mapper.Map<MonedaDto>(moneda);
-        return this.OkResponse(monedaDto, "Moneda actualizada exitosamente");
+        return this.OkResponse(string.Empty, "Moneda actualizada exitosamente");
     }
 
     [HttpPatch("{id}/activar")]
@@ -83,9 +87,6 @@ public class MonedasController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Eliminar(int id, CancellationToken token)
     {
-        var moneda = await _service.ObtenerPorId(id, false, token);
-        if (moneda == null)
-            return this.NotFoundResponse("Moneda no encontrada");
         var command = new EliminarMonedaCommand(id);
         await _mediator.Send(command, token);
         return this.OkResponse<string?>(null, "Moneda eliminada exitosamente");
