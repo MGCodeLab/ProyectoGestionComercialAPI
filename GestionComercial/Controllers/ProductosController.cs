@@ -92,7 +92,6 @@ namespace API.GestionComercial.Controllers
         public async Task<IActionResult> Inactivar(int id)
         {
             await _mediator.Send(new ActualizarEstadoProductoCommand(id, false));
-
             return this.OkResponse(string.Empty, "Producto inactivado correctamente");
         }
 
@@ -100,7 +99,6 @@ namespace API.GestionComercial.Controllers
         public async Task<IActionResult> Activar(int id)
         {
             await _mediator.Send(new ActualizarEstadoProductoCommand(id, true));
-
             return this.OkResponse(string.Empty, "Producto activado correctamente");
         }
     }
