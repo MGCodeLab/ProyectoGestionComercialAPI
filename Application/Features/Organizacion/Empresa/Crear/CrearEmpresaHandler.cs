@@ -22,9 +22,9 @@ namespace Application.Features.Organizacion.Empresa.Crear
         public async Task<int> Handle(CrearEmpresaCommand request, CancellationToken ct)
         {
             // GUARD: SingleTenant
-            var empresaExistente = await _service.ObtenerPrimera();
-            if (empresaExistente != null)
-                throw new InvalidOperationException("Solo 1 empresa permitida en sistema");
+            //var empresaExistente = await _service.ObtenerPrimera();
+            //if (empresaExistente != null)
+            //    throw new InvalidOperationException("Solo 1 empresa permitida en sistema");
 
             // Map
             var empresa = _mapper.Map<Domain.Organizacion.Empresa>(request);

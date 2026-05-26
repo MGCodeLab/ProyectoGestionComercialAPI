@@ -54,6 +54,7 @@ builder.Services.AddScoped<IAlmacenValidatorService, AlmacenValidatorService>();
 // Sprint 3 - Catalogo Fiscal
 builder.Services.AddScoped<ITipoImpuestoService, TipoImpuestoService>();
 builder.Services.AddScoped<ITipoComprobanteService, TipoComprobanteService>();
+builder.Services.AddScoped<ITipoDocumentoService, TipoDocumentoService>();
 builder.Services.AddScoped<ISerieDocumentoService, SerieDocumentoService>();
 
 // Sprint 4 - Producto Enriquecido (CategoriaProducto, MarcaProducto)
