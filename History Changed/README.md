@@ -8,6 +8,31 @@ Este directorio mantiene un historial detallado de todos los cambios arquitectó
 
 ## 📋 Cambios Registrados
 
+### ✅ 20260525_T1400_OptimizarTipoDocumentoCRUD
+
+**Estatus:** ✅ Completado  
+**Build:** ✅ Exitoso (0 errores, 0 advertencias)  
+**Commits:** 
+- `5b63357` - feat(catalogo): Optimizar Crear/Actualizar - patrón Producto
+- `970966e` - feat(catalogo): Crear módulo TipoDocumento CRUD completo
+
+**Resumen Ejecutivo:**
+Dos cambios correlacionados: (1) Optimización de patrones Crear/Actualizar en 3 entidades (Moneda, Pais, UnidadMedida) — reducción de 50% en queries BD mediante construcción en memoria de DTOs. (2) Creación completa de módulo TipoDocumento CRUD con 18 archivos nuevos, 7 endpoints, FK validation crítica en Eliminar, y logging completo.
+
+**Archivos:**
+- `SUMMARY.md` - Resumen ejecutivo + estadísticas + impacto
+- `CHANGES.md` - Detalles técnicos de ambos cambios + código comparativo
+
+**Impacto:**
+- ⏱️ 50% reducción en queries para Crear/Actualizar (6 queries → 3)
+- ✅ TipoDocumento: 100% funcional, 7/7 endpoints
+- 🔒 FK validation en Eliminar previene corrupción de datos
+- 📊 Patrón optimizado aplicable a catálogos restantes
+
+**Dependencias:** Sprint 1-3 ✅ (todas completadas)
+
+---
+
 ### ✅ 20260518_T1400_feat_Sprint5Comercial_COMPLETADO
 
 **Estatus:** ✅ Completado  
@@ -157,6 +182,6 @@ Use `CHANGES.md` como documentación de patrones arquitectónicos implementados.
 
 ---
 
-**Última actualización:** 2026-05-18 14:00 UTC  
-**Catálogos Base:** ✅ 100% Completados (18 entidades, 5 sprints)  
+**Última actualización:** 2026-05-25 14:00 UTC  
+**Catálogos Base:** ✅ 100% Completados (18 entidades, 5 sprints) + Optimizaciones  
 **Próximo:** Módulo Ventas v3.1 (sin bloqueos de dependencias)
