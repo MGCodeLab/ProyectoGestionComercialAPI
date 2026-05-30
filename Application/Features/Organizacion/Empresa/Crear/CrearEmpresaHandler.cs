@@ -21,7 +21,9 @@ namespace Application.Features.Organizacion.Empresa.Crear
 
         public async Task<int> Handle(CrearEmpresaCommand request, CancellationToken ct)
         {
-            // GUARD: SingleTenant
+            // GUARD: SingleTenant - Regla de dominio: el sistema soporta una sola empresa (configuración única por organización)
+            // DECISION: Arquitectónica, aprobada por Miguel (CLAUDE.md - Architecture Governance)
+            // Si se requiere multi-empresa en el futuro, se debe actualizar esta lógica y documentar la ADR correspondiente
             var empresaExistente = await _service.ObtenerPrimera();
             if (empresaExistente != null)
                 throw new InvalidOperationException("Solo 1 empresa permitida en sistema");

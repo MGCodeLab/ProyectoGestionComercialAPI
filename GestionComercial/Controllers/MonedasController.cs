@@ -44,6 +44,13 @@ public class MonedasController : ControllerBase
         return this.OkResponse(monedaDto, "Moneda obtenida exitosamente");
     }
 
+    [HttpGet("combo/list")]
+    public async Task<IActionResult> ObtenerCombo(CancellationToken token)
+    {
+        var result = await _service.ObtenerCombo(token);
+        return this.OkResponse(result, "Monedas para combo obtenidas exitosamente");
+    }
+
     [HttpPost]
     public async Task<IActionResult> Crear([FromBody] CrearMonedaDto dto, CancellationToken token)
     {

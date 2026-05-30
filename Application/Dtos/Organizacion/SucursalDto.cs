@@ -14,5 +14,7 @@ namespace Application.Dtos.Organizacion
         public bool Activo { get; set; }
         public DateTime FechaRegistro { get; set; }
         public DateTime? FechaActualizacion { get; set; }
+
+        public EmpresaSlimDto? Empresa { get; set; }
     }
 }

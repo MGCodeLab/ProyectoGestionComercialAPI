@@ -45,6 +45,13 @@ public class PaisesController : ControllerBase
         return this.OkResponse(paisDto, "País obtenido exitosamente");
     }
 
+    [HttpGet("combo/list")]
+    public async Task<IActionResult> ObtenerCombo(CancellationToken token)
+    {
+        var result = await _service.ObtenerCombo(token);
+        return this.OkResponse(result, "Países para combo obtenidos exitosamente");
+    }
+
     [HttpPost]
     public async Task<IActionResult> Crear([FromBody] CrearPaisDto dto, CancellationToken token)
     {
