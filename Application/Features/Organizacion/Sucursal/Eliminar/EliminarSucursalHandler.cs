@@ -1,5 +1,7 @@
-using MediatR;
+using Application.Exceptions;
 using Application.Interfaces;
+using Domain.Catalogo;
+using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Organizacion.Sucursal.Eliminar
@@ -15,11 +17,15 @@ namespace Application.Features.Organizacion.Sucursal.Eliminar
             _logger = logger;
         }
 
-        public async Task<int> Handle(EliminarSucursalCommand request, CancellationToken ct)
+        public async Task<int> Handle(EliminarSucursalCommand request, CancellationToken cancellationToken)
         {
             var sucursal = await _service.ObtenerPorId(request.Id, true);
             if (sucursal == null)
                 throw new KeyNotFoundException($"Sucursal con Id {request.Id} no encontrada");
+
+            var tieneDependencias = await _service.TieneDependencias(sucursal, cancellationToken);
+            if (tieneDependencias)
+                throw new BadRequestException("Sucursal en uso en Almacen. Solo se permite deshabilitar mediante PATCH /inactivar");
 
             await _service.Eliminar(request.Id);
 

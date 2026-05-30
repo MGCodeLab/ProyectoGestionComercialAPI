@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Application.Dtos;
 using Application.Interfaces;
 using Domain.Catalogo;
 using Infrastructure.Persistence;
@@ -28,6 +29,16 @@ public class PaisService : IPaisService
             query = query.AsNoTracking();
         return await query.FirstOrDefaultAsync(p => p.Id == id, token);
     }
+
+    public async Task<List<ComboDto>> ObtenerCombo(CancellationToken token)
+        => await _context.Paises
+            .AsNoTracking()
+            .Select(p => new ComboDto
+            {
+                Id = p.Id,
+                Nombre = p.Nombre
+            })
+            .ToListAsync(token);
 
     public async Task<int> Crear(Pais entity, CancellationToken token)
     {

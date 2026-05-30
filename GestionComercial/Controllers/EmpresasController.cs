@@ -49,6 +49,13 @@ namespace API.GestionComercial.Controllers
             return this.OkResponse(result);
         }
 
+        [HttpGet("combo/list")]
+        public async Task<IActionResult> GetCombo()
+        {
+            var result = await _service.ObtenerCombo();
+            return this.OkResponse(result, "Empresas para combo obtenidas exitosamente");
+        }
+
         [HttpPost]
         public async Task<IActionResult> Create(CrearEmpresaDto dto)
         {

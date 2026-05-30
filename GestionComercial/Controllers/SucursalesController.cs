@@ -1,13 +1,14 @@
+using API.GestionComercial.Extensions;
 using Application.Dtos.Organizacion;
-using Application.Features.Organizacion.Sucursal.Crear;
 using Application.Features.Organizacion.Sucursal.Actualizar;
 using Application.Features.Organizacion.Sucursal.ActualizarEstado;
+using Application.Features.Organizacion.Sucursal.Crear;
 using Application.Features.Organizacion.Sucursal.Eliminar;
 using Application.Interfaces;
 using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using API.GestionComercial.Extensions;
 
 namespace API.GestionComercial.Controllers
 {
@@ -32,21 +33,33 @@ namespace API.GestionComercial.Controllers
         [HttpGet]
         public async Task<IActionResult> GetList()
         {
-            var sucursales = await _service.ObtenerTodos();
-            var result = _mapper.Map<List<SucursalDto>>(sucursales);
-            return this.OkResponse(result);
+            var sucursales = await _service.ObtenerTodosOptimizado();
+            return this.OkResponse(sucursales);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var sucursal = await _service.ObtenerPorId(id, tracking: false);
+            var sucursal = await _service.ObtenerPorIdOptimizado(id);
 
             if (sucursal == null)
                 return this.NotFoundResponse("Sucursal no encontrada");
 
-            var result = _mapper.Map<SucursalDto>(sucursal);
-            return this.OkResponse(result);
+            return this.OkResponse(sucursal);
+        }
+
+        [HttpGet("combo/list")]
+        public async Task<IActionResult> GetCombo()
+        {
+            var result = await _service.ObtenerCombo();
+            return this.OkResponse(result, "Sucursales para combo obtenidas exitosamente");
+        }
+
+        [HttpGet("combo/list/{idEmpresa}")]
+        public async Task<IActionResult> GetComboByIdEmpresa(int idEmpresa)
+        {
+            var result = await _service.ObtenerComboByIdEmpresa(idEmpresa, HttpContext.RequestAborted);
+            return this.OkResponse(result, "Sucursales para combo obtenidas exitosamente");
         }
 
         [HttpPost]
@@ -54,8 +67,8 @@ namespace API.GestionComercial.Controllers
         {
             var command = _mapper.Map<CrearSucursalCommand>(dto);
             var id = await _mediator.Send(command);
+            var result = await _service.ObtenerPorIdOptimizado(id);
 
-            var result = new { id, nombre = dto.Nombre };
             return this.CreatedResponse(
                 nameof(GetById),
                 new { id },
@@ -68,10 +81,10 @@ namespace API.GestionComercial.Controllers
         {
             var command = _mapper.Map<ActualizarSucursalCommand>(dto);
             command = command with { Id = id };
-
             await _mediator.Send(command);
+            var result = await _service.ObtenerPorIdOptimizado(id);
 
-            return this.OkResponse(string.Empty, "Sucursal actualizada correctamente");
+            return this.OkResponse(result, "Sucursal actualizada correctamente");
         }
 
         [HttpPatch("{id}/activar")]

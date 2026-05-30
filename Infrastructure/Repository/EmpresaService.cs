@@ -1,4 +1,6 @@
+using Application.Dtos;
 using Application.Interfaces;
+using Domain.Catalogo;
 using Domain.Organizacion;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +27,17 @@ namespace Infrastructure.Repository
         public async Task<List<Empresa>> ObtenerTodos()
             => await _context.Empresas.ToListAsync();
 
+        public async Task<List<ComboDto>> ObtenerCombo()
+            => await _context.Empresas
+                .AsNoTracking()
+                .Where(e => e.Activo)
+                .Select(e => new ComboDto
+                {
+                    Id = e.Id,
+                    Nombre = e.RazonSocial
+                })
+                .ToListAsync();
+
         public async Task<int> Crear(Empresa empresa)
         {
             _context.Empresas.Add(empresa);
@@ -37,6 +50,15 @@ namespace Infrastructure.Repository
             empresa.FechaActualizacion = DateTime.UtcNow;
             _context.Empresas.Update(empresa);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<bool> TieneDependencias(Empresa entity, CancellationToken token)
+        {
+            var existeSucursal = await _context.Sucursales
+                .AsNoTracking()
+                .AnyAsync(e => e.EmpresaId == entity.Id, token);
+
+            return existeSucursal;
         }
 
         public async Task Eliminar(int id)

@@ -1,3 +1,5 @@
+using Application.Dtos;
+using Application.Dtos.Organizacion;
 using Application.Interfaces;
 using Domain.Organizacion;
 using Infrastructure.Persistence;
@@ -21,6 +23,74 @@ namespace Infrastructure.Repository
 
         public async Task<List<Almacen>> ObtenerTodos()
             => await _context.Almacenes.ToListAsync();
+
+        public async Task<List<AlmacenDto>> ObtenerTodosOptimizado()
+            => await _context.Almacenes
+                .AsNoTracking()
+                .Select(a => new AlmacenDto
+                {
+                    Id = a.Id,
+                    PublicId = a.PublicId,
+                    Nombre = a.Nombre,
+                    Codigo = a.Codigo,
+                    SucursalId = a.SucursalId,
+                    Descripcion = a.Descripcion,
+                    EsPrincipal = a.EsPrincipal,
+                    Activo = a.Activo,
+                    FechaRegistro = a.FechaRegistro,
+                    FechaActualizacion = a.FechaActualizacion,
+                    Sucursal = new SucursalSlimDto
+                    {
+                        Id = a.Sucursal.Id,
+                        Nombre = a.Sucursal.Nombre
+                    },
+                    Empresa = new EmpresaSlimDto
+                    {
+                        Id = a.Sucursal.Empresa.Id,
+                        RazonSocial = a.Sucursal.Empresa.RazonSocial
+                    }
+                })
+                .ToListAsync();
+
+        public async Task<AlmacenDto?> ObtenerPorIdOptimizado(int id)
+            => await _context.Almacenes
+                .AsNoTracking()
+                .Where(x => x.Id == id)
+                .Select(a => new AlmacenDto
+                {
+                    Id = a.Id,
+                    PublicId = a.PublicId,
+                    Nombre = a.Nombre,
+                    Codigo = a.Codigo,
+                    SucursalId = a.SucursalId,
+                    Descripcion = a.Descripcion,
+                    EsPrincipal = a.EsPrincipal,
+                    Activo = a.Activo,
+                    FechaRegistro = a.FechaRegistro,
+                    FechaActualizacion = a.FechaActualizacion,
+                    Sucursal = new SucursalSlimDto
+                    {
+                        Id = a.Sucursal.Id,
+                        Nombre = a.Sucursal.Nombre
+                    },
+                    Empresa = new EmpresaSlimDto
+                    {
+                        Id = a.Sucursal.Empresa.Id,
+                        RazonSocial = a.Sucursal.Empresa.RazonSocial
+                    }
+                })
+                .FirstOrDefaultAsync();
+
+        public async Task<List<ComboDto>> ObtenerCombo()
+            => await _context.Almacenes
+                .AsNoTracking()
+                .Where(a => a.Activo)
+                .Select(a => new ComboDto
+                {
+                    Id = a.Id,
+                    Nombre = a.Nombre
+                })
+                .ToListAsync();
 
         public async Task<int> Crear(Almacen almacen)
         {

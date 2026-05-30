@@ -32,21 +32,26 @@ namespace API.GestionComercial.Controllers
         [HttpGet]
         public async Task<IActionResult> GetList()
         {
-            var almacenes = await _service.ObtenerTodos();
-            var result = _mapper.Map<List<AlmacenDto>>(almacenes);
+            var result = await _service.ObtenerTodosOptimizado();
             return this.OkResponse(result);
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var almacen = await _service.ObtenerPorId(id, tracking: false);
+            var result = await _service.ObtenerPorIdOptimizado(id);
 
-            if (almacen == null)
+            if (result == null)
                 return this.NotFoundResponse("Almacén no encontrado");
 
-            var result = _mapper.Map<AlmacenDto>(almacen);
             return this.OkResponse(result);
+        }
+
+        [HttpGet("combo/list")]
+        public async Task<IActionResult> GetCombo()
+        {
+            var result = await _service.ObtenerCombo();
+            return this.OkResponse(result, "Almacenes para combo obtenidos exitosamente");
         }
 
         [HttpPost]
@@ -54,8 +59,8 @@ namespace API.GestionComercial.Controllers
         {
             var command = _mapper.Map<CrearAlmacenCommand>(dto);
             var id = await _mediator.Send(command);
+            var result = await _service.ObtenerPorIdOptimizado(id);
 
-            var result = new { id, nombre = dto.Nombre };
             return this.CreatedResponse(
                 nameof(GetById),
                 new { id },
@@ -68,10 +73,10 @@ namespace API.GestionComercial.Controllers
         {
             var command = _mapper.Map<ActualizarAlmacenCommand>(dto);
             command = command with { Id = id };
-
             await _mediator.Send(command);
+            var result = await _service.ObtenerPorIdOptimizado(id);
 
-            return this.OkResponse(string.Empty, "Almacén actualizado correctamente");
+            return this.OkResponse(result, "Almacén actualizado correctamente");
         }
 
         [HttpPatch("{id}/activar")]
