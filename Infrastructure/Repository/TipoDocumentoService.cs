@@ -15,7 +15,9 @@ public class TipoDocumentoService : ITipoDocumentoService
         => await _context.TipoDocumentos.AsNoTracking().ToListAsync(token);
 
     public async Task<TipoDocumento?> ObtenerPorId(int id, bool isAsTracking, CancellationToken token)
-        => await _context.TipoDocumentos.FirstOrDefaultAsync(u => u.Id == id, token);
+        => isAsTracking
+            ? await _context.TipoDocumentos.FirstOrDefaultAsync(u => u.Id == id, token)
+            : await _context.TipoDocumentos.AsNoTracking().FirstOrDefaultAsync(u => u.Id == id, token);
 
     public async Task<int> Crear(TipoDocumento entity, CancellationToken token)
     {
@@ -44,12 +46,6 @@ public class TipoDocumentoService : ITipoDocumentoService
         var existeEnProveedores = await _context.Proveedores
             .AsNoTracking()
             .AnyAsync(p => p.TipoDocumentoId == entity.Id, token);
-        if (existeEnProveedores)
-            return true;
-
-        var existeEnSeriesDocumento = await _context.SeriesDocumento
-            .AsNoTracking()
-            .AnyAsync(s => s.TipoComprobanteId == entity.Id, token);
-        return existeEnSeriesDocumento;
+        return existeEnProveedores;
     }
 }
