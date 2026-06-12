@@ -7,5 +7,5 @@ namespace Application.Features.Catalogo.TipoImpuesto.Actualizar
         string Codigo,
         decimal Porcentaje,
         bool EsIncluido,
-        int Id = 0) : IRequest<int>;
+        int Id = 0) : IRequest<Unit>;
 }

@@ -271,6 +271,9 @@ namespace Application.Features.{Contexto}.Actualizar
 3. ✅ ActualizarHandler: SIEMPRE `entity.FechaActualizacion = DateTime.UtcNow;`
 4. ✅ Logging en INFO level con información relevante
 5. ✅ Validación y excepciones antes de procesar
+6. ✅ `NotFoundException` acepta UN solo `string`: `throw new NotFoundException($"{Entity} con ID {id} no encontrado")`
+7. ✅ NUNCA usar sobrecarga de 2 argumentos `(nameof(Entity), id)` — no existe en este proyecto
+8. ✅ Inyección obligatoria: Crear/Actualizar → IService+IMapper+ILogger; ActualizarEstado/Eliminar → IService+ILogger
 
 ### 6. Validator (Application)
 
@@ -475,7 +478,43 @@ namespace API.GestionComercial.Controllers
 }
 ```
 
-### 11. Program.cs - DI Registration
+### 11. Patrón Combo — Endpoint para Selects/Dropdowns
+
+Aplicar cuando el módulo es un catálogo referenciado en formularios (selects/dropdowns).
+
+**Interface (extensión del estándar de 5 métodos):**
+```csharp
+using Application.Dtos;
+// ... 5 métodos estándar ...
+Task<List<ComboDto>> ObtenerCombo(CancellationToken token);
+```
+
+**Implementación (Infrastructure):**
+```csharp
+public async Task<List<ComboDto>> ObtenerCombo(CancellationToken token)
+    => await _context.{Entidades}
+        .AsNoTracking()
+        .Where(x => x.Activo)           // ← SÍ filtra activos (único método que lo hace)
+        .Select(x => new ComboDto { Id = x.Id, Nombre = x.Nombre })
+        .ToListAsync(token);
+```
+
+**Controller (colocar ANTES del endpoint Listar):**
+```csharp
+[HttpGet("combo/list")]
+public async Task<IActionResult> GetCombo()
+{
+    var result = await _service.ObtenerCombo(HttpContext.RequestAborted);
+    return this.OkResponse(result, "{Entidades} para combo obtenidos exitosamente");
+}
+```
+
+**Regla crítica:** `ObtenerCombo` es el ÚNICO método del service que filtra por `Activo`.  
+`ObtenerTodos` NUNCA filtra — siempre devuelve todos los registros.
+
+---
+
+### 12. Program.cs - DI Registration
 
 ```csharp
 // En Program.cs, agregar:
@@ -569,9 +608,16 @@ modelBuilder.ApplyConfiguration(new {Entity}Configuration());
     [ ] INSERT statements ejecutados
     [ ] Datos verificables
 
+[ ] Si módulo es catálogo referenciado en forms:
+    [ ] ComboDto en Application/Dtos/ComboDto.cs (ya existe — no recrear)
+    [ ] ObtenerCombo(CancellationToken) en interface
+    [ ] ObtenerCombo implementado con .Where(x => x.Activo).Select(ComboDto)
+    [ ] GET /api/v1/entities/combo/list en controller (antes del Listar)
+
 [ ] Endpoints testeados
     [ ] GET /api/v1/entities
     [ ] GET /api/v1/entities/{id}
+    [ ] GET /api/v1/entities/combo/list (si aplica)
     [ ] POST /api/v1/entities
     [ ] PUT /api/v1/entities/{id}
     [ ] PATCH /api/v1/entities/{id}/inactivar

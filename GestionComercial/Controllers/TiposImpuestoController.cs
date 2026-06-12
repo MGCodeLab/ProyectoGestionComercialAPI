@@ -15,73 +15,71 @@ namespace API.GestionComercial.Controllers;
 [Route("api/v1/[controller]")]
 public class TiposImpuestoController : ControllerBase
 {
-        private readonly IMediator _mediator;
-        private readonly ITipoImpuestoService _service;
-        private readonly IMapper _mapper;
+    private readonly IMediator _mediator;
+    private readonly ITipoImpuestoService _service;
+    private readonly IMapper _mapper;
 
-        public TiposImpuestoController(IMediator mediator, ITipoImpuestoService service, IMapper mapper)
-        {
-            _mediator = mediator;
-            _service = service;
-            _mapper = mapper;
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Listar()
-        {
-            var datos = await _service.ObtenerTodosAsync();
-            var response = _mapper.Map<List<TipoImpuestoDto>>(datos);
-            return this.OkResponse(response);
-        }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Obtener(int id)
-        {
-            var dato = await _service.ObtenerPorIdAsync(id);
-            if (dato == null)
-                return this.NotFoundResponse("TipoImpuesto no encontrado");
-
-            var response = _mapper.Map<TipoImpuestoDto>(dato);
-            return this.OkResponse(response);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Crear([FromBody] CrearTipoImpuestoDto dto)
-        {
-            var command = new CrearTipoImpuestoCommand(dto.Nombre, dto.Codigo, dto.Porcentaje, dto.EsIncluido);
-            var id = await _mediator.Send(command);
-            return this.CreatedResponse(nameof(Obtener), new { id }, id);
-        }
-
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Actualizar(int id, [FromBody] ActualizarTipoImpuestoDto dto)
-        {
-            var command = new ActualizarTipoImpuestoCommand(dto.Nombre, dto.Codigo, dto.Porcentaje, dto.EsIncluido, id);
-            await _mediator.Send(command);
-            return this.OkResponse<object>(null, "TipoImpuesto actualizado correctamente");
-        }
-
-        [HttpPatch("{id}/activar")]
-        public async Task<IActionResult> Activar(int id)
-        {
-            var command = new ActualizarEstadoTipoImpuestoCommand(true, id);
-            await _mediator.Send(command);
-            return this.OkResponse<object>(null, "TipoImpuesto activado correctamente");
-        }
-
-        [HttpPatch("{id}/inactivar")]
-        public async Task<IActionResult> Inactivar(int id)
-        {
-            var command = new ActualizarEstadoTipoImpuestoCommand(false, id);
-            await _mediator.Send(command);
-            return this.OkResponse<object>(null, "TipoImpuesto inactivado correctamente");
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Eliminar(int id)
-        {
-            var command = new EliminarTipoImpuestoCommand(id);
-            await _mediator.Send(command);
-            return this.OkResponse<object>(null, "TipoImpuesto eliminado correctamente");
-        }
+    public TiposImpuestoController(IMediator mediator, ITipoImpuestoService service, IMapper mapper)
+    {
+        _mediator = mediator;
+        _service = service;
+        _mapper = mapper;
     }
+
+    [HttpGet]
+    public async Task<IActionResult> Listar()
+    {
+        var datos = await _service.ObtenerTodos(HttpContext.RequestAborted);
+        var response = _mapper.Map<List<TipoImpuestoDto>>(datos);
+        return this.OkResponse(response);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> Obtener(int id)
+    {
+        var dato = await _service.ObtenerPorId(id, isAsTracking: false, HttpContext.RequestAborted);
+        if (dato == null)
+            return this.NotFoundResponse("TipoImpuesto no encontrado");
+
+        var response = _mapper.Map<TipoImpuestoDto>(dato);
+        return this.OkResponse(response);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Crear([FromBody] CrearTipoImpuestoDto dto)
+    {
+        var command = _mapper.Map<CrearTipoImpuestoCommand>(dto);
+        var id = await _mediator.Send(command);
+        return this.CreatedResponse(nameof(Obtener), new { id }, new { id, nombre = dto.Nombre }, "TipoImpuesto creado exitosamente");
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Actualizar(int id, [FromBody] ActualizarTipoImpuestoDto dto)
+    {
+        var command = _mapper.Map<ActualizarTipoImpuestoCommand>(dto);
+        command = command with { Id = id };
+        await _mediator.Send(command);
+        return this.OkResponse(string.Empty, "TipoImpuesto actualizado correctamente");
+    }
+
+    [HttpPatch("{id}/activar")]
+    public async Task<IActionResult> Activar(int id)
+    {
+        await _mediator.Send(new ActualizarEstadoTipoImpuestoCommand(true, id));
+        return this.OkResponse(string.Empty, "TipoImpuesto activado correctamente");
+    }
+
+    [HttpPatch("{id}/inactivar")]
+    public async Task<IActionResult> Inactivar(int id)
+    {
+        await _mediator.Send(new ActualizarEstadoTipoImpuestoCommand(false, id));
+        return this.OkResponse(string.Empty, "TipoImpuesto inactivado correctamente");
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Eliminar(int id)
+    {
+        await _mediator.Send(new EliminarTipoImpuestoCommand(id));
+        return this.OkResponse(string.Empty, "TipoImpuesto eliminado correctamente");
+    }
+}

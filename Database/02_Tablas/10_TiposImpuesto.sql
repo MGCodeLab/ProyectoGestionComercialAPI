@@ -11,7 +11,7 @@ BEGIN
         [EsIncluido] BIT NOT NULL DEFAULT 1,
         [Activo] BIT NOT NULL DEFAULT 1,
         [FechaRegistro] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-        [FechaActualizacion] DATETIME2 NOT NULL DEFAULT GETUTCDATE()
+        [FechaActualizacion] DATETIME2 NULL
     );
 
     CREATE INDEX [IX_TiposImpuesto_Codigo] ON [catalogo].[TiposImpuesto]([Codigo]);

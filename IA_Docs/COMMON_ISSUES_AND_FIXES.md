@@ -1366,6 +1366,536 @@ Testing encontró: TipoDocumento entidad tiene `Codigo` (RUC, DNI, PASSPORT), NO
 
 ---
 
+---
+
+### 12. (2026-06-12) FechaActualizacion NOT NULL en SQL — SqlNullValueException — **RESUELTO**
+
+**ENCONTRADO EN:** Sprint 3 Fiscal (TiposImpuesto, TiposComprobante, SeriesDocumento)  
+**ESTADO:** ✅ RESUELTO (2026-06-12)
+
+**Error Message:**
+```
+System.Data.SqlTypes.SqlNullValueException
+  Mensaje = Data is Null. This method or property cannot be called on Null values.
+  en Microsoft.Data.SqlClient.SqlDataReader.GetDateTime(Int32 i)
+  en Infrastructure.Repository.TipoImpuestoService.ObtenerTodosAsync()
+```
+
+**Problema Raíz (3 capas combinadas):**
+
+**Capa 1 — SQL Script incorrecto:**
+```sql
+-- ❌ INCORRECTO (Sprint 3 scripts 10, 11, 12)
+[FechaActualizacion] DATETIME2 NOT NULL DEFAULT GETUTCDATE()
+
+-- ✅ CORRECTO (patrón establecido desde Sprint 1)
+[FechaActualizacion] DATETIME2 NULL
+```
+
+**Capa 2 — EF Configuration con .IsRequired():**
+```csharp
+// ❌ INCORRECTO — fuerza lectura como non-nullable
+builder.Property(t => t.FechaActualizacion)
+    .IsRequired();
+
+// ✅ CORRECTO
+builder.Property(t => t.FechaActualizacion)
+    .IsRequired(false);
+```
+
+**Capa 3 — DTO con DateTime non-nullable:**
+```csharp
+// ❌ INCORRECTO
+public DateTime FechaActualizacion { get; set; }
+
+// ✅ CORRECTO
+public DateTime? FechaActualizacion { get; set; }
+```
+
+**Causa Raíz:**
+Los scripts del Sprint 3 no siguieron el patrón establecido en `IMPLEMENTATION_PATTERNS.md` (línea 700-702). El campo `FechaActualizacion` es nullable por diseño: se llena solo cuando hay una actualización posterior a la creación.
+
+**Solución Implementada:**
+1. Scripts SQL: `NOT NULL DEFAULT GETUTCDATE()` → `NULL` en los 3 scripts
+2. Configurations: `.IsRequired()` → `.IsRequired(false)` en los 3 configurations
+3. DTOs: `DateTime` → `DateTime?` en los 3 DTOs
+4. BD existente: `ALTER TABLE ... ALTER COLUMN [FechaActualizacion] DATETIME2 NULL`
+
+**Archivos corregidos:**
+- `Database/02_Tablas/10_TiposImpuesto.sql` ✅
+- `Database/02_Tablas/11_TiposComprobante.sql` ✅
+- `Database/02_Tablas/12_SeriesDocumento.sql` ✅
+- `Infrastructure/Persistence/Configurations/TipoImpuestoConfiguration.cs` ✅
+- `Infrastructure/Persistence/Configurations/TipoComprobanteConfiguration.cs` ✅
+- `Infrastructure/Persistence/Configurations/SerieDocumentoConfiguration.cs` ✅
+- `Application/Dtos/Catalogo/TipoImpuestoDto.cs` ✅
+- `Application/Dtos/Catalogo/TipoComprobanteDto.cs` ✅
+- `Application/Dtos/Catalogo/SerieDocumentoDto.cs` ✅
+
+**Script de fix para BD existente:**
+```sql
+ALTER TABLE [catalogo].[TiposImpuesto]     ALTER COLUMN [FechaActualizacion] DATETIME2 NULL;
+ALTER TABLE [catalogo].[TiposComprobante]  ALTER COLUMN [FechaActualizacion] DATETIME2 NULL;
+ALTER TABLE [catalogo].[SeriesDocumento]   ALTER COLUMN [FechaActualizacion] DATETIME2 NULL;
+```
+
+**Regla Para Futuro — NO NEGOCIABLE:**
+- `FechaActualizacion` es SIEMPRE `DATETIME2 NULL` en SQL (nunca NOT NULL)
+- `FechaActualizacion` es SIEMPRE `DateTime?` en Entity, DTO y Configuration
+- `FechaRegistro` es la única fecha con `NOT NULL DEFAULT GETUTCDATE()`
+- Toda Configuration nueva: NO poner `.IsRequired()` en FechaActualizacion
+- Si `.IsRequired()` aparece para FechaActualizacion → es un bug, corregir inmediatamente
+
+---
+
+### 13. (2026-06-12) Service Interface Desviada del Patrón Estándar — **RESUELTO**
+
+**ENCONTRADO EN:** Sprint 3 Fiscal (ITipoImpuestoService + implementación)  
+**ESTADO:** ✅ RESUELTO (2026-06-12)
+
+**Problema:**
+La interface y su implementación de `TipoImpuestoService` fueron creadas sin seguir el patrón estándar definido en `IMPLEMENTATION_PATTERNS.md`. Múltiples desviaciones acumuladas:
+
+```csharp
+// ❌ INCORRECTO — Interface con firmas incorrectas
+public interface ITipoImpuestoService
+{
+    Task<List<TipoImpuesto>> ObtenerTodosAsync();            // Sin CancellationToken
+    Task<TipoImpuesto> ObtenerPorIdAsync(int id);            // Sin isAsTracking, sin CancellationToken, non-nullable
+    Task Crear(TipoImpuesto tipoImpuesto);                   // Retorna void en vez de int
+    Task Actualizar(TipoImpuesto tipoImpuesto);              // Recibe entity en vez de solo CancellationToken
+    Task Eliminar(int id);                                   // Recibe id en vez de entity
+}
+
+// ✅ CORRECTO — Patrón estándar obligatorio
+public interface ITipoImpuestoService
+{
+    Task<List<TipoImpuesto>> ObtenerTodos(CancellationToken token);
+    Task<TipoImpuesto?> ObtenerPorId(int id, bool isAsTracking, CancellationToken token);
+    Task<int> Crear(TipoImpuesto entity, CancellationToken token);
+    Task Actualizar(CancellationToken token);
+    Task Eliminar(TipoImpuesto entity, CancellationToken token);
+}
+```
+
+**Regla Para Futuro:**
+Los 5 métodos de toda interface de service SIEMPRE tienen esta firma exacta:
+1. `ObtenerTodos(CancellationToken token)` → devuelve `Task<List<T>>`
+2. `ObtenerPorId(int id, bool isAsTracking, CancellationToken token)` → devuelve `Task<T?>`
+3. `Crear(T entity, CancellationToken token)` → devuelve `Task<int>` (retorna ID)
+4. `Actualizar(CancellationToken token)` → devuelve `Task` (cambios ya aplicados via mapper en Handler)
+5. `Eliminar(T entity, CancellationToken token)` → devuelve `Task` (recibe entity, no id)
+
+---
+
+### 14. (2026-06-12) Eliminar Hacía Soft-Delete en vez de DELETE Real — **RESUELTO**
+
+**ENCONTRADO EN:** Sprint 3 (TipoImpuestoService.Eliminar)  
+**ESTADO:** ✅ RESUELTO (2026-06-12)
+
+**Problema:**
+El método `Eliminar` en el service hacía un soft-delete (`Activo = false`) en lugar de eliminar físicamente el registro. Esto confunde responsabilidades: el soft-delete es competencia de `ActualizarEstado`, no de `Eliminar`.
+
+```csharp
+// ❌ INCORRECTO — Eliminar haciendo soft-delete
+public async Task Eliminar(int id)
+{
+    var tipoImpuesto = await ObtenerPorIdAsync(id);
+    if (tipoImpuesto != null)
+    {
+        tipoImpuesto.Activo = false;        // ← Esto es soft-delete
+        await Actualizar(tipoImpuesto);     // ← No es una eliminación real
+    }
+}
+
+// ✅ CORRECTO — Eliminar hace DELETE real
+public async Task Eliminar(TipoImpuesto entity, CancellationToken token)
+{
+    _context.TiposImpuesto.Remove(entity);
+    await _context.SaveChangesAsync(token);
+}
+```
+
+**Separación de responsabilidades:**
+- `DELETE /api/v1/tipos-impuesto/{id}` → `Eliminar()` → `_context.Remove()` → DELETE físico en BD
+- `PATCH /api/v1/tipos-impuesto/{id}/inactivar` → `ActualizarEstado()` → `Activo = false` → soft-delete
+
+**Regla Para Futuro:**
+- `Eliminar()` en service SIEMPRE hace `_context.{Entidades}.Remove(entity)` + `SaveChangesAsync()`
+- NUNCA usar `Eliminar()` para cambiar `Activo = false` — eso es `ActualizarEstado`
+- Si el negocio requiere solo soft-delete (sin DELETE físico), igualmente exponer ambos endpoints; el DELETE llama a Remove(), el PATCH /inactivar cambia Activo
+
+---
+
+### 15. (2026-06-12) Commands Retornando IRequest<int> en vez de IRequest<Unit> — **RESUELTO**
+
+**ENCONTRADO EN:** Sprint 3 (Actualizar, ActualizarEstado, Eliminar Commands de TipoImpuesto)  
+**ESTADO:** ✅ RESUELTO (2026-06-12)
+
+**Problema:**
+Los Commands de operaciones que no devuelven datos retornaban `IRequest<int>` en vez de `IRequest<Unit>`:
+
+```csharp
+// ❌ INCORRECTO
+public record ActualizarTipoImpuestoCommand(...) : IRequest<int>;
+public record ActualizarEstadoTipoImpuestoCommand(...) : IRequest<int>;
+public record EliminarTipoImpuestoCommand(int Id) : IRequest<int>;
+
+// ✅ CORRECTO
+public record ActualizarTipoImpuestoCommand(...) : IRequest<Unit>;
+public record ActualizarEstadoTipoImpuestoCommand(...) : IRequest<Unit>;
+public record EliminarTipoImpuestoCommand(int Id) : IRequest<Unit>;
+```
+
+**Regla estándar de tipos de retorno en Commands:**
+
+| Operación | Tipo de retorno | Razón |
+|-----------|----------------|-------|
+| `CrearXxxCommand` | `IRequest<int>` | Retorna el ID del nuevo registro |
+| `ActualizarXxxCommand` | `IRequest<Unit>` | Solo confirma éxito, sin datos |
+| `ActualizarEstadoXxxCommand` | `IRequest<Unit>` | Solo confirma éxito, sin datos |
+| `EliminarXxxCommand` | `IRequest<Unit>` | Solo confirma éxito, sin datos |
+
+**Regla Para Futuro:**
+Solo `Crear` retorna `IRequest<int>`. Todo lo demás retorna `IRequest<Unit>`. Si algún endpoint necesita datos del resultado de un update/delete, usar una Query posterior, no modificar el Command.
+
+---
+
+### 16. (2026-06-12) Handlers Sin IMapper e ILogger — **RESUELTO**
+
+**ENCONTRADO EN:** Sprint 3 (todos los Handlers de TipoImpuesto)  
+**ESTADO:** ✅ RESUELTO (2026-06-12)
+
+**Problema:**
+Los Handlers fueron creados inyectando solo el service, sin `IMapper` ni `ILogger`. Esto llevó a dos problemas adicionales:
+
+1. **Sin IMapper:** Asignación manual de propiedades en vez de `_mapper.Map()`:
+```csharp
+// ❌ INCORRECTO — Asignación manual en CrearHandler
+var tipoImpuesto = new TipoImpuesto
+{
+    Nombre = command.Nombre,
+    Codigo = command.Codigo,
+    Porcentaje = command.Porcentaje,
+    EsIncluido = command.EsIncluido,
+    Activo = true
+};
+
+// ✅ CORRECTO — Mapper
+var entity = _mapper.Map<TipoImpuesto>(request);
+```
+
+2. **Sin ILogger:** Sin trazabilidad de operaciones.
+
+3. **Sin IMapper en Actualizar:** Asignación campo por campo en vez de `_mapper.Map(request, entity)`:
+```csharp
+// ❌ INCORRECTO — Actualizar manual
+tipoImpuesto.Nombre = command.Nombre;
+tipoImpuesto.Codigo = command.Codigo;
+// ...
+
+// ✅ CORRECTO
+_mapper.Map(request, entity);
+entity.FechaActualizacion = DateTime.UtcNow;
+```
+
+**Inyección obligatoria en Handlers — SIEMPRE los 3:**
+```csharp
+public class CrearXxxHandler : IRequestHandler<CrearXxxCommand, int>
+{
+    private readonly IXxxService _service;    // 1. Service
+    private readonly IMapper _mapper;          // 2. Mapper
+    private readonly ILogger<CrearXxxHandler> _logger;  // 3. Logger
+    
+    public CrearXxxHandler(IXxxService service, IMapper mapper, ILogger<CrearXxxHandler> logger)
+    { ... }
+}
+```
+
+**Excepción:** `ActualizarEstado` y `Eliminar` no necesitan IMapper porque no mapean DTOs — solo cambian estado o eliminan. Deben tener IService + ILogger.
+
+**Regla Para Futuro:**
+- `Crear` → IService + IMapper + ILogger (obligatorio)
+- `Actualizar` → IService + IMapper + ILogger (obligatorio — usa `_mapper.Map(request, entity)`)
+- `ActualizarEstado` → IService + ILogger
+- `Eliminar` → IService + ILogger
+- Asignación manual de propiedades en Handlers → siempre es un smell, usar `_mapper.Map()`
+
+---
+
+### 17. (2026-06-12) TipoComprobante — Módulo Completo Fuera de Patrón — **RESUELTO**
+
+**ENCONTRADO EN:** Sprint 3 Fiscal (TipoComprobante — todos los archivos del módulo)  
+**ESTADO:** ✅ RESUELTO (2026-06-12)
+
+**Problema:**
+El módulo TipoComprobante fue creado sin seguir los patrones establecidos en ninguna de sus capas. Es el mismo conjunto de desviaciones que TipoImpuesto (Issues 13-16), pero adicionalmente tenía un filtro incorrecto en el service.
+
+**Desviaciones encontradas:**
+
+| Archivo | Desviación |
+|---------|-----------|
+| `ITipoComprobanteService` | Sin `CancellationToken`, sin `isAsTracking`, `Crear` void, `Actualizar` recibía entity, `Eliminar` recibía `int` |
+| `TipoComprobanteService` | `ObtenerTodos` filtraba `.Where(x => x.Activo)`, `Eliminar` hacía soft-delete (`Activo = false`), sin tokens |
+| `ActualizarTipoComprobanteCommand` | `IRequest<int>` en vez de `IRequest<Unit>` |
+| `ActualizarEstadoTipoComprobanteCommand` | `IRequest<int>` en vez de `IRequest<Unit>` |
+| `EliminarTipoComprobanteCommand` | `IRequest<int>` en vez de `IRequest<Unit>` |
+| `CrearTipoComprobanteHandler` | Sin IMapper, sin ILogger, asignación manual de propiedades |
+| `ActualizarTipoComprobanteHandler` | `IRequest<int>`, sin Mapper/Logger, `InvalidOperationException`, sin `FechaActualizacion`, `_service.Actualizar(entity)` |
+| `ActualizarEstadoTipoComprobanteHandler` | `IRequest<int>`, sin ILogger, `InvalidOperationException`, sin `FechaActualizacion` |
+| `EliminarTipoComprobanteHandler` | `IRequest<int>`, sin ILogger, `InvalidOperationException`, llamaba `_service.Eliminar(int)` |
+| `TipoComprobanteProfile` | Sin `ReverseMap()`, sin mappings de commands |
+| `TiposComprobanteController` | Commands construidos manualmente, `OkResponse<object>(null,...)`, métodos sin `HttpContext.RequestAborted` |
+
+**Desviación adicional específica de TipoComprobante:**
+```csharp
+// ❌ INCORRECTO — ObtenerTodos filtraba por Activo
+public async Task<List<TipoComprobante>> ObtenerTodosAsync()
+    => await _context.TiposComprobante.Where(x => x.Activo).ToListAsync();
+
+// ✅ CORRECTO — ObtenerTodos retorna TODOS (el filtro lo decide el caller)
+public async Task<List<TipoComprobante>> ObtenerTodos(CancellationToken token)
+    => await _context.TiposComprobante.ToListAsync(token);
+```
+
+**Regla adicional Para Futuro:**
+- `ObtenerTodos` en el service NUNCA filtra por `Activo` — devuelve todos los registros
+- Si el frontend necesita solo activos, que lo filtre en la query del controller, o crear un endpoint separado `/activos`
+- El filtro en el service viola Single Responsibility y elimina flexibilidad del API
+
+**Todos los archivos corregidos:** Ver Issue 13, 14, 15, 16 para el patrón correcto aplicado a cada capa.
+
+---
+
+### 18. (2026-06-12) DTOs de Respuesta Sin Campo `Id` — **RESUELTO**
+
+**ENCONTRADO EN:** Sprint 3 Fiscal (`TipoComprobanteDto`, `SerieDocumentoDto`)  
+**ESTADO:** ✅ RESUELTO (2026-06-12)
+
+**Problema:**
+Los DTOs de respuesta de TipoComprobante y SerieDocumento fueron creados sin el campo `Id`, lo que impide al frontend identificar registros para operaciones PUT/DELETE/PATCH.
+
+```csharp
+// ❌ INCORRECTO — Sin Id
+public class TipoComprobanteDto
+{
+    public Guid PublicId { get; set; }  // ← Primer campo, falta Id antes
+    public string Nombre { get; set; }
+    // ...
+}
+
+// ✅ CORRECTO — Id como primer campo
+public class TipoComprobanteDto
+{
+    public int Id { get; set; }         // ← Siempre primero
+    public Guid PublicId { get; set; }
+    public string Nombre { get; set; }
+    // ...
+}
+```
+
+**Archivos corregidos:**
+- `Application/Dtos/Catalogo/TipoComprobanteDto.cs` ✅ — `Id` agregado
+- `Application/Dtos/Catalogo/SerieDocumentoDto.cs` ✅ — `Id` agregado
+
+**Patrón obligatorio para todo DTO de respuesta (GET):**
+```csharp
+public class XxxDto
+{
+    public int Id { get; set; }          // 1. SIEMPRE primero
+    public Guid PublicId { get; set; }   // 2. Siempre segundo
+    // ... resto de campos ...
+    public bool Activo { get; set; }
+    public DateTime FechaRegistro { get; set; }
+    public DateTime? FechaActualizacion { get; set; }  // Siempre nullable
+}
+```
+
+**Regla Para Futuro — NO NEGOCIABLE:**
+- Todo DTO de respuesta expone `Id` como **primer campo**
+- `PublicId` va siempre segundo (para operaciones públicas/externas)
+- Sin `Id` en el DTO = el frontend no puede hacer PUT/DELETE sobre el registro
+- Checklist al crear DTO: ¿Tiene `Id`? ¿Tiene `PublicId`? ¿`FechaActualizacion` es `DateTime?`?
+
+---
+
+### 19. (2026-06-12) SerieDocumento — Módulo Completo Fuera de Patrón — **RESUELTO**
+
+**ENCONTRADO EN:** Sprint 3 Fiscal (SerieDocumento — todos los archivos del módulo)  
+**ESTADO:** ✅ RESUELTO (2026-06-12)
+
+**Problema:**
+El módulo SerieDocumento tenía el mismo conjunto de desviaciones que TipoImpuesto (Issues 13-16) y TipoComprobante (Issue 17), con dos problemas adicionales propios:
+
+1. **`ObtenerTodos` filtraba por `Activo`** (igual que TipoComprobante, Issue 17):
+```csharp
+// ❌ INCORRECTO
+.Where(x => x.Activo).ToListAsync()  // Filtra registros inactivos
+
+// ✅ CORRECTO
+.ToListAsync(token)  // Retorna todos
+```
+
+2. **`Eliminar` hacía soft-delete** (igual que TipoImpuesto, Issue 14):
+```csharp
+// ❌ INCORRECTO — Cambiaba Activo = false
+public async Task Eliminar(int id) { entity.Activo = false; ... }
+
+// ✅ CORRECTO — DELETE físico
+public async Task Eliminar(SerieDocumento entity, CancellationToken token)
+{ _context.SeriesDocumento.Remove(entity); await _context.SaveChangesAsync(token); }
+```
+
+**Desviaciones completas encontradas:**
+
+| Archivo | Desviación |
+|---------|-----------|
+| `ISerieDocumentoService` | Sin `CancellationToken`, sin `isAsTracking`, `Crear` devolvía void, `Actualizar` recibía entity, `Eliminar` recibía `int` |
+| `SerieDocumentoService` | `ObtenerTodos` filtraba `.Where(x => x.Activo)`, `Eliminar` hacía soft-delete, sin tokens |
+| `ActualizarSerieDocumentoCommand` | `IRequest<int>` en vez de `IRequest<Unit>` |
+| `ActualizarEstadoSerieDocumentoCommand` | `IRequest<int>` en vez de `IRequest<Unit>` |
+| `EliminarSerieDocumentoCommand` | `IRequest<int>` en vez de `IRequest<Unit>` |
+| `CrearSerieDocumentoHandler` | Sin IMapper, sin ILogger, asignación manual de propiedades |
+| `ActualizarSerieDocumentoHandler` | `IRequest<int>`, sin Mapper/Logger, sin `FechaActualizacion` |
+| `ActualizarEstadoSerieDocumentoHandler` | `IRequest<int>`, sin ILogger, sin `FechaActualizacion` |
+| `EliminarSerieDocumentoHandler` | `IRequest<int>`, sin ILogger, llamaba `_service.Eliminar(int)` en vez de `(entity, token)` |
+| `SerieDocumentoProfile` | Sin `ReverseMap()`, sin mappings de commands |
+| `SeriesDocumentoController` | Commands construidos manualmente, sin `HttpContext.RequestAborted`, `OkResponse<object>(null,...)` |
+
+**Particularidad de SerieDocumento:**
+El service tiene un método adicional `ObtenerProximoNumeroAsync` (lógica de negocio crítica con SQL atómico). Este método NO es parte del patrón estándar de 5 métodos — es una extensión específica del negocio. Debe preservarse intacto al refactorizar.
+
+**Solución Implementada:**
+Todos los archivos del módulo reescritos siguiendo el patrón estándar de `IMPLEMENTATION_PATTERNS.md`.  
+Ver Issues 13, 14, 15, 16 para el patrón correcto aplicado a cada capa.
+
+**Regla Para Futuro:**
+- Cuando se detecta UNA desviación del patrón en un módulo, auditar TODO el módulo — usualmente hay múltiples desviaciones correlacionadas
+- Preservar siempre la lógica de negocio específica del módulo (como `ObtenerProximoNumeroAsync`) al refactorizar hacia el patrón
+- Los 3 módulos fiscales (TipoImpuesto, TipoComprobante, SerieDocumento) son el patrón de referencia para módulos futuros
+
+---
+
+### 20. (2026-06-12) NotFoundException Llamado con 2 Argumentos — **RESUELTO**
+
+**ENCONTRADO EN:** Sprint 3 Fiscal (Handlers de SerieDocumento: Actualizar, ActualizarEstado, Eliminar)  
+**ESTADO:** ✅ RESUELTO (2026-06-12)
+
+**Error Message (compilación):**
+```
+CS1503: Argument 2: cannot convert from 'int' to '...'
+CS7036: There is no argument given that corresponds to the required parameter
+```
+
+**Problema:**
+Los handlers usaban `NotFoundException` con 2 argumentos (estilo de otras librerías como `Ardalis.SmartEnum` o el patrón `(nameof(Entity), id)`), pero el proyecto tiene una implementación propia que solo acepta un `string`:
+
+```csharp
+// ❌ INCORRECTO — 2 argumentos, no existe esta sobrecarga
+throw new NotFoundException(nameof(Domain.Catalogo.SerieDocumento), request.Id);
+
+// ✅ CORRECTO — 1 argumento string (interpolado)
+throw new NotFoundException($"SerieDocumento con ID {request.Id} no encontrado");
+```
+
+**Causa:**
+La clase `NotFoundException` del proyecto:
+```csharp
+// Application/Exceptions/NotFoundException.cs
+public class NotFoundException : Exception
+{
+    public NotFoundException(string message) : base(message) { }
+    // Solo un constructor — NO existe sobrecarga de 2 parámetros
+}
+```
+
+**Verificación del patrón correcto:**
+El patrón verificado contra handlers existentes que compilan (ej: `TipoComprobanteHandler`):
+```csharp
+throw new NotFoundException($"TipoComprobante con ID {request.Id} no encontrado");
+```
+
+**Archivos corregidos:**
+- `Application/Features/Catalogo/SerieDocumento/Actualizar/ActualizarSerieDocumentoHandler.cs` ✅
+- `Application/Features/Catalogo/SerieDocumento/ActualizarEstado/ActualizarEstadoSerieDocumentoHandler.cs` ✅
+- `Application/Features/Catalogo/SerieDocumento/Eliminar/EliminarSerieDocumentoHandler.cs` ✅
+
+**Regla Para Futuro — CRÍTICA:**
+- `NotFoundException` en este proyecto **SOLO acepta un `string`**
+- SIEMPRE usar string interpolado: `$"{NombreEntidad} con ID {id} no encontrado"`
+- NUNCA usar el patrón de 2 argumentos `(nameof(Entity), id)` — no existe esa sobrecarga
+- Si al escribir un handler tienes duda del constructor → leer `Application/Exceptions/NotFoundException.cs` o copiar de un handler existente que compile
+- Antes de asumir una API de una clase — leer la clase, no adivinar
+
+---
+
+### 21. (2026-06-12) Patrón Combo (GetCombo) — Endpoint para Selects/Dropdowns — **ESTABLECIDO**
+
+**CONTEXTO:**  
+**ESTADO:** ✅ PATRÓN ESTABLECIDO (2026-06-12)
+
+**Propósito:**
+Los módulos que son catálogos (TipoComprobante, Sucursal, TipoDocumento, Moneda, etc.) requieren un endpoint liviano para poblar selects/dropdowns en el frontend. Este endpoint retorna solo `Id` y `Nombre` de los registros activos.
+
+**Patrón Completo:**
+
+**1. ComboDto (ya existe en `Application/Dtos/ComboDto.cs`):**
+```csharp
+public class ComboDto
+{
+    public int Id { get; set; }
+    public string Nombre { get; set; } = string.Empty;
+}
+```
+
+**2. Interface (agregar método extra al estándar de 5):**
+```csharp
+// En Application/Interfaces/IXxxService.cs
+using Application.Dtos;
+// ... interfaz estándar de 5 métodos ...
+Task<List<ComboDto>> ObtenerCombo(CancellationToken token);
+```
+
+**3. Implementación (Infrastructure):**
+```csharp
+public async Task<List<ComboDto>> ObtenerCombo(CancellationToken token)
+    => await _context.{Entidades}
+        .AsNoTracking()
+        .Where(x => x.Activo)
+        .Select(x => new ComboDto { Id = x.Id, Nombre = x.Nombre })
+        .ToListAsync(token);
+```
+**Regla:** `ObtenerCombo` SÍ filtra por `Activo == true` (a diferencia de `ObtenerTodos` que nunca filtra).
+
+**4. Controller (endpoint antes del Listar estándar):**
+```csharp
+[HttpGet("combo/list")]
+public async Task<IActionResult> GetCombo()
+{
+    var result = await _service.ObtenerCombo(HttpContext.RequestAborted);
+    return this.OkResponse(result, "{Entidades} para combo obtenidos exitosamente");
+}
+```
+
+**Diferencias clave vs `ObtenerTodos`:**
+
+| Aspecto | `ObtenerTodos` | `ObtenerCombo` |
+|---------|---------------|----------------|
+| Filtro Activo | ❌ NUNCA filtra | ✅ Solo activos |
+| AsNoTracking | Opcional | ✅ SIEMPRE |
+| Proyección | Retorna `List<Entity>` | Retorna `List<ComboDto>` (solo Id+Nombre) |
+| Uso | Listar con full data | Poblar selects/dropdowns |
+| Ruta | `GET /api/v1/{modulo}` | `GET /api/v1/{modulo}/combo/list` |
+
+**Módulos con GetCombo implementado:**
+- `SucursalesController` ✅ (patrón de referencia original)
+- `TiposComprobanteController` ✅ (2026-06-12)
+
+**Módulos candidatos a GetCombo:**
+Todo catálogo que sea referenciado en forms (TipoDocumento, Moneda, Pais, TipoImpuesto, etc.).
+
+---
+
 ## 🔗 Referencias Relacionadas
 
 - **IMPLEMENTATION_PATTERNS.md** — Patrones para entidades, handlers, servicios
@@ -1375,5 +1905,5 @@ Testing encontró: TipoDocumento entidad tiene `Codigo` (RUC, DNI, PASSPORT), NO
 
 ---
 
-**Última revisión:** 2026-05-18 (Sprint 4 en progreso)  
-**Próxima revisión:** Después de smoke testing SQL scripts y API endpoints + validación campos DTO→Command
+**Última revisión:** 2026-06-12 (Sprint 3 Fiscal — Issues 19-21: SerieDocumento refactor completo, NotFoundException, patrón Combo)  
+**Próxima revisión:** Al iniciar módulos nuevos que consuman catálogos fiscales (Ventas, Compras)

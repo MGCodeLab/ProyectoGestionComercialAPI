@@ -38,7 +38,7 @@ namespace Infrastructure.Persistence.Configurations
                 .IsRequired();
 
             builder.Property(s => s.FechaActualizacion)
-                .IsRequired();
+                .IsRequired(false);
 
             builder.HasIndex(s => new { s.TipoComprobanteId, s.SucursalId, s.Serie })
                 .IsUnique(true);

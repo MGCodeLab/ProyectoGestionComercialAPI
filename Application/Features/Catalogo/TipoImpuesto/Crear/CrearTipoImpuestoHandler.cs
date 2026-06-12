@@ -1,31 +1,36 @@
 using Application.Interfaces;
+using AutoMapper;
 using Domain.Catalogo;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Catalogo.TipoImpuesto.Crear
 {
     public class CrearTipoImpuestoHandler : IRequestHandler<CrearTipoImpuestoCommand, int>
     {
         private readonly ITipoImpuestoService _service;
+        private readonly IMapper _mapper;
+        private readonly ILogger<CrearTipoImpuestoHandler> _logger;
 
-        public CrearTipoImpuestoHandler(ITipoImpuestoService service)
+        public CrearTipoImpuestoHandler(
+            ITipoImpuestoService service,
+            IMapper mapper,
+            ILogger<CrearTipoImpuestoHandler> logger)
         {
             _service = service;
+            _mapper = mapper;
+            _logger = logger;
         }
 
-        public async Task<int> Handle(CrearTipoImpuestoCommand command, CancellationToken cancellationToken)
+        public async Task<int> Handle(CrearTipoImpuestoCommand request, CancellationToken cancellationToken)
         {
-            var tipoImpuesto = new Domain.Catalogo.TipoImpuesto
-            {
-                Nombre = command.Nombre,
-                Codigo = command.Codigo,
-                Porcentaje = command.Porcentaje,
-                EsIncluido = command.EsIncluido,
-                Activo = true
-            };
+            _logger.LogInformation("CrearTipoImpuesto: {@request}", request);
 
-            await _service.Crear(tipoImpuesto);
-            return tipoImpuesto.Id;
+            var entity = _mapper.Map<Domain.Catalogo.TipoImpuesto>(request);
+            var id = await _service.Crear(entity, cancellationToken);
+
+            _logger.LogInformation("CrearTipoImpuesto: ID {id}", id);
+            return id;
         }
     }
 }
