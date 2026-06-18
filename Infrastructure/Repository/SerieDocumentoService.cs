@@ -17,43 +17,38 @@ namespace Infrastructure.Repository
             _logger = logger;
         }
 
-        public async Task<List<SerieDocumento>> ObtenerTodosAsync()
-        {
-            return await _context.SeriesDocumento
+        public async Task<List<SerieDocumento>> ObtenerTodos(CancellationToken token)
+            => await _context.SeriesDocumento
                 .Include(x => x.TipoComprobante)
                 .Include(x => x.Sucursal)
-                .Where(x => x.Activo)
-                .ToListAsync();
+                .ToListAsync(token);
+
+        public async Task<SerieDocumento?> ObtenerPorId(int id, bool isAsTracking, CancellationToken token)
+            => isAsTracking
+                ? await _context.SeriesDocumento
+                    .Include(x => x.TipoComprobante)
+                    .Include(x => x.Sucursal)
+                    .FirstOrDefaultAsync(x => x.Id == id, token)
+                : await _context.SeriesDocumento
+                    .AsNoTracking()
+                    .Include(x => x.TipoComprobante)
+                    .Include(x => x.Sucursal)
+                    .FirstOrDefaultAsync(x => x.Id == id, token);
+
+        public async Task<int> Crear(SerieDocumento entity, CancellationToken token)
+        {
+            _context.SeriesDocumento.Add(entity);
+            await _context.SaveChangesAsync(token);
+            return entity.Id;
         }
 
-        public async Task<SerieDocumento> ObtenerPorIdAsync(int id)
-        {
-            return await _context.SeriesDocumento
-                .Include(x => x.TipoComprobante)
-                .Include(x => x.Sucursal)
-                .FirstOrDefaultAsync(x => x.Id == id);
-        }
+        public async Task Actualizar(CancellationToken token)
+            => await _context.SaveChangesAsync(token);
 
-        public async Task Crear(SerieDocumento serieDocumento)
+        public async Task Eliminar(SerieDocumento entity, CancellationToken token)
         {
-            _context.SeriesDocumento.Add(serieDocumento);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task Actualizar(SerieDocumento serieDocumento)
-        {
-            _context.SeriesDocumento.Update(serieDocumento);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task Eliminar(int id)
-        {
-            var serieDocumento = await ObtenerPorIdAsync(id);
-            if (serieDocumento != null)
-            {
-                serieDocumento.Activo = false;
-                await Actualizar(serieDocumento);
-            }
+            _context.SeriesDocumento.Remove(entity);
+            await _context.SaveChangesAsync(token);
         }
 
         public async Task<int> ObtenerProximoNumeroAsync(int serieDocumentoId, CancellationToken ct = default)
@@ -78,10 +73,8 @@ namespace Infrastructure.Repository
                 var serie = resultado.FirstOrDefault();
 
                 if (serie == null)
-                {
                     throw new InvalidOperationException(
                         $"Serie {serieDocumentoId} no encontrada o alcanzó límite máximo");
-                }
 
                 await transaction.CommitAsync(ct);
 

@@ -12,7 +12,7 @@ BEGIN
         [NumeroMaximo] INT NULL,
         [Activo] BIT NOT NULL DEFAULT 1,
         [FechaRegistro] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-        [FechaActualizacion] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        [FechaActualizacion] DATETIME2 NULL,
         CONSTRAINT [FK_SeriesDocumento_TiposComprobante] FOREIGN KEY ([TipoComprobanteId])
             REFERENCES [catalogo].[TiposComprobante]([Id]) ON DELETE NO ACTION,
         CONSTRAINT [FK_SeriesDocumento_Sucursales] FOREIGN KEY ([SucursalId])

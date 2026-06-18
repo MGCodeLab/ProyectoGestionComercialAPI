@@ -14,36 +14,28 @@ namespace Infrastructure.Repository
             _context = context;
         }
 
-        public async Task<List<TipoImpuesto>> ObtenerTodosAsync()
+        public async Task<List<TipoImpuesto>> ObtenerTodos(CancellationToken token)
+            => await _context.TiposImpuesto.ToListAsync(token);
+
+        public async Task<TipoImpuesto?> ObtenerPorId(int id, bool isAsTracking, CancellationToken token)
+            => isAsTracking
+                ? await _context.TiposImpuesto.FirstOrDefaultAsync(x => x.Id == id, token)
+                : await _context.TiposImpuesto.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, token);
+
+        public async Task<int> Crear(TipoImpuesto entity, CancellationToken token)
         {
-            return await _context.TiposImpuesto.Where(x => x.Activo).ToListAsync();
+            _context.TiposImpuesto.Add(entity);
+            await _context.SaveChangesAsync(token);
+            return entity.Id;
         }
 
-        public async Task<TipoImpuesto> ObtenerPorIdAsync(int id)
-        {
-            return await _context.TiposImpuesto.FirstOrDefaultAsync(x => x.Id == id);
-        }
+        public async Task Actualizar(CancellationToken token)
+            => await _context.SaveChangesAsync(token);
 
-        public async Task Crear(TipoImpuesto tipoImpuesto)
+        public async Task Eliminar(TipoImpuesto entity, CancellationToken token)
         {
-            _context.TiposImpuesto.Add(tipoImpuesto);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task Actualizar(TipoImpuesto tipoImpuesto)
-        {
-            _context.TiposImpuesto.Update(tipoImpuesto);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task Eliminar(int id)
-        {
-            var tipoImpuesto = await ObtenerPorIdAsync(id);
-            if (tipoImpuesto != null)
-            {
-                tipoImpuesto.Activo = false;
-                await Actualizar(tipoImpuesto);
-            }
+            _context.TiposImpuesto.Remove(entity);
+            await _context.SaveChangesAsync(token);
         }
     }
 }

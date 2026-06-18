@@ -4,10 +4,10 @@ namespace Application.Interfaces
 {
     public interface ITipoImpuestoService
     {
-        Task<List<TipoImpuesto>> ObtenerTodosAsync();
-        Task<TipoImpuesto> ObtenerPorIdAsync(int id);
-        Task Crear(TipoImpuesto tipoImpuesto);
-        Task Actualizar(TipoImpuesto tipoImpuesto);
-        Task Eliminar(int id);
+        Task<List<TipoImpuesto>> ObtenerTodos(CancellationToken token);
+        Task<TipoImpuesto?> ObtenerPorId(int id, bool isAsTracking, CancellationToken token);
+        Task<int> Crear(TipoImpuesto entity, CancellationToken token);
+        Task Actualizar(CancellationToken token);
+        Task Eliminar(TipoImpuesto entity, CancellationToken token);
     }
 }

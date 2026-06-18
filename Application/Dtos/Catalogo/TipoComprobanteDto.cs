@@ -2,6 +2,7 @@ namespace Application.Dtos.Catalogo
 {
     public class TipoComprobanteDto
     {
+        public int Id { get; set; }
         public Guid PublicId { get; set; }
         public string Nombre { get; set; }
         public string Codigo { get; set; }
@@ -9,6 +10,6 @@ namespace Application.Dtos.Catalogo
         public bool AfectaContable { get; set; }
         public bool Activo { get; set; }
         public DateTime FechaRegistro { get; set; }
-        public DateTime FechaActualizacion { get; set; }
+        public DateTime? FechaActualizacion { get; set; }
     }
 }

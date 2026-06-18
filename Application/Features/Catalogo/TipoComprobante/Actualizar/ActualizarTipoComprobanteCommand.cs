@@ -7,5 +7,5 @@ namespace Application.Features.Catalogo.TipoComprobante.Actualizar
         string Codigo,
         bool AfectaInventario,
         bool AfectaContable,
-        int Id = 0) : IRequest<int>;
+        int Id = 0) : IRequest<Unit>;
 }

@@ -7,5 +7,5 @@ namespace Application.Features.Catalogo.SerieDocumento.Actualizar
         int SucursalId,
         string Serie,
         int? NumeroMaximo = null,
-        int Id = 0) : IRequest<int>;
+        int Id = 0) : IRequest<Unit>;
 }

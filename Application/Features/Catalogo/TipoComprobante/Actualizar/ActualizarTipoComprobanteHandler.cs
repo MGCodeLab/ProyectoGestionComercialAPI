@@ -1,30 +1,42 @@
+using Application.Exceptions;
 using Application.Interfaces;
+using AutoMapper;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Catalogo.TipoComprobante.Actualizar
 {
-    public class ActualizarTipoComprobanteHandler : IRequestHandler<ActualizarTipoComprobanteCommand, int>
+    public class ActualizarTipoComprobanteHandler : IRequestHandler<ActualizarTipoComprobanteCommand, Unit>
     {
         private readonly ITipoComprobanteService _service;
+        private readonly IMapper _mapper;
+        private readonly ILogger<ActualizarTipoComprobanteHandler> _logger;
 
-        public ActualizarTipoComprobanteHandler(ITipoComprobanteService service)
+        public ActualizarTipoComprobanteHandler(
+            ITipoComprobanteService service,
+            IMapper mapper,
+            ILogger<ActualizarTipoComprobanteHandler> logger)
         {
             _service = service;
+            _mapper = mapper;
+            _logger = logger;
         }
 
-        public async Task<int> Handle(ActualizarTipoComprobanteCommand command, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(ActualizarTipoComprobanteCommand request, CancellationToken cancellationToken)
         {
-            var tipoComprobante = await _service.ObtenerPorIdAsync(command.Id);
-            if (tipoComprobante == null)
-                throw new InvalidOperationException($"TipoComprobante con ID {command.Id} no encontrado");
+            _logger.LogInformation("ActualizarTipoComprobante: ID {Id}", request.Id);
 
-            tipoComprobante.Nombre = command.Nombre;
-            tipoComprobante.Codigo = command.Codigo;
-            tipoComprobante.AfectaInventario = command.AfectaInventario;
-            tipoComprobante.AfectaContable = command.AfectaContable;
+            var entity = await _service.ObtenerPorId(request.Id, isAsTracking: true, cancellationToken);
+            if (entity == null)
+                throw new NotFoundException($"TipoComprobante con ID {request.Id} no encontrado");
 
-            await _service.Actualizar(tipoComprobante);
-            return tipoComprobante.Id;
+            _mapper.Map(request, entity);
+            entity.FechaActualizacion = DateTime.UtcNow;
+
+            await _service.Actualizar(cancellationToken);
+
+            _logger.LogInformation("TipoComprobante {Id} actualizado correctamente", request.Id);
+            return Unit.Value;
         }
     }
 }

@@ -1,3 +1,4 @@
+using Application.Dtos;
 using Application.Interfaces;
 using Domain.Catalogo;
 using Infrastructure.Persistence;
@@ -14,36 +15,44 @@ namespace Infrastructure.Repository
             _context = context;
         }
 
-        public async Task<List<TipoComprobante>> ObtenerTodosAsync()
+        public async Task<List<TipoComprobante>> ObtenerTodos(CancellationToken token)
+            => await _context.TiposComprobante.ToListAsync(token);
+
+        public async Task<TipoComprobante?> ObtenerPorId(int id, bool isAsTracking, CancellationToken token)
+            => isAsTracking
+                ? await _context.TiposComprobante.FirstOrDefaultAsync(x => x.Id == id, token)
+                : await _context.TiposComprobante.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, token);
+
+        public async Task<int> Crear(TipoComprobante entity, CancellationToken token)
         {
-            return await _context.TiposComprobante.Where(x => x.Activo).ToListAsync();
+            _context.TiposComprobante.Add(entity);
+            await _context.SaveChangesAsync(token);
+            return entity.Id;
         }
 
-        public async Task<TipoComprobante> ObtenerPorIdAsync(int id)
+        public async Task Actualizar(CancellationToken token)
+            => await _context.SaveChangesAsync(token);
+
+        public async Task Eliminar(TipoComprobante entity, CancellationToken token)
         {
-            return await _context.TiposComprobante.FirstOrDefaultAsync(x => x.Id == id);
+            _context.TiposComprobante.Remove(entity);
+            await _context.SaveChangesAsync(token);
         }
 
-        public async Task Crear(TipoComprobante tipoComprobante)
-        {
-            _context.TiposComprobante.Add(tipoComprobante);
-            await _context.SaveChangesAsync();
-        }
+        public async Task<List<ComboDto>> ObtenerCombo(CancellationToken token)
+            => await _context.TiposComprobante
+                .AsNoTracking()
+                .Where(x => x.Activo)
+                .Select(x => new ComboDto { Id = x.Id, Nombre = x.Nombre })
+                .ToListAsync(token);
 
-        public async Task Actualizar(TipoComprobante tipoComprobante)
+        public async Task<bool> TieneDependencias(TipoComprobante entity, CancellationToken cancellationToken)
         {
-            _context.TiposComprobante.Update(tipoComprobante);
-            await _context.SaveChangesAsync();
-        }
+            var existeSerieDocumento = await _context.SeriesDocumento
+                .AsNoTracking()
+                .AnyAsync(e => e.TipoComprobanteId == entity.Id, cancellationToken);
 
-        public async Task Eliminar(int id)
-        {
-            var tipoComprobante = await ObtenerPorIdAsync(id);
-            if (tipoComprobante != null)
-            {
-                tipoComprobante.Activo = false;
-                await Actualizar(tipoComprobante);
-            }
+            return existeSerieDocumento;
         }
     }
 }

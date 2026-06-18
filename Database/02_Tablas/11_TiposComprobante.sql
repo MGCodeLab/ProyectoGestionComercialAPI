@@ -11,7 +11,7 @@ BEGIN
         [AfectaContable] BIT NOT NULL DEFAULT 1,
         [Activo] BIT NOT NULL DEFAULT 1,
         [FechaRegistro] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-        [FechaActualizacion] DATETIME2 NOT NULL DEFAULT GETUTCDATE()
+        [FechaActualizacion] DATETIME2 NULL
     );
 
     CREATE INDEX [IX_TiposComprobante_Codigo] ON [catalogo].[TiposComprobante]([Codigo]);
