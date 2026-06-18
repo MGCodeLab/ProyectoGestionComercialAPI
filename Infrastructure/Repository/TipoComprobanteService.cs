@@ -45,5 +45,14 @@ namespace Infrastructure.Repository
                 .Where(x => x.Activo)
                 .Select(x => new ComboDto { Id = x.Id, Nombre = x.Nombre })
                 .ToListAsync(token);
+
+        public async Task<bool> TieneDependencias(TipoComprobante entity, CancellationToken cancellationToken)
+        {
+            var existeSerieDocumento = await _context.SeriesDocumento
+                .AsNoTracking()
+                .AnyAsync(e => e.TipoComprobanteId == entity.Id, cancellationToken);
+
+            return existeSerieDocumento;
+        }
     }
 }

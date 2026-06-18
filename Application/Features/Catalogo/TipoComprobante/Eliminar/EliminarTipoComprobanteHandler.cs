@@ -1,5 +1,6 @@
 using Application.Exceptions;
 using Application.Interfaces;
+using Domain.Catalogo;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -25,6 +26,10 @@ namespace Application.Features.Catalogo.TipoComprobante.Eliminar
             var entity = await _service.ObtenerPorId(request.Id, isAsTracking: true, cancellationToken);
             if (entity == null)
                 throw new NotFoundException($"TipoComprobante con ID {request.Id} no encontrado");
+
+            var tieneDependencias = await _service.TieneDependencias(entity, cancellationToken);
+            if (tieneDependencias)
+                throw new BadRequestException("Tipo de comprobante en uso en documentos. Solo se permite deshabilitar mediante PATCH /inactivar");
 
             await _service.Eliminar(entity, cancellationToken);
 

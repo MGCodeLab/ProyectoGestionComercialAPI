@@ -11,5 +11,6 @@ namespace Application.Interfaces
         Task Actualizar(CancellationToken token);
         Task Eliminar(TipoComprobante entity, CancellationToken token);
         Task<List<ComboDto>> ObtenerCombo(CancellationToken token);
+        Task<bool> TieneDependencias(TipoComprobante entity, CancellationToken cancellationToken);
     }
 }
