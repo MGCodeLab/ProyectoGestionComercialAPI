@@ -26,8 +26,6 @@ namespace Application.Features.Catalogo.TipoComprobante.Crear
             _logger.LogInformation("CrearTipoComprobante: {Nombre}", request.Nombre);
 
             var entity = _mapper.Map<Domain.Catalogo.TipoComprobante>(request);
-            entity.Activo = true;
-
             var id = await _service.Crear(entity, cancellationToken);
 
             _logger.LogInformation("TipoComprobante creado con ID {Id}", id);

@@ -21,7 +21,6 @@ namespace Application.Features.Catalogo.SerieDocumento.Crear
         public async Task<int> Handle(CrearSerieDocumentoCommand request, CancellationToken cancellationToken)
         {
             var entity = _mapper.Map<Domain.Catalogo.SerieDocumento>(request);
-            entity.Activo = true;
             entity.NumeroActual = 0;
 
             var id = await _service.Crear(entity, cancellationToken);
