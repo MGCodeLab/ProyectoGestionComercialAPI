@@ -18,7 +18,7 @@ public class ActualizarEstadoTipoDocumentoHandler : IRequestHandler<ActualizarEs
 
     public async Task<Unit> Handle(ActualizarEstadoTipoDocumentoCommand request, CancellationToken cancellationToken)
     {
-        var tipoDocumento = await _service.ObtenerPorId(request.Id, false, cancellationToken);
+        var tipoDocumento = await _service.ObtenerPorId(request.Id, true, cancellationToken);
         if (tipoDocumento == null)
             throw new NotFoundException($"Tipo de documento con id {request.Id} no encontrado");
 
