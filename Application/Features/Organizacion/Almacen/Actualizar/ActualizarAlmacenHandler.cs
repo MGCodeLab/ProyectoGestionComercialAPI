@@ -25,6 +25,7 @@ namespace Application.Features.Organizacion.Almacen.Actualizar
                 throw new KeyNotFoundException($"Almacén con Id {request.Id} no encontrado");
 
             _mapper.Map(request, almacen);
+            almacen.FechaActualizacion = DateTime.UtcNow;
             await _service.Actualizar(almacen);
 
             _logger.LogInformation($"Almacén actualizado: {almacen.Id}");

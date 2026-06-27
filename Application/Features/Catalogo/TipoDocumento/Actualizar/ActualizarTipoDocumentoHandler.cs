@@ -1,5 +1,6 @@
 using Application.Exceptions;
 using Application.Interfaces;
+using AutoMapper;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
@@ -8,11 +9,13 @@ namespace Application.Features.Catalogo.TipoDocumento.Actualizar;
 public class ActualizarTipoDocumentoHandler : IRequestHandler<ActualizarTipoDocumentoCommand, Unit>
 {
     private readonly ITipoDocumentoService _service;
+    private readonly IMapper _mapper;
     private readonly ILogger<ActualizarTipoDocumentoHandler> _logger;
 
-    public ActualizarTipoDocumentoHandler(ITipoDocumentoService service, ILogger<ActualizarTipoDocumentoHandler> logger)
+    public ActualizarTipoDocumentoHandler(ITipoDocumentoService service, IMapper mapper, ILogger<ActualizarTipoDocumentoHandler> logger)
     {
         _service = service;
+        _mapper = mapper;
         _logger = logger;
     }
 
@@ -22,8 +25,8 @@ public class ActualizarTipoDocumentoHandler : IRequestHandler<ActualizarTipoDocu
         if (tipoDocumento == null)
             throw new NotFoundException($"Tipo de documento con id {request.Id} no encontrado");
 
-        tipoDocumento.Codigo = request.Codigo;
-        tipoDocumento.Descripcion = request.Descripcion;
+        _mapper.Map(request, tipoDocumento);
+        tipoDocumento.FechaActualizacion = DateTime.UtcNow;
 
         await _service.Actualizar(cancellationToken);
 

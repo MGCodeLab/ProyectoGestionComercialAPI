@@ -25,6 +25,7 @@ namespace Application.Features.Organizacion.Empresa.Actualizar
                 throw new KeyNotFoundException($"Empresa con Id {request.Id} no encontrada");
 
             _mapper.Map(request, empresa);
+            empresa.FechaActualizacion = DateTime.UtcNow;
             await _service.Actualizar(empresa);
 
             _logger.LogInformation($"Empresa actualizada: {empresa.Id}");

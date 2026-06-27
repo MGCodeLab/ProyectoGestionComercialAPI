@@ -33,6 +33,7 @@ public class ActualizarListaPrecioHandler : IRequestHandler<ActualizarListaPreci
         }
 
         var lista = _mapper.Map<Domain.Catalogo.ListaPrecio>(request);
+        lista.FechaActualizacion = DateTime.UtcNow;
         return await _service.Actualizar(lista, cancellationToken);
     }
 }

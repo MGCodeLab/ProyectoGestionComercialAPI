@@ -25,6 +25,7 @@ namespace Application.Features.Organizacion.Sucursal.Actualizar
                 throw new KeyNotFoundException($"Sucursal con Id {request.Id} no encontrada");
 
             _mapper.Map(request, sucursal);
+            sucursal.FechaActualizacion = DateTime.UtcNow;
             await _service.Actualizar(sucursal);
 
             _logger.LogInformation($"Sucursal actualizada: {sucursal.Id}");

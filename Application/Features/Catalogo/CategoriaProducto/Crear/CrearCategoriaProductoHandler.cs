@@ -1,6 +1,7 @@
 using Application.Interfaces;
-using Domain.Catalogo;
+using AutoMapper;
 using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Catalogo.CategoriaProducto.Crear
 {
@@ -8,17 +9,25 @@ namespace Application.Features.Catalogo.CategoriaProducto.Crear
     {
         private readonly ICategoriaProductoService _service;
         private readonly ICategoriaProductoValidatorService _validator;
+        private readonly IMapper _mapper;
+        private readonly ILogger<CrearCategoriaProductoHandler> _logger;
 
         public CrearCategoriaProductoHandler(
             ICategoriaProductoService service,
-            ICategoriaProductoValidatorService validator)
+            ICategoriaProductoValidatorService validator,
+            IMapper mapper,
+            ILogger<CrearCategoriaProductoHandler> logger)
         {
             _service = service;
             _validator = validator;
+            _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<int> Handle(CrearCategoriaProductoCommand command, CancellationToken cancellationToken)
         {
+            _logger.LogInformation("CrearCategoriaProducto: {@request}", command);
+
             // Validar profundidad si tiene padre
             if (command.CategoriaPadreId.HasValue)
             {
@@ -27,15 +36,11 @@ namespace Application.Features.Catalogo.CategoriaProducto.Crear
                     throw new InvalidOperationException("Máximo 3 niveles de profundidad permitidos");
             }
 
-            var categoria = new Domain.Catalogo.CategoriaProducto
-            {
-                Nombre = command.Nombre,
-                Descripcion = command.Descripcion,
-                CategoriaPadreId = command.CategoriaPadreId,
-                Activo = true
-            };
+            var categoria = _mapper.Map<Domain.Catalogo.CategoriaProducto>(command);
+            categoria.Activo = true;
 
             await _service.Crear(categoria);
+            _logger.LogInformation("CrearCategoriaProducto: ID {id}", categoria.Id);
             return categoria.Id;
         }
     }
