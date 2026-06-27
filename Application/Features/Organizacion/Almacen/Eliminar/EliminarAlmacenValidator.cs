@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Organizacion.Almacen.Eliminar.Almacen;
+namespace Application.Features.Organizacion.Almacen.Eliminar;
 
 public class EliminarAlmacenValidator : AbstractValidator<EliminarAlmacenCommand>
 {

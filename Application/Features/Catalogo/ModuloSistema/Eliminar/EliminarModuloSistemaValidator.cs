@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Catalogo.ModuloSistema.Eliminar.ModuloSistema;
+namespace Application.Features.Catalogo.ModuloSistema.Eliminar;
 
 public class EliminarModuloSistemaValidator : AbstractValidator<EliminarModuloSistemaCommand>
 {

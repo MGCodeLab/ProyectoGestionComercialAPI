@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Catalogo.TipoImpuesto.Eliminar.TipoImpuesto;
+namespace Application.Features.Catalogo.TipoImpuesto.Eliminar;
 
 public class EliminarTipoImpuestoValidator : AbstractValidator<EliminarTipoImpuestoCommand>
 {

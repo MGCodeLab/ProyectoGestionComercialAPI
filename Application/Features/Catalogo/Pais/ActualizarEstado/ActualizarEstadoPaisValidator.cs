@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Catalogo.Pais.ActualizarEstado.Pais;
+namespace Application.Features.Catalogo.Pais.ActualizarEstado;
 
 public class ActualizarEstadoPaisValidator : AbstractValidator<ActualizarEstadoPaisCommand>
 {

@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Catalogo.Moneda.Eliminar.Moneda;
+namespace Application.Features.Catalogo.Moneda.Eliminar;
 
 public class EliminarMonedaValidator : AbstractValidator<EliminarMonedaCommand>
 {

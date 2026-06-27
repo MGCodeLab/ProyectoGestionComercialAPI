@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Catalogo.TipoComprobante.ActualizarEstado.TipoComprobante;
+namespace Application.Features.Catalogo.TipoComprobante.ActualizarEstado;
 
 public class ActualizarEstadoTipoComprobanteValidator : AbstractValidator<ActualizarEstadoTipoComprobanteCommand>
 {

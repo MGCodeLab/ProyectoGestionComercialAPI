@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Catalogo.MarcaProducto.Eliminar.MarcaProducto;
+namespace Application.Features.Catalogo.MarcaProducto.Eliminar;
 
 public class EliminarMarcaProductoValidator : AbstractValidator<EliminarMarcaProductoCommand>
 {

@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Catalogo.SerieDocumento.Eliminar.SerieDocumento;
+namespace Application.Features.Catalogo.SerieDocumento.Eliminar;
 
 public class EliminarSerieDocumentoValidator : AbstractValidator<EliminarSerieDocumentoCommand>
 {

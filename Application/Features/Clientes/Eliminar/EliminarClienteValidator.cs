@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Clientes.Eliminar.Cliente;
+namespace Application.Features.Clientes.Eliminar;
 
 public class EliminarClienteValidator : AbstractValidator<EliminarClienteCommand>
 {

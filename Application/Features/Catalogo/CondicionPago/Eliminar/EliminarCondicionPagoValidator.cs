@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Catalogo.CondicionPago.Eliminar.CondicionPago;
+namespace Application.Features.Catalogo.CondicionPago.Eliminar;
 
 public class EliminarCondicionPagoValidator : AbstractValidator<EliminarCondicionPagoCommand>
 {

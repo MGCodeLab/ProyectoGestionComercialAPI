@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Catalogo.ModuloSistema.ActualizarEstado.ModuloSistema;
+namespace Application.Features.Catalogo.ModuloSistema.ActualizarEstado;
 
 public class ActualizarEstadoModuloSistemaValidator : AbstractValidator<ActualizarEstadoModuloSistemaCommand>
 {

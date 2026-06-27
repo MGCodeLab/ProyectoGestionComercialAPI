@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Catalogo.UnidadMedida.Eliminar.UnidadMedida;
+namespace Application.Features.Catalogo.UnidadMedida.Eliminar;
 
 public class EliminarUnidadMedidaValidator : AbstractValidator<EliminarUnidadMedidaCommand>
 {

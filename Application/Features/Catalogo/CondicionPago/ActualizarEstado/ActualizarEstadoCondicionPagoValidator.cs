@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Catalogo.CondicionPago.ActualizarEstado.CondicionPago;
+namespace Application.Features.Catalogo.CondicionPago.ActualizarEstado;
 
 public class ActualizarEstadoCondicionPagoValidator : AbstractValidator<ActualizarEstadoCondicionPagoCommand>
 {

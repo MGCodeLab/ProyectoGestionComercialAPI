@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Catalogo.TipoImpuesto.ActualizarEstado.TipoImpuesto;
+namespace Application.Features.Catalogo.TipoImpuesto.ActualizarEstado;
 
 public class ActualizarEstadoTipoImpuestoValidator : AbstractValidator<ActualizarEstadoTipoImpuestoCommand>
 {

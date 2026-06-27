@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Catalogo.ParametroSistema.ActualizarEstado.ParametroSistema;
+namespace Application.Features.Catalogo.ParametroSistema.ActualizarEstado;
 
 public class ActualizarEstadoParametroSistemaValidator : AbstractValidator<ActualizarEstadoParametroSistemaCommand>
 {

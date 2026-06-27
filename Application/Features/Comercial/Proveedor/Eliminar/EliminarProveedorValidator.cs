@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Comercial.Proveedor.Eliminar.Proveedor;
+namespace Application.Features.Comercial.Proveedor.Eliminar;
 
 public class EliminarProveedorValidator : AbstractValidator<EliminarProveedorCommand>
 {

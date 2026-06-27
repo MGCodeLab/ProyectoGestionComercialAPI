@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Catalogo.Pais.Eliminar.Pais;
+namespace Application.Features.Catalogo.Pais.Eliminar;
 
 public class EliminarPaisValidator : AbstractValidator<EliminarPaisCommand>
 {

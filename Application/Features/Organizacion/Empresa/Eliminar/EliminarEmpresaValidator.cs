@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Organizacion.Empresa.Eliminar.Empresa;
+namespace Application.Features.Organizacion.Empresa.Eliminar;
 
 public class EliminarEmpresaValidator : AbstractValidator<EliminarEmpresaCommand>
 {

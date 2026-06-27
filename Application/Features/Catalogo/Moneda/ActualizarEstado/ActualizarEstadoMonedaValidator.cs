@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Catalogo.Moneda.ActualizarEstado.Moneda;
+namespace Application.Features.Catalogo.Moneda.ActualizarEstado;
 
 public class ActualizarEstadoMonedaValidator : AbstractValidator<ActualizarEstadoMonedaCommand>
 {

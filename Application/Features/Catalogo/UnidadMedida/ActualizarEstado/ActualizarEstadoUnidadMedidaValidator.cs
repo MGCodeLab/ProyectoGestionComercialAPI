@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Catalogo.UnidadMedida.ActualizarEstado.UnidadMedida;
+namespace Application.Features.Catalogo.UnidadMedida.ActualizarEstado;
 
 public class ActualizarEstadoUnidadMedidaValidator : AbstractValidator<ActualizarEstadoUnidadMedidaCommand>
 {

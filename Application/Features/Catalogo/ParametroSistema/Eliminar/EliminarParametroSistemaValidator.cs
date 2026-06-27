@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Catalogo.ParametroSistema.Eliminar.ParametroSistema;
+namespace Application.Features.Catalogo.ParametroSistema.Eliminar;
 
 public class EliminarParametroSistemaValidator : AbstractValidator<EliminarParametroSistemaCommand>
 {

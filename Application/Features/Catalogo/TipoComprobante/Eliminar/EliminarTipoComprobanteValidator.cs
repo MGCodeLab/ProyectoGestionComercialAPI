@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Catalogo.TipoComprobante.Eliminar.TipoComprobante;
+namespace Application.Features.Catalogo.TipoComprobante.Eliminar;
 
 public class EliminarTipoComprobanteValidator : AbstractValidator<EliminarTipoComprobanteCommand>
 {

@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Catalogo.SerieDocumento.ActualizarEstado.SerieDocumento;
+namespace Application.Features.Catalogo.SerieDocumento.ActualizarEstado;
 
 public class ActualizarEstadoSerieDocumentoValidator : AbstractValidator<ActualizarEstadoSerieDocumentoCommand>
 {

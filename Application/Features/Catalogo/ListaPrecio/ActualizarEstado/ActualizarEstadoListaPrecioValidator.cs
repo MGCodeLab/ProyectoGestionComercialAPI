@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Catalogo.ListaPrecio.ActualizarEstado.ListaPrecio;
+namespace Application.Features.Catalogo.ListaPrecio.ActualizarEstado;
 
 public class ActualizarEstadoListaPrecioValidator : AbstractValidator<ActualizarEstadoListaPrecioCommand>
 {

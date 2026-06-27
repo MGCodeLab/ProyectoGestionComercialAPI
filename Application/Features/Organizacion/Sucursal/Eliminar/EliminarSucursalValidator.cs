@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Organizacion.Sucursal.Eliminar.Sucursal;
+namespace Application.Features.Organizacion.Sucursal.Eliminar;
 
 public class EliminarSucursalValidator : AbstractValidator<EliminarSucursalCommand>
 {

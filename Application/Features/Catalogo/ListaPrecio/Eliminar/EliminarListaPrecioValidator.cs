@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Application.Features.Catalogo.ListaPrecio.Eliminar.ListaPrecio;
+namespace Application.Features.Catalogo.ListaPrecio.Eliminar;
 
 public class EliminarListaPrecioValidator : AbstractValidator<EliminarListaPrecioCommand>
 {
