@@ -20,12 +20,13 @@ namespace Application.Features.Organizacion.Sucursal.Actualizar
 
         public async Task<int> Handle(ActualizarSucursalCommand request, CancellationToken ct)
         {
-            var sucursal = await _service.ObtenerPorId(request.Id, true);
+            var sucursal = await _service.ObtenerPorId(request.Id, true, ct);
             if (sucursal == null)
                 throw new KeyNotFoundException($"Sucursal con Id {request.Id} no encontrada");
 
             _mapper.Map(request, sucursal);
-            await _service.Actualizar(sucursal);
+            sucursal.FechaActualizacion = DateTime.UtcNow;
+            await _service.Actualizar(sucursal, ct);
 
             _logger.LogInformation($"Sucursal actualizada: {sucursal.Id}");
 

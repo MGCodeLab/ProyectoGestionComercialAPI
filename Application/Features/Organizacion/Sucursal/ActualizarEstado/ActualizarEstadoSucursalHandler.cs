@@ -17,12 +17,12 @@ namespace Application.Features.Organizacion.Sucursal.ActualizarEstado
 
         public async Task<int> Handle(ActualizarEstadoSucursalCommand request, CancellationToken ct)
         {
-            var sucursal = await _service.ObtenerPorId(request.Id, true);
+            var sucursal = await _service.ObtenerPorId(request.Id, true, ct);
             if (sucursal == null)
                 throw new KeyNotFoundException($"Sucursal con Id {request.Id} no encontrada");
 
             sucursal.Activo = request.Activo;
-            await _service.Actualizar(sucursal);
+            await _service.Actualizar(sucursal, ct);
 
             _logger.LogInformation($"Sucursal {request.Id} estado actualizado a {request.Activo}");
 

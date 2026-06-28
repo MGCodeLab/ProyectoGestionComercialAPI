@@ -30,16 +30,16 @@ namespace API.GestionComercial.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetList()
+        public async Task<IActionResult> GetList(CancellationToken cancellationToken)
         {
-            var result = await _service.ObtenerTodosOptimizado();
+            var result = await _service.ObtenerTodosOptimizado(cancellationToken);
             return this.OkResponse(result);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
         {
-            var result = await _service.ObtenerPorIdOptimizado(id);
+            var result = await _service.ObtenerPorIdOptimizado(id, cancellationToken);
 
             if (result == null)
                 return this.NotFoundResponse("Almacén no encontrado");
@@ -48,18 +48,18 @@ namespace API.GestionComercial.Controllers
         }
 
         [HttpGet("combo/list")]
-        public async Task<IActionResult> GetCombo()
+        public async Task<IActionResult> GetCombo(CancellationToken cancellationToken)
         {
-            var result = await _service.ObtenerCombo();
+            var result = await _service.ObtenerCombo(cancellationToken);
             return this.OkResponse(result, "Almacenes para combo obtenidos exitosamente");
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(CrearAlmacenDto dto)
+        public async Task<IActionResult> Create(CrearAlmacenDto dto, CancellationToken cancellationToken)
         {
             var command = _mapper.Map<CrearAlmacenCommand>(dto);
-            var id = await _mediator.Send(command);
-            var result = await _service.ObtenerPorIdOptimizado(id);
+            var id = await _mediator.Send(command, cancellationToken);
+            var result = await _service.ObtenerPorIdOptimizado(id, cancellationToken);
 
             return this.CreatedResponse(
                 nameof(GetById),
@@ -69,12 +69,12 @@ namespace API.GestionComercial.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, ActualizarAlmacenDto dto)
+        public async Task<IActionResult> Update(int id, ActualizarAlmacenDto dto, CancellationToken cancellationToken)
         {
             var command = _mapper.Map<ActualizarAlmacenCommand>(dto);
             command = command with { Id = id };
-            await _mediator.Send(command);
-            var result = await _service.ObtenerPorIdOptimizado(id);
+            await _mediator.Send(command, cancellationToken);
+            var result = await _service.ObtenerPorIdOptimizado(id, cancellationToken);
 
             return this.OkResponse(result, "Almacén actualizado correctamente");
         }

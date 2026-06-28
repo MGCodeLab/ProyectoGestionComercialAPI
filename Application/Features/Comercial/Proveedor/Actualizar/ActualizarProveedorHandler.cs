@@ -22,6 +22,7 @@ public class ActualizarProveedorHandler : IRequestHandler<ActualizarProveedorCom
     {
         _logger.LogInformation("Actualizando proveedor: {Id}", request.Id);
         var proveedor = _mapper.Map<Domain.Comercial.Proveedor>(request);
+        proveedor.FechaActualizacion = DateTime.UtcNow;
         return await _service.Actualizar(proveedor, cancellationToken);
     }
 }

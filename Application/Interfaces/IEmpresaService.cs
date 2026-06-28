@@ -6,13 +6,13 @@ namespace Application.Interfaces
 {
     public interface IEmpresaService
     {
-        Task<Empresa?> ObtenerPorId(int id, bool tracking = false);
-        Task<Empresa?> ObtenerPrimera();
-        Task<List<Empresa>> ObtenerTodos();
-        Task<List<ComboDto>> ObtenerCombo();
-        Task<int> Crear(Empresa empresa);
-        Task Actualizar(Empresa empresa);
-        Task Eliminar(int id);
+        Task<Empresa?> ObtenerPorId(int id, bool tracking, CancellationToken cancellationToken);
+        Task<Empresa?> ObtenerPrimera(CancellationToken cancellationToken);
+        Task<List<Empresa>> ObtenerTodos(CancellationToken cancellationToken);
+        Task<List<ComboDto>> ObtenerCombo(CancellationToken cancellationToken);
+        Task<int> Crear(Empresa empresa, CancellationToken cancellationToken);
+        Task Actualizar(Empresa empresa, CancellationToken cancellationToken);
+        Task Eliminar(int id, CancellationToken cancellationToken);
         Task<bool> TieneDependencias(Empresa entity, CancellationToken token);
     }
 }

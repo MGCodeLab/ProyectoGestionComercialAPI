@@ -30,17 +30,17 @@ namespace API.GestionComercial.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetList()
+        public async Task<IActionResult> GetList(CancellationToken cancellationToken)
         {
-            var empresas = await _service.ObtenerTodos();
+            var empresas = await _service.ObtenerTodos(cancellationToken);
             var result = _mapper.Map<List<EmpresaDto>>(empresas);
             return this.OkResponse(result);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
         {
-            var empresa = await _service.ObtenerPorId(id, tracking: false);
+            var empresa = await _service.ObtenerPorId(id, tracking: false, cancellationToken);
 
             if (empresa == null)
                 return this.NotFoundResponse("Empresa no encontrada");
@@ -50,17 +50,17 @@ namespace API.GestionComercial.Controllers
         }
 
         [HttpGet("combo/list")]
-        public async Task<IActionResult> GetCombo()
+        public async Task<IActionResult> GetCombo(CancellationToken cancellationToken)
         {
-            var result = await _service.ObtenerCombo();
+            var result = await _service.ObtenerCombo(cancellationToken);
             return this.OkResponse(result, "Empresas para combo obtenidas exitosamente");
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(CrearEmpresaDto dto)
+        public async Task<IActionResult> Create(CrearEmpresaDto dto, CancellationToken cancellationToken)
         {
             var command = _mapper.Map<CrearEmpresaCommand>(dto);
-            var id = await _mediator.Send(command);
+            var id = await _mediator.Send(command, cancellationToken);
 
             var result = new { id, razonSocial = dto.RazonSocial };
             return this.CreatedResponse(
@@ -71,12 +71,12 @@ namespace API.GestionComercial.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, ActualizarEmpresaDto dto)
+        public async Task<IActionResult> Update(int id, ActualizarEmpresaDto dto, CancellationToken cancellationToken)
         {
             var command = _mapper.Map<ActualizarEmpresaCommand>(dto);
             command = command with { Id = id };
 
-            await _mediator.Send(command);
+            await _mediator.Send(command, cancellationToken);
 
             return this.OkResponse(string.Empty, "Empresa actualizada correctamente");
         }

@@ -12,7 +12,7 @@ public class CondicionPagoService : ICondicionPagoService
     public CondicionPagoService(AppDbContext context) => _context = context;
 
     public async Task<List<CondicionPago>> ObtenerTodos(CancellationToken token)
-        => await _context.CondicionesPago.ToListAsync(token);
+        => await _context.CondicionesPago.AsNoTracking().ToListAsync(token);
 
     public async Task<CondicionPago?> ObtenerPorId(int id, CancellationToken token)
         => await _context.CondicionesPago.FirstOrDefaultAsync(x => x.Id == id, token);

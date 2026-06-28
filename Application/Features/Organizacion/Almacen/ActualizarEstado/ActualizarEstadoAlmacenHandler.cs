@@ -17,12 +17,12 @@ namespace Application.Features.Organizacion.Almacen.ActualizarEstado
 
         public async Task<int> Handle(ActualizarEstadoAlmacenCommand request, CancellationToken ct)
         {
-            var almacen = await _service.ObtenerPorId(request.Id, true);
+            var almacen = await _service.ObtenerPorId(request.Id, true, ct);
             if (almacen == null)
                 throw new KeyNotFoundException($"Almacén con Id {request.Id} no encontrado");
 
             almacen.Activo = request.Activo;
-            await _service.Actualizar(almacen);
+            await _service.Actualizar(almacen, ct);
 
             _logger.LogInformation($"Almacén {request.Id} estado actualizado a {request.Activo}");
 

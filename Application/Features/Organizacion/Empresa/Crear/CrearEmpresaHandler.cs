@@ -24,7 +24,7 @@ namespace Application.Features.Organizacion.Empresa.Crear
             // GUARD: SingleTenant - Regla de dominio: el sistema soporta una sola empresa (configuración única por organización)
             // DECISION: Arquitectónica, aprobada por Miguel (CLAUDE.md - Architecture Governance)
             // Si se requiere multi-empresa en el futuro, se debe actualizar esta lógica y documentar la ADR correspondiente
-            var empresaExistente = await _service.ObtenerPrimera();
+            var empresaExistente = await _service.ObtenerPrimera(ct);
             if (empresaExistente != null)
                 throw new InvalidOperationException("Solo 1 empresa permitida en sistema");
 
@@ -32,7 +32,7 @@ namespace Application.Features.Organizacion.Empresa.Crear
             var empresa = _mapper.Map<Domain.Organizacion.Empresa>(request);
 
             // Persist
-            var resultado = await _service.Crear(empresa);
+            var resultado = await _service.Crear(empresa, ct);
 
             // Log
             _logger.LogInformation($"Empresa creada: {empresa.Id}");

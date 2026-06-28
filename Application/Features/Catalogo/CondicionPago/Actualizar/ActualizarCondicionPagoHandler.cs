@@ -22,6 +22,7 @@ public class ActualizarCondicionPagoHandler : IRequestHandler<ActualizarCondicio
     {
         _logger.LogInformation("Actualizando condición de pago: {Id}", request.Id);
         var condicion = _mapper.Map<Domain.Catalogo.CondicionPago>(request);
+        condicion.FechaActualizacion = DateTime.UtcNow;
         return await _service.Actualizar(condicion, cancellationToken);
     }
 }

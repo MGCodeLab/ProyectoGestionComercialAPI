@@ -17,14 +17,14 @@ namespace Infrastructure.Repository
             _context = context;
         }
 
-        public async Task<Sucursal?> ObtenerPorId(int id, bool tracking = false)
+        public async Task<Sucursal?> ObtenerPorId(int id, bool tracking, CancellationToken cancellationToken)
             => tracking
-                ? await _context.Sucursales.FirstOrDefaultAsync(x => x.Id == id)
-                : await _context.Sucursales.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+                ? await _context.Sucursales.FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
+                : await _context.Sucursales.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-        public async Task<List<Sucursal>> ObtenerTodos()
-            => await _context.Sucursales.ToListAsync();
-        public async Task<List<SucursalDto>> ObtenerTodosOptimizado()
+        public async Task<List<Sucursal>> ObtenerTodos(CancellationToken cancellationToken)
+            => await _context.Sucursales.ToListAsync(cancellationToken);
+        public async Task<List<SucursalDto>> ObtenerTodosOptimizado(CancellationToken cancellationToken)
           => await _context.Sucursales
                 .AsNoTracking()
                 .Select(a => new SucursalDto
@@ -47,9 +47,9 @@ namespace Infrastructure.Repository
                         RazonSocial = a.Empresa.RazonSocial
                     }
                 })
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
-        public async Task<SucursalDto?> ObtenerPorIdOptimizado(int id)
+        public async Task<SucursalDto?> ObtenerPorIdOptimizado(int id, CancellationToken cancellationToken)
              => await _context.Sucursales
                     .AsNoTracking()
                     .Where(x => x.Id == id)
@@ -73,9 +73,9 @@ namespace Infrastructure.Repository
                             RazonSocial = a.Empresa.RazonSocial
                         }
                     })
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync(cancellationToken);
 
-        public async Task<List<ComboDto>> ObtenerCombo()
+        public async Task<List<ComboDto>> ObtenerCombo(CancellationToken cancellationToken)
             => await _context.Sucursales
                 .AsNoTracking()
                 .Where(s => s.Empresa.Activo)
@@ -84,7 +84,7 @@ namespace Infrastructure.Repository
                     Id = s.Id,
                     Nombre = s.Nombre
                 })
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
         public async Task<List<ComboDto>> ObtenerComboByIdEmpresa(int IdEmpresa, 
             CancellationToken cancellationToken)
@@ -99,27 +99,27 @@ namespace Infrastructure.Repository
              })
              .ToListAsync(cancellationToken);
 
-        public async Task<int> Crear(Sucursal sucursal)
+        public async Task<int> Crear(Sucursal sucursal, CancellationToken cancellationToken)
         {
             _context.Sucursales.Add(sucursal);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
             return sucursal.Id;
         }
 
-        public async Task Actualizar(Sucursal sucursal)
+        public async Task Actualizar(Sucursal sucursal, CancellationToken cancellationToken)
         {
             sucursal.FechaActualizacion = DateTime.UtcNow;
             _context.Sucursales.Update(sucursal);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task Eliminar(int id)
+        public async Task Eliminar(int id, CancellationToken cancellationToken)
         {
-            var sucursal = await _context.Sucursales.FindAsync(id);
+            var sucursal = await _context.Sucursales.FindAsync(new object?[] { id }, cancellationToken: cancellationToken);
             if (sucursal != null)
             {
                 _context.Sucursales.Remove(sucursal);
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
             }
         }
 

@@ -13,6 +13,7 @@ public class TipoDocumentoProfile : Profile
         CreateMap<CrearTipoDocumentoDto, CrearTipoDocumentoCommand>();
         CreateMap<CrearTipoDocumentoCommand, TipoDocumento>();
         CreateMap<ActualizarTipoDocumentoDto, ActualizarTipoDocumentoCommand>();
+        CreateMap<ActualizarTipoDocumentoCommand, TipoDocumento>().ReverseMap();
         CreateMap<TipoDocumento, TipoDocumentoDto>();
     }
 }
