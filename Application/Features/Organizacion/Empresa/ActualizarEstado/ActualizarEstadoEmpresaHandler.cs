@@ -17,12 +17,12 @@ namespace Application.Features.Organizacion.Empresa.ActualizarEstado
 
         public async Task<int> Handle(ActualizarEstadoEmpresaCommand request, CancellationToken ct)
         {
-            var empresa = await _service.ObtenerPorId(request.Id, true);
+            var empresa = await _service.ObtenerPorId(request.Id, true, ct);
             if (empresa == null)
                 throw new KeyNotFoundException($"Empresa con Id {request.Id} no encontrada");
 
             empresa.Activo = request.Activo;
-            await _service.Actualizar(empresa);
+            await _service.Actualizar(empresa, ct);
 
             _logger.LogInformation($"Empresa {request.Id} estado actualizado a {request.Activo}");
 

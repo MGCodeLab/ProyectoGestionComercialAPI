@@ -16,15 +16,15 @@ namespace Infrastructure.Repository
             _context = context;
         }
 
-        public async Task<Almacen?> ObtenerPorId(int id, bool tracking = false)
+        public async Task<Almacen?> ObtenerPorId(int id, bool tracking, CancellationToken cancellationToken)
             => tracking
-                ? await _context.Almacenes.FirstOrDefaultAsync(x => x.Id == id)
-                : await _context.Almacenes.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+                ? await _context.Almacenes.FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
+                : await _context.Almacenes.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-        public async Task<List<Almacen>> ObtenerTodos()
-            => await _context.Almacenes.ToListAsync();
+        public async Task<List<Almacen>> ObtenerTodos(CancellationToken cancellationToken)
+            => await _context.Almacenes.ToListAsync(cancellationToken);
 
-        public async Task<List<AlmacenDto>> ObtenerTodosOptimizado()
+        public async Task<List<AlmacenDto>> ObtenerTodosOptimizado(CancellationToken cancellationToken)
             => await _context.Almacenes
                 .AsNoTracking()
                 .Select(a => new AlmacenDto
@@ -50,9 +50,9 @@ namespace Infrastructure.Repository
                         RazonSocial = a.Sucursal.Empresa.RazonSocial
                     }
                 })
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
-        public async Task<AlmacenDto?> ObtenerPorIdOptimizado(int id)
+        public async Task<AlmacenDto?> ObtenerPorIdOptimizado(int id, CancellationToken cancellationToken)
             => await _context.Almacenes
                 .AsNoTracking()
                 .Where(x => x.Id == id)
@@ -79,9 +79,9 @@ namespace Infrastructure.Repository
                         RazonSocial = a.Sucursal.Empresa.RazonSocial
                     }
                 })
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(cancellationToken);
 
-        public async Task<List<ComboDto>> ObtenerCombo()
+        public async Task<List<ComboDto>> ObtenerCombo(CancellationToken cancellationToken)
             => await _context.Almacenes
                 .AsNoTracking()
                 .Where(a => a.Activo)
@@ -90,29 +90,29 @@ namespace Infrastructure.Repository
                     Id = a.Id,
                     Nombre = a.Nombre
                 })
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
-        public async Task<int> Crear(Almacen almacen)
+        public async Task<int> Crear(Almacen almacen, CancellationToken cancellationToken)
         {
             _context.Almacenes.Add(almacen);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
             return almacen.Id;
         }
 
-        public async Task Actualizar(Almacen almacen)
+        public async Task Actualizar(Almacen almacen, CancellationToken cancellationToken)
         {
             almacen.FechaActualizacion = DateTime.UtcNow;
             _context.Almacenes.Update(almacen);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task Eliminar(int id)
+        public async Task Eliminar(int id, CancellationToken cancellationToken)
         {
-            var almacen = await _context.Almacenes.FindAsync(id);
+            var almacen = await _context.Almacenes.FindAsync(new object?[] { id }, cancellationToken: cancellationToken);
             if (almacen != null)
             {
                 _context.Almacenes.Remove(almacen);
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
             }
         }
     }

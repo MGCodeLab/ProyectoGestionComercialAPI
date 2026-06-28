@@ -20,13 +20,13 @@ namespace Application.Features.Organizacion.Empresa.Actualizar
 
         public async Task<int> Handle(ActualizarEmpresaCommand request, CancellationToken ct)
         {
-            var empresa = await _service.ObtenerPorId(request.Id, true);
+            var empresa = await _service.ObtenerPorId(request.Id, true, ct);
             if (empresa == null)
                 throw new KeyNotFoundException($"Empresa con Id {request.Id} no encontrada");
 
             _mapper.Map(request, empresa);
             empresa.FechaActualizacion = DateTime.UtcNow;
-            await _service.Actualizar(empresa);
+            await _service.Actualizar(empresa, ct);
 
             _logger.LogInformation($"Empresa actualizada: {empresa.Id}");
 

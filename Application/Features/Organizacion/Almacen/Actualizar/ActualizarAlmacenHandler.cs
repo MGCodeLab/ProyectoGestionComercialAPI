@@ -20,13 +20,13 @@ namespace Application.Features.Organizacion.Almacen.Actualizar
 
         public async Task<int> Handle(ActualizarAlmacenCommand request, CancellationToken ct)
         {
-            var almacen = await _service.ObtenerPorId(request.Id, true);
+            var almacen = await _service.ObtenerPorId(request.Id, true, ct);
             if (almacen == null)
                 throw new KeyNotFoundException($"Almacén con Id {request.Id} no encontrado");
 
             _mapper.Map(request, almacen);
             almacen.FechaActualizacion = DateTime.UtcNow;
-            await _service.Actualizar(almacen);
+            await _service.Actualizar(almacen, ct);
 
             _logger.LogInformation($"Almacén actualizado: {almacen.Id}");
 

@@ -16,18 +16,18 @@ namespace Infrastructure.Repository
             _context = context;
         }
 
-        public async Task<Empresa?> ObtenerPorId(int id, bool tracking = false)
+        public async Task<Empresa?> ObtenerPorId(int id, bool tracking, CancellationToken cancellationToken)
             => tracking
-                ? await _context.Empresas.FirstOrDefaultAsync(x => x.Id == id)
-                : await _context.Empresas.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+                ? await _context.Empresas.FirstOrDefaultAsync(x => x.Id == id, cancellationToken)
+                : await _context.Empresas.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-        public async Task<Empresa?> ObtenerPrimera()
-            => await _context.Empresas.FirstOrDefaultAsync();
+        public async Task<Empresa?> ObtenerPrimera(CancellationToken cancellationToken)
+            => await _context.Empresas.FirstOrDefaultAsync(cancellationToken);
 
-        public async Task<List<Empresa>> ObtenerTodos()
-            => await _context.Empresas.ToListAsync();
+        public async Task<List<Empresa>> ObtenerTodos(CancellationToken cancellationToken)
+            => await _context.Empresas.ToListAsync(cancellationToken);
 
-        public async Task<List<ComboDto>> ObtenerCombo()
+        public async Task<List<ComboDto>> ObtenerCombo(CancellationToken cancellationToken)
             => await _context.Empresas
                 .AsNoTracking()
                 .Where(e => e.Activo)
@@ -36,20 +36,20 @@ namespace Infrastructure.Repository
                     Id = e.Id,
                     Nombre = e.RazonSocial
                 })
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
-        public async Task<int> Crear(Empresa empresa)
+        public async Task<int> Crear(Empresa empresa, CancellationToken cancellationToken)
         {
             _context.Empresas.Add(empresa);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
             return empresa.Id;
         }
 
-        public async Task Actualizar(Empresa empresa)
+        public async Task Actualizar(Empresa empresa, CancellationToken cancellationToken)
         {
             empresa.FechaActualizacion = DateTime.UtcNow;
             _context.Empresas.Update(empresa);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
         public async Task<bool> TieneDependencias(Empresa entity, CancellationToken token)
@@ -61,13 +61,13 @@ namespace Infrastructure.Repository
             return existeSucursal;
         }
 
-        public async Task Eliminar(int id)
+        public async Task Eliminar(int id, CancellationToken cancellationToken)
         {
-            var empresa = await _context.Empresas.FindAsync(id);
+            var empresa = await _context.Empresas.FindAsync(new object?[] { id }, cancellationToken: cancellationToken);
             if (empresa != null)
             {
                 _context.Empresas.Remove(empresa);
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
             }
         }
     }
