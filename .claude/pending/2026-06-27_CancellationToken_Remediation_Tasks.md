@@ -2,7 +2,7 @@
 **Fecha:** 2026-06-27  
 **Auditoría:** `.claude/audit/20260627_T1730_CancellationTokenHomogeneityAudit/AUDIT_REPORT.md`  
 **Asignado a:** @.claude/agents/Nexus-Fast-Builder.md  
-**Estado:** PENDIENTE  
+**Estado:** ✅ COMPLETADA  
 **Prioridad:** 🔴 CRÍTICA  
 
 ---
@@ -285,26 +285,26 @@ dotnet build
 ## CHECKLIST DE REMEDIATION
 
 ### FASE 1: ORGANIZACION Services
-- [ ] SucursalService: 8 métodos actualizados + CT propagado
-- [ ] AlmacenService: 8 métodos actualizados + CT propagado
-- [ ] EmpresaService: 7 métodos actualizados + CT propagado
-- [ ] Compilación sin errores
+- [x] SucursalService: 8 métodos actualizados + CT propagado ✅ (Completada 2026-06-27)
+- [x] AlmacenService: 8 métodos actualizados + CT propagado ✅ (Completada 2026-06-27)
+- [x] EmpresaService: 7 métodos actualizados + CT propagado ✅ (Completada 2026-06-27)
+- [x] Compilación sin errores ✅ (Commit f590d37)
 
 ### FASE 2: CATALOGO Services
-- [ ] CategoriaProductoService: 6 métodos actualizados + CT propagado
-- [ ] MarcaProductoService: 5 métodos actualizados + CT propagado
-- [ ] Compilación sin errores
+- [x] CategoriaProductoService: 6 métodos actualizados + CT propagado ✅ (Completada 2026-06-27)
+- [x] MarcaProductoService: 5 métodos actualizados + CT propagado ✅ (Completada 2026-06-27)
+- [x] Compilación sin errores ✅ (Commit 5c7473c)
 
 ### FASE 3: Handlers CT Propagation
-- [ ] 12 ORGANIZACION handlers: CT propagado
-- [ ] CategoriaProducto handlers: CT propagado
-- [ ] MarcaProducto handlers: CT propagado
-- [ ] Compilación sin errores
+- [x] 12 ORGANIZACION handlers: CT propagado ✅ (Completada 2026-06-27)
+- [x] 8 CATALOGO handlers (CategoriaProducto + MarcaProducto): CT propagado ✅ (Completada 2026-06-27)
+- [x] 5 Controllers actualizado con CT ✅ (Completada 2026-06-27)
+- [x] Compilación sin errores ✅ (Verificado 2026-06-27)
 
 ### FASE 4: Validación
-- [ ] `dotnet build` → 0 errores
-- [ ] Patrón consistente en todo el codebase
-- [ ] Todos los métodos async tienen CT
+- [x] `dotnet build` → 0 errores ✅ (Verificado 2026-06-27)
+- [x] Patrón consistente en todo el codebase ✅ (Verified 2026-06-27)
+- [x] Todos los métodos async tienen CT ✅ (Spot-check passed 2026-06-27)
 
 ---
 
