@@ -1,4 +1,5 @@
 using Application.Exceptions;
+using Application.Handlers;
 using Application.Interfaces;
 using AutoMapper;
 using MediatR;
@@ -6,17 +7,18 @@ using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Catalogo.TipoDocumento.Actualizar;
 
-public class ActualizarTipoDocumentoHandler : IRequestHandler<ActualizarTipoDocumentoCommand, Unit>
+public class ActualizarTipoDocumentoHandler
+    : AuditableUpdateHandlerBase<ActualizarTipoDocumentoCommand, Unit>
 {
     private readonly ITipoDocumentoService _service;
-    private readonly IMapper _mapper;
-    private readonly ILogger<ActualizarTipoDocumentoHandler> _logger;
 
-    public ActualizarTipoDocumentoHandler(ITipoDocumentoService service, IMapper mapper, ILogger<ActualizarTipoDocumentoHandler> logger)
+    public ActualizarTipoDocumentoHandler(
+        ITipoDocumentoService service,
+        IMapper mapper,
+        ILogger<ActualizarTipoDocumentoHandler> logger)
+        : base(mapper, logger)
     {
         _service = service;
-        _mapper = mapper;
-        _logger = logger;
     }
 
     public async Task<Unit> Handle(ActualizarTipoDocumentoCommand request, CancellationToken cancellationToken)
@@ -25,12 +27,13 @@ public class ActualizarTipoDocumentoHandler : IRequestHandler<ActualizarTipoDocu
         if (tipoDocumento == null)
             throw new NotFoundException($"Tipo de documento con id {request.Id} no encontrado");
 
-        _mapper.Map(request, tipoDocumento);
-        tipoDocumento.FechaActualizacion = DateTime.UtcNow;
+        Mapper.Map(request, tipoDocumento);
 
-        await _service.Actualizar(cancellationToken);
-
-        _logger.LogInformation("Tipo de documento {Id} actualizado", request.Id);
-        return Unit.Value;
+        return await UpdateAuditableEntity(
+            tipoDocumento,
+            async () => await _service.Actualizar(cancellationToken),
+            () => Unit.Value,
+            cancellationToken
+        );
     }
 }

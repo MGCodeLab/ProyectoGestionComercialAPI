@@ -1,37 +1,41 @@
+using Application.Handlers;
 using Application.Interfaces;
 using AutoMapper;
-using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Catalogo.MarcaProducto.Actualizar
 {
-    public class ActualizarMarcaProductoHandler : IRequestHandler<ActualizarMarcaProductoCommand, int>
+    public class ActualizarMarcaProductoHandler
+        : AuditableUpdateHandlerBase<ActualizarMarcaProductoCommand, int>
     {
         private readonly IMarcaProductoService _service;
-        private readonly IMapper _mapper;
-        private readonly ILogger<ActualizarMarcaProductoHandler> _logger;
 
-        public ActualizarMarcaProductoHandler(IMarcaProductoService service, IMapper mapper, ILogger<ActualizarMarcaProductoHandler> logger)
+        public ActualizarMarcaProductoHandler(
+            IMarcaProductoService service,
+            IMapper mapper,
+            ILogger<ActualizarMarcaProductoHandler> logger)
+            : base(mapper, logger)
         {
             _service = service;
-            _mapper = mapper;
-            _logger = logger;
         }
 
         public async Task<int> Handle(ActualizarMarcaProductoCommand command, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("ActualizarMarcaProducto: {@request}", command);
+            Logger.LogInformation("ActualizarMarcaProducto: {@request}", command);
 
             var marca = await _service.ObtenerPorIdAsync(command.Id, tracking: true, cancellationToken);
             if (marca == null)
                 throw new InvalidOperationException($"MarcaProducto con ID {command.Id} no encontrada");
 
-            _mapper.Map(command, marca);
-            marca.FechaActualizacion = DateTime.UtcNow;
+            Mapper.Map(command, marca);
 
-            await _service.Actualizar(marca, cancellationToken);
-            _logger.LogInformation("ActualizarMarcaProducto: ID {id}", marca.Id);
-            return marca.Id;
+            // Usar el método base que establece FechaActualizacion automáticamente
+            return await UpdateAuditableEntity(
+                marca,
+                async () => await _service.Actualizar(marca, cancellationToken),
+                () => marca.Id,
+                cancellationToken
+            );
         }
     }
 }

@@ -1,32 +1,30 @@
+using Application.Handlers;
 using Application.Interfaces;
 using AutoMapper;
-using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Catalogo.CategoriaProducto.Actualizar
 {
-    public class ActualizarCategoriaProductoHandler : IRequestHandler<ActualizarCategoriaProductoCommand, int>
+    public class ActualizarCategoriaProductoHandler
+        : AuditableUpdateHandlerBase<ActualizarCategoriaProductoCommand, int>
     {
         private readonly ICategoriaProductoService _service;
         private readonly ICategoriaProductoValidatorService _validator;
-        private readonly IMapper _mapper;
-        private readonly ILogger<ActualizarCategoriaProductoHandler> _logger;
 
         public ActualizarCategoriaProductoHandler(
             ICategoriaProductoService service,
             ICategoriaProductoValidatorService validator,
             IMapper mapper,
             ILogger<ActualizarCategoriaProductoHandler> logger)
+            : base(mapper, logger)
         {
             _service = service;
             _validator = validator;
-            _mapper = mapper;
-            _logger = logger;
         }
 
         public async Task<int> Handle(ActualizarCategoriaProductoCommand command, CancellationToken cancellationToken)
         {
-            _logger.LogInformation("ActualizarCategoriaProducto: {@request}", command);
+            Logger.LogInformation("ActualizarCategoriaProducto: {@request}", command);
 
             var categoria = await _service.ObtenerPorIdAsync(command.Id, tracking: true, cancellationToken);
             if (categoria == null)
@@ -41,12 +39,15 @@ namespace Application.Features.Catalogo.CategoriaProducto.Actualizar
                     throw new InvalidOperationException("No se puede crear ciclo: padre no puede ser descendiente");
             }
 
-            _mapper.Map(command, categoria);
-            categoria.FechaActualizacion = DateTime.UtcNow;
+            Mapper.Map(command, categoria);
 
-            await _service.Actualizar(categoria, cancellationToken);
-            _logger.LogInformation("ActualizarCategoriaProducto: ID {id}", categoria.Id);
-            return categoria.Id;
+            // Usar el método base que establece FechaActualizacion automáticamente
+            return await UpdateAuditableEntity(
+                categoria,
+                async () => await _service.Actualizar(categoria, cancellationToken),
+                () => categoria.Id,
+                cancellationToken
+            );
         }
     }
 }
