@@ -19,12 +19,12 @@ namespace Application.Features.Catalogo.MarcaProducto.ActualizarEstado
         {
             _logger.LogInformation("ActualizarEstadoMarcaProducto: {@request}", command);
 
-            var marca = await _service.ObtenerPorIdAsync(command.Id);
+            var marca = await _service.ObtenerPorIdAsync(command.Id, tracking: true, cancellationToken);
             if (marca == null)
                 throw new InvalidOperationException($"MarcaProducto con ID {command.Id} no encontrada");
 
             marca.Activo = command.Activo;
-            await _service.Actualizar(marca);
+            await _service.Actualizar(marca, cancellationToken);
             _logger.LogInformation("ActualizarEstadoMarcaProducto: ID {id}", marca.Id);
             return marca.Id;
         }

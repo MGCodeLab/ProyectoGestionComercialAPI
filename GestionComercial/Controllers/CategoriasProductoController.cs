@@ -27,25 +27,25 @@ public class CategoriasProductoController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> Listar()
+    public async Task<IActionResult> Listar(CancellationToken cancellationToken)
     {
-        var datos = await _service.ObtenerTodosAsync();
+        var datos = await _service.ObtenerTodosAsync(cancellationToken);
         var response = _mapper.Map<List<CategoriaProductoDto>>(datos);
         return this.OkResponse(response);
     }
 
     [HttpGet("raices")]
-    public async Task<IActionResult> ObtenerRaices()
+    public async Task<IActionResult> ObtenerRaices(CancellationToken cancellationToken)
     {
-        var datos = await _service.ObtenerRaicesAsync();
+        var datos = await _service.ObtenerRaicesAsync(cancellationToken);
         var response = _mapper.Map<List<CategoriaProductoDto>>(datos);
         return this.OkResponse(response);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> Obtener(int id)
+    public async Task<IActionResult> Obtener(int id, CancellationToken cancellationToken)
     {
-        var dato = await _service.ObtenerPorIdAsync(id);
+        var dato = await _service.ObtenerPorIdAsync(id, tracking: false, cancellationToken);
         if (dato == null)
             return this.NotFoundResponse("CategoriaProducto no encontrada");
 
@@ -54,42 +54,42 @@ public class CategoriasProductoController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Crear([FromBody] CrearCategoriaProductoDto dto)
+    public async Task<IActionResult> Crear([FromBody] CrearCategoriaProductoDto dto, CancellationToken cancellationToken)
     {
         var command = new CrearCategoriaProductoCommand(dto.Nombre, dto.Descripcion, dto.CategoriaPadreId);
-        var id = await _mediator.Send(command);
+        var id = await _mediator.Send(command, cancellationToken);
         return this.CreatedResponse(nameof(Obtener), new { id }, id);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Actualizar(int id, [FromBody] ActualizarCategoriaProductoDto dto)
+    public async Task<IActionResult> Actualizar(int id, [FromBody] ActualizarCategoriaProductoDto dto, CancellationToken cancellationToken)
     {
         var command = new ActualizarCategoriaProductoCommand(id, dto.Nombre, dto.Descripcion, dto.CategoriaPadreId);
-        await _mediator.Send(command);
+        await _mediator.Send(command, cancellationToken);
         return this.OkResponse<object>(null, "CategoriaProducto actualizada correctamente");
     }
 
     [HttpPatch("{id}/activar")]
-    public async Task<IActionResult> Activar(int id)
+    public async Task<IActionResult> Activar(int id, CancellationToken cancellationToken)
     {
         var command = new ActualizarEstadoCategoriaProductoCommand(id, true);
-        await _mediator.Send(command);
+        await _mediator.Send(command, cancellationToken);
         return this.OkResponse<object>(null, "CategoriaProducto activada correctamente");
     }
 
     [HttpPatch("{id}/inactivar")]
-    public async Task<IActionResult> Inactivar(int id)
+    public async Task<IActionResult> Inactivar(int id, CancellationToken cancellationToken)
     {
         var command = new ActualizarEstadoCategoriaProductoCommand(id, false);
-        await _mediator.Send(command);
+        await _mediator.Send(command, cancellationToken);
         return this.OkResponse<object>(null, "CategoriaProducto inactivada correctamente");
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Eliminar(int id)
+    public async Task<IActionResult> Eliminar(int id, CancellationToken cancellationToken)
     {
         var command = new EliminarCategoriaProductoCommand(id);
-        await _mediator.Send(command);
+        await _mediator.Send(command, cancellationToken);
         return this.OkResponse<object>(null, "CategoriaProducto eliminada correctamente");
     }
 }

@@ -25,7 +25,7 @@ namespace Application.Features.Catalogo.MarcaProducto.Crear
             var marca = _mapper.Map<Domain.Catalogo.MarcaProducto>(command);
             marca.Activo = true;
 
-            await _service.Crear(marca);
+            await _service.Crear(marca, cancellationToken);
             _logger.LogInformation("CrearMarcaProducto: ID {id}", marca.Id);
             return marca.Id;
         }

@@ -28,7 +28,7 @@ namespace Application.Features.Catalogo.CategoriaProducto.Actualizar
         {
             _logger.LogInformation("ActualizarCategoriaProducto: {@request}", command);
 
-            var categoria = await _service.ObtenerPorIdAsync(command.Id);
+            var categoria = await _service.ObtenerPorIdAsync(command.Id, tracking: true, cancellationToken);
             if (categoria == null)
                 throw new InvalidOperationException($"CategoriaProducto con ID {command.Id} no encontrada");
 
@@ -44,7 +44,7 @@ namespace Application.Features.Catalogo.CategoriaProducto.Actualizar
             _mapper.Map(command, categoria);
             categoria.FechaActualizacion = DateTime.UtcNow;
 
-            await _service.Actualizar(categoria);
+            await _service.Actualizar(categoria, cancellationToken);
             _logger.LogInformation("ActualizarCategoriaProducto: ID {id}", categoria.Id);
             return categoria.Id;
         }

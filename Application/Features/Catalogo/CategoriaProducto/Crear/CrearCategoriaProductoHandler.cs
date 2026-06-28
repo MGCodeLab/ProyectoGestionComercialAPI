@@ -39,7 +39,7 @@ namespace Application.Features.Catalogo.CategoriaProducto.Crear
             var categoria = _mapper.Map<Domain.Catalogo.CategoriaProducto>(command);
             categoria.Activo = true;
 
-            await _service.Crear(categoria);
+            await _service.Crear(categoria, cancellationToken);
             _logger.LogInformation("CrearCategoriaProducto: ID {id}", categoria.Id);
             return categoria.Id;
         }

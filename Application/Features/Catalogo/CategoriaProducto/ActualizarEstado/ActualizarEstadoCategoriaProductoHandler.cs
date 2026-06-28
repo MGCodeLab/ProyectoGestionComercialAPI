@@ -19,12 +19,12 @@ namespace Application.Features.Catalogo.CategoriaProducto.ActualizarEstado
         {
             _logger.LogInformation("ActualizarEstadoCategoriaProducto: {@request}", command);
 
-            var categoria = await _service.ObtenerPorIdAsync(command.Id);
+            var categoria = await _service.ObtenerPorIdAsync(command.Id, tracking: true, cancellationToken);
             if (categoria == null)
                 throw new InvalidOperationException($"CategoriaProducto con ID {command.Id} no encontrada");
 
             categoria.Activo = command.Activo;
-            await _service.Actualizar(categoria);
+            await _service.Actualizar(categoria, cancellationToken);
             _logger.LogInformation("ActualizarEstadoCategoriaProducto: ID {id}", categoria.Id);
             return categoria.Id;
         }

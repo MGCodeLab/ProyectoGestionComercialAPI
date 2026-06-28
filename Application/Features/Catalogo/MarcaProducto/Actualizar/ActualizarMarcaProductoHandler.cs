@@ -22,14 +22,14 @@ namespace Application.Features.Catalogo.MarcaProducto.Actualizar
         {
             _logger.LogInformation("ActualizarMarcaProducto: {@request}", command);
 
-            var marca = await _service.ObtenerPorIdAsync(command.Id);
+            var marca = await _service.ObtenerPorIdAsync(command.Id, tracking: true, cancellationToken);
             if (marca == null)
                 throw new InvalidOperationException($"MarcaProducto con ID {command.Id} no encontrada");
 
             _mapper.Map(command, marca);
             marca.FechaActualizacion = DateTime.UtcNow;
 
-            await _service.Actualizar(marca);
+            await _service.Actualizar(marca, cancellationToken);
             _logger.LogInformation("ActualizarMarcaProducto: ID {id}", marca.Id);
             return marca.Id;
         }
