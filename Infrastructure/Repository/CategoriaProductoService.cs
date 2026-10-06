@@ -22,7 +22,7 @@ namespace Infrastructure.Repository
                 .ToListAsync(cancellationToken);
         }
 
-        public async Task<CategoriaProducto?> ObtenerPorIdAsync(int id, bool tracking, CancellationToken cancellationToken)
+        public async Task<CategoriaProducto?> ObtenerPorId(int id, bool tracking, CancellationToken cancellationToken)
         {
             var query = _context.CategoriasProducto.AsQueryable();
             if (!tracking)
@@ -52,7 +52,7 @@ namespace Infrastructure.Repository
 
         public async Task Eliminar(int id, CancellationToken cancellationToken)
         {
-            var categoria = await ObtenerPorIdAsync(id, tracking: true, cancellationToken);
+            var categoria = await ObtenerPorId(id, tracking: true, cancellationToken);
             if (categoria != null)
             {
                 categoria.Activo = false;

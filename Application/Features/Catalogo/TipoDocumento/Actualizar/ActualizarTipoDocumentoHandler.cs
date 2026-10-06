@@ -21,7 +21,7 @@ public class ActualizarTipoDocumentoHandler
         _service = service;
     }
 
-    public async Task<Unit> Handle(ActualizarTipoDocumentoCommand request, CancellationToken cancellationToken)
+    public override async Task<Unit> Handle(ActualizarTipoDocumentoCommand request, CancellationToken cancellationToken)
     {
         var tipoDocumento = await _service.ObtenerPorId(request.Id, true, cancellationToken);
         if (tipoDocumento == null)

@@ -19,7 +19,7 @@ namespace Application.Features.Organizacion.Empresa.Actualizar
             _service = service;
         }
 
-        public async Task<int> Handle(ActualizarEmpresaCommand request, CancellationToken ct)
+        public override async Task<int> Handle(ActualizarEmpresaCommand request, CancellationToken ct)
         {
             var empresa = await _service.ObtenerPorId(request.Id, true, ct);
             if (empresa == null)

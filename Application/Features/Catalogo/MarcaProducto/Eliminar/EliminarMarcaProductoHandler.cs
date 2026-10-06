@@ -19,7 +19,7 @@ namespace Application.Features.Catalogo.MarcaProducto.Eliminar
         {
             _logger.LogInformation("EliminarMarcaProducto: {@request}", command);
 
-            var marca = await _service.ObtenerPorIdAsync(command.Id, tracking: true, cancellationToken);
+            var marca = await _service.ObtenerPorId(command.Id, tracking: true, cancellationToken);
             if (marca == null)
                 throw new InvalidOperationException($"MarcaProducto con ID {command.Id} no encontrada");
 

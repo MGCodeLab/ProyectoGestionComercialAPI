@@ -47,7 +47,6 @@ namespace Infrastructure.Repository
 
         public async Task Actualizar(Empresa empresa, CancellationToken cancellationToken)
         {
-            empresa.FechaActualizacion = DateTime.UtcNow;
             _context.Empresas.Update(empresa);
             await _context.SaveChangesAsync(cancellationToken);
         }

@@ -19,7 +19,7 @@ namespace Application.Features.Organizacion.Almacen.Actualizar
             _service = service;
         }
 
-        public async Task<int> Handle(ActualizarAlmacenCommand request, CancellationToken ct)
+        public override async Task<int> Handle(ActualizarAlmacenCommand request, CancellationToken ct)
         {
             var almacen = await _service.ObtenerPorId(request.Id, true, ct);
             if (almacen == null)

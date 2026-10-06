@@ -22,11 +22,11 @@ namespace Application.Features.Catalogo.CategoriaProducto.Actualizar
             _validator = validator;
         }
 
-        public async Task<int> Handle(ActualizarCategoriaProductoCommand command, CancellationToken cancellationToken)
+        public override async Task<int> Handle(ActualizarCategoriaProductoCommand command, CancellationToken cancellationToken)
         {
             Logger.LogInformation("ActualizarCategoriaProducto: {@request}", command);
 
-            var categoria = await _service.ObtenerPorIdAsync(command.Id, tracking: true, cancellationToken);
+            var categoria = await _service.ObtenerPorId(command.Id, tracking: true, cancellationToken);
             if (categoria == null)
                 throw new InvalidOperationException($"CategoriaProducto con ID {command.Id} no encontrada");
 

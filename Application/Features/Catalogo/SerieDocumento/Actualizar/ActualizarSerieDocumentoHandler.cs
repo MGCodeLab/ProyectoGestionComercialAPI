@@ -1,36 +1,42 @@
+using Application.Handlers;
 using Application.Exceptions;
 using Application.Interfaces;
 using AutoMapper;
-using MediatR;
 using Microsoft.Extensions.Logging;
+using MediatR;
 
 namespace Application.Features.Catalogo.SerieDocumento.Actualizar
 {
-    public class ActualizarSerieDocumentoHandler : IRequestHandler<ActualizarSerieDocumentoCommand, Unit>
+    public class ActualizarSerieDocumentoHandler
+        : AuditableUpdateHandlerBase<ActualizarSerieDocumentoCommand, Unit>
     {
         private readonly ISerieDocumentoService _service;
-        private readonly IMapper _mapper;
-        private readonly ILogger<ActualizarSerieDocumentoHandler> _logger;
 
-        public ActualizarSerieDocumentoHandler(ISerieDocumentoService service, IMapper mapper, ILogger<ActualizarSerieDocumentoHandler> logger)
+        public ActualizarSerieDocumentoHandler(
+            ISerieDocumentoService service,
+            IMapper mapper,
+            ILogger<ActualizarSerieDocumentoHandler> logger)
+            : base(mapper, logger)
         {
             _service = service;
-            _mapper = mapper;
-            _logger = logger;
         }
 
-        public async Task<Unit> Handle(ActualizarSerieDocumentoCommand request, CancellationToken cancellationToken)
+        public override async Task<Unit> Handle(ActualizarSerieDocumentoCommand request, CancellationToken cancellationToken)
         {
             var entity = await _service.ObtenerPorId(request.Id, isAsTracking: true, cancellationToken);
             if (entity == null)
                 throw new NotFoundException($"SerieDocumento con ID {request.Id} no encontrado");
 
-            _mapper.Map(request, entity);
-            entity.FechaActualizacion = DateTime.UtcNow;
+            Mapper.Map(request, entity);
 
-            await _service.Actualizar(cancellationToken);
+            await UpdateAuditableEntity(
+                entity,
+                async () => await _service.Actualizar(cancellationToken),
+                () => Unit.Value,
+                cancellationToken
+            );
 
-            _logger.LogInformation("SerieDocumento actualizado con Id: {Id}", request.Id);
+            Logger.LogInformation("SerieDocumento actualizado con Id: {Id}", request.Id);
 
             return Unit.Value;
         }

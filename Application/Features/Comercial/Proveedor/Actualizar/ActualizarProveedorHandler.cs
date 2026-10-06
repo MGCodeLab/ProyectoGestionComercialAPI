@@ -19,7 +19,7 @@ public class ActualizarProveedorHandler
         _service = service;
     }
 
-    public async Task<int> Handle(ActualizarProveedorCommand request, CancellationToken cancellationToken)
+    public override async Task<int> Handle(ActualizarProveedorCommand request, CancellationToken cancellationToken)
     {
         Logger.LogInformation("Actualizando proveedor: {Id}", request.Id);
         var proveedor = Mapper.Map<Domain.Comercial.Proveedor>(request);

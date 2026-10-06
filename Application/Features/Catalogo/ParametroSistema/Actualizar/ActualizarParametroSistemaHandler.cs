@@ -1,37 +1,45 @@
-using AutoMapper;
-using MediatR;
-using Microsoft.Extensions.Logging;
+using Application.Handlers;
 using Application.Exceptions;
 using Application.Interfaces;
+using AutoMapper;
+using Microsoft.Extensions.Logging;
+using MediatR;
 
 namespace Application.Features.Catalogo.ParametroSistema.Actualizar;
 
-public class ActualizarParametroSistemaHandler : IRequestHandler<ActualizarParametroSistemaCommand>
+public class ActualizarParametroSistemaHandler
+    : AuditableUpdateHandlerBase<ActualizarParametroSistemaCommand, Unit>
 {
     private readonly IParametroSistemaService _service;
-    private readonly IMapper _mapper;
-    private readonly ILogger<ActualizarParametroSistemaHandler> _logger;
 
-    public ActualizarParametroSistemaHandler(IParametroSistemaService service, IMapper mapper, ILogger<ActualizarParametroSistemaHandler> logger)
+    public ActualizarParametroSistemaHandler(
+        IParametroSistemaService service,
+        IMapper mapper,
+        ILogger<ActualizarParametroSistemaHandler> logger)
+        : base(mapper, logger)
     {
         _service = service;
-        _mapper = mapper;
-        _logger = logger;
     }
 
-    public async Task Handle(ActualizarParametroSistemaCommand request, CancellationToken cancellationToken)
+    public override async Task<Unit> Handle(ActualizarParametroSistemaCommand request, CancellationToken cancellationToken)
     {
         var parametro = await _service.ObtenerPorId(request.Id, true, cancellationToken);
         if (parametro == null)
             throw new NotFoundException($"Parámetro con id {request.Id} no encontrado");
 
-        _logger.LogInformation("Actualizando parámetro: {ParametroId}", request.Id);
+        Logger.LogInformation("Actualizando parámetro: {ParametroId}", request.Id);
 
-        _mapper.Map(request, parametro);
-        parametro.FechaActualizacion = DateTime.UtcNow;
+        Mapper.Map(request, parametro);
 
-        await _service.Actualizar(cancellationToken);
+        await UpdateAuditableEntity(
+            parametro,
+            async () => await _service.Actualizar(cancellationToken),
+            () => Unit.Value,
+            cancellationToken
+        );
 
-        _logger.LogInformation("Parámetro actualizado exitosamente: {ParametroId}", request.Id);
+        Logger.LogInformation("Parámetro actualizado exitosamente: {ParametroId}", request.Id);
+
+        return Unit.Value;
     }
 }

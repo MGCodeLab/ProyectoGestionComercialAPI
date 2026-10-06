@@ -19,11 +19,11 @@ namespace Application.Features.Catalogo.MarcaProducto.Actualizar
             _service = service;
         }
 
-        public async Task<int> Handle(ActualizarMarcaProductoCommand command, CancellationToken cancellationToken)
+        public override async Task<int> Handle(ActualizarMarcaProductoCommand command, CancellationToken cancellationToken)
         {
             Logger.LogInformation("ActualizarMarcaProducto: {@request}", command);
 
-            var marca = await _service.ObtenerPorIdAsync(command.Id, tracking: true, cancellationToken);
+            var marca = await _service.ObtenerPorId(command.Id, tracking: true, cancellationToken);
             if (marca == null)
                 throw new InvalidOperationException($"MarcaProducto con ID {command.Id} no encontrada");
 

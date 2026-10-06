@@ -19,9 +19,9 @@ namespace Application.Features.Organizacion.Sucursal.Actualizar
             _service = service;
         }
 
-        public async Task<int> Handle(ActualizarSucursalCommand request, CancellationToken ct)
+        public override async Task<int> Handle(ActualizarSucursalCommand request, CancellationToken cancellationToken)
         {
-            var sucursal = await _service.ObtenerPorId(request.Id, true, ct);
+            var sucursal = await _service.ObtenerPorId(request.Id, true, cancellationToken);
             if (sucursal == null)
                 throw new KeyNotFoundException($"Sucursal con Id {request.Id} no encontrada");
 
@@ -29,9 +29,9 @@ namespace Application.Features.Organizacion.Sucursal.Actualizar
 
             await UpdateAuditableEntity(
                 sucursal,
-                async () => await _service.Actualizar(sucursal, ct),
+                async () => await _service.Actualizar(sucursal, cancellationToken),
                 () => sucursal.Id,
-                ct
+                cancellationToken
             );
 
             Logger.LogInformation($"Sucursal actualizada: {sucursal.Id}");

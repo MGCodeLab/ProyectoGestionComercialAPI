@@ -19,7 +19,7 @@ namespace Application.Features.Catalogo.CategoriaProducto.Eliminar
         {
             _logger.LogInformation("EliminarCategoriaProducto: {@request}", command);
 
-            var categoria = await _service.ObtenerPorIdAsync(command.Id, tracking: true, cancellationToken);
+            var categoria = await _service.ObtenerPorId(command.Id, tracking: true, cancellationToken);
             if (categoria == null)
                 throw new InvalidOperationException($"CategoriaProducto con ID {command.Id} no encontrada");
 

@@ -19,7 +19,7 @@ public class ActualizarListaPrecioHandler
         _service = service;
     }
 
-    public async Task<int> Handle(ActualizarListaPrecioCommand request, CancellationToken cancellationToken)
+    public override async Task<int> Handle(ActualizarListaPrecioCommand request, CancellationToken cancellationToken)
     {
         Logger.LogInformation("Actualizando lista de precios: {Id}", request.Id);
 

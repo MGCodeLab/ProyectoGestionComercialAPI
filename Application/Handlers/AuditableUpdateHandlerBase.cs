@@ -1,5 +1,6 @@
 using AutoMapper;
 using Domain.Common;
+using MediatR;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Handlers
@@ -18,7 +19,9 @@ namespace Application.Handlers
     ///    - Llama al servicio para guardar
     ///    - Retorna la respuesta
     /// </summary>
-    public class AuditableUpdateHandlerBase<TCommand, TResponse>
+    public abstract class AuditableUpdateHandlerBase<TCommand, TResponse>
+        : IRequestHandler<TCommand, TResponse>
+        where TCommand : IRequest<TResponse>
     {
         protected readonly IMapper Mapper;
         protected readonly ILogger Logger;
@@ -28,6 +31,8 @@ namespace Application.Handlers
             Mapper = mapper;
             Logger = logger;
         }
+
+        public abstract Task<TResponse> Handle(TCommand request, CancellationToken cancellationToken);
 
         /// <summary>
         /// Ejecuta la actualización de una entidad auditable con timestamp automático.

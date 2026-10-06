@@ -19,7 +19,7 @@ public class ActualizarCondicionPagoHandler
         _service = service;
     }
 
-    public async Task<int> Handle(ActualizarCondicionPagoCommand request, CancellationToken cancellationToken)
+    public override async Task<int> Handle(ActualizarCondicionPagoCommand request, CancellationToken cancellationToken)
     {
         Logger.LogInformation("Actualizando condición de pago: {Id}", request.Id);
         var condicion = Mapper.Map<Domain.Catalogo.CondicionPago>(request);

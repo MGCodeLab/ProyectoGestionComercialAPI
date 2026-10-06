@@ -19,7 +19,7 @@ namespace Infrastructure.Repository
             return await _context.MarcasProducto.Where(x => x.Activo).ToListAsync(cancellationToken);
         }
 
-        public async Task<MarcaProducto?> ObtenerPorIdAsync(int id, bool tracking, CancellationToken cancellationToken)
+        public async Task<MarcaProducto?> ObtenerPorId(int id, bool tracking, CancellationToken cancellationToken)
         {
             var query = _context.MarcasProducto.AsQueryable();
             if (!tracking)
@@ -41,7 +41,7 @@ namespace Infrastructure.Repository
 
         public async Task Eliminar(int id, CancellationToken cancellationToken)
         {
-            var marca = await ObtenerPorIdAsync(id, tracking: true, cancellationToken);
+            var marca = await ObtenerPorId(id, tracking: true, cancellationToken);
             if (marca != null)
             {
                 marca.Activo = false;

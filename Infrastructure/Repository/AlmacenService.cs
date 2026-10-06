@@ -101,7 +101,6 @@ namespace Infrastructure.Repository
 
         public async Task Actualizar(Almacen almacen, CancellationToken cancellationToken)
         {
-            almacen.FechaActualizacion = DateTime.UtcNow;
             _context.Almacenes.Update(almacen);
             await _context.SaveChangesAsync(cancellationToken);
         }

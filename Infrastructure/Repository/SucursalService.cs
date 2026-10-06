@@ -108,7 +108,6 @@ namespace Infrastructure.Repository
 
         public async Task Actualizar(Sucursal sucursal, CancellationToken cancellationToken)
         {
-            sucursal.FechaActualizacion = DateTime.UtcNow;
             _context.Sucursales.Update(sucursal);
             await _context.SaveChangesAsync(cancellationToken);
         }

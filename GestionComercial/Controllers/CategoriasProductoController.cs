@@ -45,7 +45,7 @@ public class CategoriasProductoController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> Obtener(int id, CancellationToken cancellationToken)
     {
-        var dato = await _service.ObtenerPorIdAsync(id, tracking: false, cancellationToken);
+        var dato = await _service.ObtenerPorId(id, tracking: false, cancellationToken);
         if (dato == null)
             return this.NotFoundResponse("CategoriaProducto no encontrada");
 
