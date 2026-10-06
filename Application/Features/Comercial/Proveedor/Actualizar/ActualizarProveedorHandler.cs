@@ -1,3 +1,4 @@
+using Application.Exceptions;
 using Application.Handlers;
 using Application.Interfaces;
 using AutoMapper;
@@ -22,7 +23,12 @@ public class ActualizarProveedorHandler
     public override async Task<int> Handle(ActualizarProveedorCommand request, CancellationToken cancellationToken)
     {
         Logger.LogInformation("Actualizando proveedor: {Id}", request.Id);
-        var proveedor = Mapper.Map<Domain.Comercial.Proveedor>(request);
+
+        var proveedor = await _service.ObtenerPorId(request.Id, true, cancellationToken);
+        if (proveedor == null)
+            throw new NotFoundException($"Proveedor con id {request.Id} no encontrado");
+
+        Mapper.Map(request, proveedor);
 
         return await UpdateAuditableEntity(
             proveedor,

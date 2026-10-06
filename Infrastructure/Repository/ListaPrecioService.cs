@@ -29,7 +29,10 @@ public class ListaPrecioService : IListaPrecioService
 
     public async Task<int> Actualizar(ListaPrecio entity, CancellationToken token)
     {
-        _context.ListasPrecios.Update(entity);
+        // Si la entidad ya está trackeada, SaveChanges detecta los cambios; Update() marcaría
+        // además toda la relación cargada (Moneda) como modificada.
+        if (_context.Entry(entity).State == EntityState.Detached)
+            _context.ListasPrecios.Update(entity);
         await _context.SaveChangesAsync(token);
         return entity.Id;
     }

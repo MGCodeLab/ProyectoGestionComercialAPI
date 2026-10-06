@@ -1,3 +1,4 @@
+using Application.Exceptions;
 using Application.Handlers;
 using Application.Interfaces;
 using AutoMapper;
@@ -23,17 +24,23 @@ public class ActualizarListaPrecioHandler
     {
         Logger.LogInformation("Actualizando lista de precios: {Id}", request.Id);
 
+        var lista = await _service.ObtenerPorId(request.Id, cancellationToken);
+        if (lista == null)
+            throw new NotFoundException($"Lista de precios con id {request.Id} no encontrada");
+
         if (request.EsDefault)
         {
+            // Ambas entidades quedan trackeadas: la baja del default anterior se persiste
+            // en el mismo SaveChanges que la actualización (atómico).
             var listaDefaultActual = await _service.ObtenerDefaultAsync(cancellationToken);
             if (listaDefaultActual != null && listaDefaultActual.Id != request.Id)
             {
                 listaDefaultActual.EsDefault = false;
-                await _service.Actualizar(listaDefaultActual, cancellationToken);
+                listaDefaultActual.FechaActualizacion = DateTime.UtcNow;
             }
         }
 
-        var lista = Mapper.Map<Domain.Catalogo.ListaPrecio>(request);
+        Mapper.Map(request, lista);
 
         return await UpdateAuditableEntity(
             lista,

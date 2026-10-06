@@ -1,3 +1,4 @@
+using Application.Exceptions;
 using Application.Handlers;
 using Application.Interfaces;
 using AutoMapper;
@@ -22,7 +23,12 @@ public class ActualizarCondicionPagoHandler
     public override async Task<int> Handle(ActualizarCondicionPagoCommand request, CancellationToken cancellationToken)
     {
         Logger.LogInformation("Actualizando condición de pago: {Id}", request.Id);
-        var condicion = Mapper.Map<Domain.Catalogo.CondicionPago>(request);
+
+        var condicion = await _service.ObtenerPorId(request.Id, cancellationToken);
+        if (condicion == null)
+            throw new NotFoundException($"Condición de pago con id {request.Id} no encontrada");
+
+        Mapper.Map(request, condicion);
 
         return await UpdateAuditableEntity(
             condicion,
