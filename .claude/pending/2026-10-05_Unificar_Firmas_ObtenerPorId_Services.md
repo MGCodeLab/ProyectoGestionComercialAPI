@@ -14,6 +14,3 @@ No hay una firma común sobre la cual definirlos. Un overload por servicio serí
 ## Propuesta
 Unificar primero las interfaces a `ObtenerPorId(int id, bool tracking, CancellationToken ct)` en un PR aparte;
 reevaluar después si hace falta un default de `tracking`.
-
-## Relacionado
-- Pendiente de la auditoría de homogeneidad: Profiles de AutoMapper, `AsNoTracking`, `ParametroSistemaService` minificado.
