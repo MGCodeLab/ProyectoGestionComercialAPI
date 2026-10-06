@@ -450,6 +450,7 @@ Son **opcionales pero recomendados** para mantener estándares enterprise.
 
 ---
 
-**Estado:** ✋ PENDIENTE DE APROBACIÓN POR MIGUEL  
-**Siguiente paso:** Miguel valida el enfoque → Nexus-Fast-Builder ejecuta
+**Estado:** ✅ CERRADO (2026-10-05)
+- **Refinement 1:** COMPLETADO (commits 7fc35da y c8c2dc6; extendido a todos los handlers Actualizar/ActualizarEstado patrón A).
+- **Refinement 2:** DIFERIDO. Las firmas de los services son inconsistentes; ver `.claude/pending/2026-10-05_Unificar_Firmas_ObtenerPorId_Services.md`.
 
