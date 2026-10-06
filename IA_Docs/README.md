@@ -35,6 +35,7 @@
 |-----------|-------------|---------------|
 | **DATABASE_SETUP_INSTRUCTIONS.md** | Setup inicial de BD | Primera vez configurando BD |
 | **PENDING_IMPROVEMENTS.md** | Mejoras futuras documentadas | Planificación de siguiente versión |
+| **AUDITABLE_ENTITY_UPDATE_HANDLERS_PATTERN.md** | Patrón AuditableUpdateHandlerBase | Refactorizar handlers de actualización |
 | **ITERATION_3_PLAN.md** | Histórico de plans | Referencia histórica |
 
 ---
