@@ -17,11 +17,11 @@ namespace Application.Features.Organizacion.Almacen.Eliminar
 
         public async Task<int> Handle(EliminarAlmacenCommand request, CancellationToken ct)
         {
-            var almacen = await _service.ObtenerPorId(request.Id, true);
+            var almacen = await _service.ObtenerPorId(request.Id, true, ct);
             if (almacen == null)
                 throw new KeyNotFoundException($"Almacén con Id {request.Id} no encontrado");
 
-            await _service.Eliminar(request.Id);
+            await _service.Eliminar(request.Id, ct);
 
             _logger.LogInformation($"Almacén eliminado: {request.Id}");
 

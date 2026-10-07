@@ -13,6 +13,6 @@ public class UnidadMedidaProfile : Profile
         CreateMap<UnidadMedida, UnidadMedidaDto>().ReverseMap();
         CreateMap<CrearUnidadMedidaDto, CrearUnidadMedidaCommand>();
         CreateMap<CrearUnidadMedidaCommand, UnidadMedida>();
-        CreateMap<ActualizarUnidadMedidaCommand, UnidadMedida>();
+        CreateMap<ActualizarUnidadMedidaCommand, UnidadMedida>().ReverseMap();
     }
 }

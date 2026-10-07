@@ -11,7 +11,10 @@ public class MonedaService : IMonedaService
     private readonly AppDbContext _context;
     public MonedaService(AppDbContext context) => _context = context;
     public async Task<List<Moneda>> ObtenerTodos(CancellationToken token) => await _context.Monedas.AsNoTracking().ToListAsync(token);
-    public async Task<Moneda?> ObtenerPorId(int id, bool isAsTracking, CancellationToken token) => await _context.Monedas.FirstOrDefaultAsync(m => m.Id == id, token);
+    public async Task<Moneda?> ObtenerPorId(int id, bool isAsTracking, CancellationToken token)
+        => isAsTracking
+            ? await _context.Monedas.FirstOrDefaultAsync(m => m.Id == id, token)
+            : await _context.Monedas.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id, token);
     public async Task<List<ComboDto>> ObtenerCombo(CancellationToken token) => await _context.Monedas
         .AsNoTracking()
         .Select(m => new ComboDto

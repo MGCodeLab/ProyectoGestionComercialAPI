@@ -19,7 +19,7 @@ namespace Application.Features.Organizacion.Empresa.Eliminar
 
         public async Task<int> Handle(EliminarEmpresaCommand request, CancellationToken cancellationToken)
         {
-            var empresa = await _service.ObtenerPorId(request.Id, true);
+            var empresa = await _service.ObtenerPorId(request.Id, true, cancellationToken);
             if (empresa == null)
                 throw new KeyNotFoundException($"Empresa con Id {request.Id} no encontrada");
 
@@ -27,7 +27,7 @@ namespace Application.Features.Organizacion.Empresa.Eliminar
             if (tieneDependencias)
                 throw new BadRequestException("Empresa en uso en sucursal. Solo se permite deshabilitar mediante PATCH /inactivar");
 
-            await _service.Eliminar(request.Id);
+            await _service.Eliminar(request.Id, cancellationToken);
 
             _logger.LogInformation($"Empresa eliminada: {request.Id}");
 

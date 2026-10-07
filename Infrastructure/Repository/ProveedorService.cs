@@ -2,6 +2,7 @@ using Application.Interfaces;
 using Domain.Comercial;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Application.Exceptions;
 
 namespace Infrastructure.Repository;
 
@@ -47,7 +48,7 @@ public class ProveedorService : IProveedorService
     {
         var proveedor = await _context.Proveedores.FirstOrDefaultAsync(x => x.Id == id, token);
         if (proveedor == null)
-            throw new InvalidOperationException($"Proveedor con ID {id} no encontrado");
+            throw new NotFoundException($"Proveedor con ID {id} no encontrado");
 
         proveedor.Activo = activo;
         proveedor.FechaActualizacion = DateTime.UtcNow;
@@ -59,7 +60,7 @@ public class ProveedorService : IProveedorService
     {
         var proveedor = await _context.Proveedores.FirstOrDefaultAsync(x => x.Id == id, token);
         if (proveedor == null)
-            throw new InvalidOperationException($"Proveedor con ID {id} no encontrado");
+            throw new NotFoundException($"Proveedor con ID {id} no encontrado");
 
         _context.Proveedores.Remove(proveedor);
         await _context.SaveChangesAsync(token);

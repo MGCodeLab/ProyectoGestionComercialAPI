@@ -1,27 +1,25 @@
-﻿using Application.Exceptions;
-using Application.Features.Clientes.ActualizarEstado;
+﻿using Application.Handlers;
+using Application.Exceptions;
 using Application.Interfaces;
-using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using MediatR;
 
 namespace Application.Features.Productos.ActualizarEstado
 {
-    public class ActualizarEstadoProductoHandler : IRequestHandler<ActualizarEstadoProductoCommand, Unit>
+    public class ActualizarEstadoProductoHandler
+        : AuditableUpdateHandlerBase<ActualizarEstadoProductoCommand, Unit>
     {
         private readonly IProductoService _service;
-        private readonly ILogger<ActualizarEstadoProductoHandler> _logger;
 
-        public ActualizarEstadoProductoHandler(IProductoService service,
+        public ActualizarEstadoProductoHandler(
+            IProductoService service,
             ILogger<ActualizarEstadoProductoHandler> logger)
+            : base(null, logger)
         {
             _service = service;
-            _logger = logger;
         }
 
-        public async Task<Unit> Handle(ActualizarEstadoProductoCommand request, CancellationToken cancellationToken)
+        public override async Task<Unit> Handle(ActualizarEstadoProductoCommand request, CancellationToken cancellationToken)
         {
             var producto = await _service.ObtenerPorId(request.Id, isAsTracking: true, cancellationToken);
 
@@ -29,12 +27,16 @@ namespace Application.Features.Productos.ActualizarEstado
                 throw new NotFoundException("Producto no encontrado");
 
             producto.Activo = request.Activo;
-            producto.FechaActualizacion = DateTime.UtcNow;
 
-            await _service.Actualizar(cancellationToken);
+            await UpdateAuditableEntity(
+                producto,
+                async () => await _service.Actualizar(cancellationToken),
+                () => Unit.Value,
+                cancellationToken
+            );
 
             var accion = request.Activo ? "activado" : "inactivado";
-            _logger.LogInformation("Cliente {Id} {Accion} correctamente", request.Id, accion);
+            Logger.LogInformation("Producto {Id} {Accion} correctamente", request.Id, accion);
 
             return Unit.Value;
         }

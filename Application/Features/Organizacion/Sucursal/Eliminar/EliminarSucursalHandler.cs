@@ -19,7 +19,7 @@ namespace Application.Features.Organizacion.Sucursal.Eliminar
 
         public async Task<int> Handle(EliminarSucursalCommand request, CancellationToken cancellationToken)
         {
-            var sucursal = await _service.ObtenerPorId(request.Id, true);
+            var sucursal = await _service.ObtenerPorId(request.Id, true, cancellationToken);
             if (sucursal == null)
                 throw new KeyNotFoundException($"Sucursal con Id {request.Id} no encontrada");
 
@@ -27,7 +27,7 @@ namespace Application.Features.Organizacion.Sucursal.Eliminar
             if (tieneDependencias)
                 throw new BadRequestException("Sucursal en uso en Almacen. Solo se permite deshabilitar mediante PATCH /inactivar");
 
-            await _service.Eliminar(request.Id);
+            await _service.Eliminar(request.Id, cancellationToken);
 
             _logger.LogInformation($"Sucursal eliminada: {request.Id}");
 

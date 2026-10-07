@@ -1,38 +1,52 @@
-using AutoMapper;
-using MediatR;
-using Microsoft.Extensions.Logging;
+using Application.Exceptions;
+using Application.Handlers;
 using Application.Interfaces;
+using AutoMapper;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Catalogo.ListaPrecio.Actualizar;
 
-public class ActualizarListaPrecioHandler : IRequestHandler<ActualizarListaPrecioCommand, int>
+public class ActualizarListaPrecioHandler
+    : AuditableUpdateHandlerBase<ActualizarListaPrecioCommand, int>
 {
     private readonly IListaPrecioService _service;
-    private readonly IMapper _mapper;
-    private readonly ILogger<ActualizarListaPrecioHandler> _logger;
 
-    public ActualizarListaPrecioHandler(IListaPrecioService service, IMapper mapper, ILogger<ActualizarListaPrecioHandler> logger)
+    public ActualizarListaPrecioHandler(
+        IListaPrecioService service,
+        IMapper mapper,
+        ILogger<ActualizarListaPrecioHandler> logger)
+        : base(mapper, logger)
     {
         _service = service;
-        _mapper = mapper;
-        _logger = logger;
     }
 
-    public async Task<int> Handle(ActualizarListaPrecioCommand request, CancellationToken cancellationToken)
+    public override async Task<int> Handle(ActualizarListaPrecioCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Actualizando lista de precios: {Id}", request.Id);
+        Logger.LogInformation("Actualizando lista de precios: {Id}", request.Id);
+
+        var lista = await _service.ObtenerPorId(request.Id, cancellationToken);
+        if (lista == null)
+            throw new NotFoundException($"Lista de precios con id {request.Id} no encontrada");
 
         if (request.EsDefault)
         {
+            // Ambas entidades quedan trackeadas: la baja del default anterior se persiste
+            // en el mismo SaveChanges que la actualización (atómico).
             var listaDefaultActual = await _service.ObtenerDefaultAsync(cancellationToken);
             if (listaDefaultActual != null && listaDefaultActual.Id != request.Id)
             {
                 listaDefaultActual.EsDefault = false;
-                await _service.Actualizar(listaDefaultActual, cancellationToken);
+                listaDefaultActual.FechaActualizacion = DateTime.UtcNow;
             }
         }
 
-        var lista = _mapper.Map<Domain.Catalogo.ListaPrecio>(request);
-        return await _service.Actualizar(lista, cancellationToken);
+        Mapper.Map(request, lista);
+
+        return await UpdateAuditableEntity(
+            lista,
+            async () => await _service.Actualizar(lista, cancellationToken),
+            () => lista.Id,
+            cancellationToken
+        );
     }
 }

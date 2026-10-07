@@ -259,4 +259,67 @@ CREATE TABLE catalogo.ListaPrecioDetalle (
 
 ---
 
-**Última actualización:** 2026-05-18
+## ADR-012: AuditableUpdateHandlerBase — Patrón Centralizado para FechaActualizacion
+
+**Fecha:** 2026-06-28  
+**Estado:** ✅ Activo  
+**Impacto:** Homogeneidad arquitectónica, prevención de errores en auditoría
+
+**Decisión:**
+Todos los handlers que actualizan entidades `AuditableEntity` DEBEN heredar de `AuditableUpdateHandlerBase<TCommand, TResponse>` en lugar de implementar `IRequestHandler` directamente.
+
+**Pattern:**
+```csharp
+public class ActualizarXxxHandler
+    : AuditableUpdateHandlerBase<ActualizarXxxCommand, int>
+{
+    private readonly IXxxService _service;
+
+    public ActualizarXxxHandler(IXxxService service, IMapper mapper, ILogger<ActualizarXxxHandler> logger)
+        : base(mapper, logger)
+    {
+        _service = service;
+    }
+
+    public override async Task<int> Handle(ActualizarXxxCommand request, CancellationToken cancellationToken)
+    {
+        var entidad = await _service.ObtenerPorId(request.Id, true, cancellationToken);
+        if (entidad == null) throw new NotFoundException($"...");
+        
+        Mapper.Map(request, entidad);
+
+        return await UpdateAuditableEntity(
+            entidad,
+            async () => await _service.Actualizar(entidad, cancellationToken),
+            () => entidad.Id,
+            cancellationToken
+        );
+    }
+}
+```
+
+**Descartado:**
+- Asignar manualmente `entity.FechaActualizacion = DateTime.UtcNow;` en cada handler
+- MediatR Behavior Pipeline con reflection (handlers son DTOs, no entidades)
+- Dejar inconsistencia arquitectónica
+
+**Razón:**
+1. **Homogeneidad garantizada:** Imposible olvidar FechaActualizacion
+2. **Centralización:** Lógica de auditoría en un lugar, no dispersa en 29+ handlers
+3. **Mantenibilidad futura:** Cambios en estrategia de auditoría afectan un archivo, no decenas
+4. **Tipado fuerte:** Base handler es clase abstracta, no decorator mágico
+5. **Escalabilidad:** Futuras entidades Auditable heredan automáticamente el patrón
+
+**Alcance completo:**
+Aplica a TODOS los handlers en: `Application/Features/*/Actualizar/*Handler.cs` y `Application/Features/*/ActualizarEstado/*Handler.cs` donde la entidad hereda `AuditableEntity`.
+
+**Implementación:**
+- Base class en: `Application/Handlers/AuditableUpdateHandlerBase.cs`
+- Handlers refactorizados: 29 total (9 completados 2026-06-27, 20 pendientes)
+- Validar compilación cero errores post-refactorización
+
+**Condición de revisión:** Revisar en próxima sesión si se requieren extensiones adicionales (ej: soft delete automático, timestamp en comandos).
+
+---
+
+**Última actualización:** 2026-06-28

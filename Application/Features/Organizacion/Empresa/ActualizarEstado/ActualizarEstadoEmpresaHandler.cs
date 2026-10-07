@@ -1,32 +1,41 @@
-using MediatR;
+using Application.Handlers;
+using Application.Exceptions;
 using Application.Interfaces;
 using Microsoft.Extensions.Logging;
+using MediatR;
 
-namespace Application.Features.Organizacion.Empresa.ActualizarEstado
+namespace Application.Features.Organizacion.Empresa.ActualizarEstado;
+
+public class ActualizarEstadoEmpresaHandler
+    : AuditableUpdateHandlerBase<ActualizarEstadoEmpresaCommand, int>
 {
-    public class ActualizarEstadoEmpresaHandler : IRequestHandler<ActualizarEstadoEmpresaCommand, int>
+    private readonly IEmpresaService _service;
+
+    public ActualizarEstadoEmpresaHandler(
+        IEmpresaService service,
+        ILogger<ActualizarEstadoEmpresaHandler> logger)
+        : base(null, logger)
     {
-        private readonly IEmpresaService _service;
-        private readonly ILogger<ActualizarEstadoEmpresaHandler> _logger;
+        _service = service;
+    }
 
-        public ActualizarEstadoEmpresaHandler(IEmpresaService service, ILogger<ActualizarEstadoEmpresaHandler> logger)
-        {
-            _service = service;
-            _logger = logger;
-        }
+    public override async Task<int> Handle(ActualizarEstadoEmpresaCommand request, CancellationToken cancellationToken)
+    {
+        var empresa = await _service.ObtenerPorId(request.Id, true, cancellationToken);
+        if (empresa == null)
+            throw new NotFoundException($"Empresa con Id {request.Id} no encontrada");
 
-        public async Task<int> Handle(ActualizarEstadoEmpresaCommand request, CancellationToken ct)
-        {
-            var empresa = await _service.ObtenerPorId(request.Id, true);
-            if (empresa == null)
-                throw new KeyNotFoundException($"Empresa con Id {request.Id} no encontrada");
+        empresa.Activo = request.Activo;
 
-            empresa.Activo = request.Activo;
-            await _service.Actualizar(empresa);
+        await UpdateAuditableEntity(
+            empresa,
+            async () => await _service.Actualizar(empresa, cancellationToken),
+            () => empresa.Id,
+            cancellationToken
+        );
 
-            _logger.LogInformation($"Empresa {request.Id} estado actualizado a {request.Activo}");
+        Logger.LogInformation("Empresa {Id} estado actualizado a {Activo}", request.Id, request.Activo);
 
-            return empresa.Id;
-        }
+        return empresa.Id;
     }
 }

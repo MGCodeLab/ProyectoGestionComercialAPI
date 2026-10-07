@@ -1,29 +1,41 @@
+using Application.Handlers;
 using Application.Interfaces;
-using MediatR;
+using AutoMapper;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Catalogo.MarcaProducto.Actualizar
 {
-    public class ActualizarMarcaProductoHandler : IRequestHandler<ActualizarMarcaProductoCommand, int>
+    public class ActualizarMarcaProductoHandler
+        : AuditableUpdateHandlerBase<ActualizarMarcaProductoCommand, int>
     {
         private readonly IMarcaProductoService _service;
 
-        public ActualizarMarcaProductoHandler(IMarcaProductoService service)
+        public ActualizarMarcaProductoHandler(
+            IMarcaProductoService service,
+            IMapper mapper,
+            ILogger<ActualizarMarcaProductoHandler> logger)
+            : base(mapper, logger)
         {
             _service = service;
         }
 
-        public async Task<int> Handle(ActualizarMarcaProductoCommand command, CancellationToken cancellationToken)
+        public override async Task<int> Handle(ActualizarMarcaProductoCommand command, CancellationToken cancellationToken)
         {
-            var marca = await _service.ObtenerPorIdAsync(command.Id);
+            Logger.LogInformation("ActualizarMarcaProducto: {@request}", command);
+
+            var marca = await _service.ObtenerPorId(command.Id, tracking: true, cancellationToken);
             if (marca == null)
                 throw new InvalidOperationException($"MarcaProducto con ID {command.Id} no encontrada");
 
-            marca.Nombre = command.Nombre;
-            marca.Descripcion = command.Descripcion;
-            marca.LogoUrl = command.LogoUrl;
+            Mapper.Map(command, marca);
 
-            await _service.Actualizar(marca);
-            return marca.Id;
+            // Usar el método base que establece FechaActualizacion automáticamente
+            return await UpdateAuditableEntity(
+                marca,
+                async () => await _service.Actualizar(marca, cancellationToken),
+                () => marca.Id,
+                cancellationToken
+            );
         }
     }
 }

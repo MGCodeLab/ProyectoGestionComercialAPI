@@ -1,38 +1,44 @@
-using AutoMapper;
-using MediatR;
-using Microsoft.Extensions.Logging;
+using Application.Handlers;
 using Application.Exceptions;
 using Application.Interfaces;
+using AutoMapper;
+using Microsoft.Extensions.Logging;
+using MediatR;
 
 namespace Application.Features.Catalogo.Moneda.Actualizar;
 
-public class ActualizarMonedaHandler : IRequestHandler<ActualizarMonedaCommand, Unit>
+public class ActualizarMonedaHandler
+    : AuditableUpdateHandlerBase<ActualizarMonedaCommand, Unit>
 {
     private readonly IMonedaService _service;
-    private readonly IMapper _mapper;
-    private readonly ILogger<ActualizarMonedaHandler> _logger;
 
-    public ActualizarMonedaHandler(IMonedaService service, IMapper mapper, ILogger<ActualizarMonedaHandler> logger)
+    public ActualizarMonedaHandler(
+        IMonedaService service,
+        IMapper mapper,
+        ILogger<ActualizarMonedaHandler> logger)
+        : base(mapper, logger)
     {
         _service = service;
-        _mapper = mapper;
-        _logger = logger;
     }
 
-    public async Task<Unit> Handle(ActualizarMonedaCommand request, CancellationToken cancellationToken)
+    public override async Task<Unit> Handle(ActualizarMonedaCommand request, CancellationToken cancellationToken)
     {
         var moneda = await _service.ObtenerPorId(request.Id, true, cancellationToken);
         if (moneda == null)
             throw new NotFoundException($"Moneda con id {request.Id} no encontrada");
 
-        _logger.LogInformation("Actualizando moneda: {MonedaId}", request.Id);
+        Logger.LogInformation("Actualizando moneda: {MonedaId}", request.Id);
 
-        _mapper.Map(request, moneda);
-        moneda.FechaActualizacion = DateTime.UtcNow;
+        Mapper.Map(request, moneda);
 
-        await _service.Actualizar(cancellationToken);
+        await UpdateAuditableEntity(
+            moneda,
+            async () => await _service.Actualizar(cancellationToken),
+            () => Unit.Value,
+            cancellationToken
+        );
 
-        _logger.LogInformation("Moneda actualizada exitosamente: {MonedaId}", request.Id);
+        Logger.LogInformation("Moneda actualizada exitosamente: {MonedaId}", request.Id);
 
         return Unit.Value;
     }

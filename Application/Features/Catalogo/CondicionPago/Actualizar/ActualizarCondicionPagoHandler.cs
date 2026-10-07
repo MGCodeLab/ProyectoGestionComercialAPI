@@ -1,27 +1,40 @@
-using AutoMapper;
-using MediatR;
-using Microsoft.Extensions.Logging;
+using Application.Exceptions;
+using Application.Handlers;
 using Application.Interfaces;
+using AutoMapper;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Catalogo.CondicionPago.Actualizar;
 
-public class ActualizarCondicionPagoHandler : IRequestHandler<ActualizarCondicionPagoCommand, int>
+public class ActualizarCondicionPagoHandler
+    : AuditableUpdateHandlerBase<ActualizarCondicionPagoCommand, int>
 {
     private readonly ICondicionPagoService _service;
-    private readonly IMapper _mapper;
-    private readonly ILogger<ActualizarCondicionPagoHandler> _logger;
 
-    public ActualizarCondicionPagoHandler(ICondicionPagoService service, IMapper mapper, ILogger<ActualizarCondicionPagoHandler> logger)
+    public ActualizarCondicionPagoHandler(
+        ICondicionPagoService service,
+        IMapper mapper,
+        ILogger<ActualizarCondicionPagoHandler> logger)
+        : base(mapper, logger)
     {
         _service = service;
-        _mapper = mapper;
-        _logger = logger;
     }
 
-    public async Task<int> Handle(ActualizarCondicionPagoCommand request, CancellationToken cancellationToken)
+    public override async Task<int> Handle(ActualizarCondicionPagoCommand request, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Actualizando condición de pago: {Id}", request.Id);
-        var condicion = _mapper.Map<Domain.Catalogo.CondicionPago>(request);
-        return await _service.Actualizar(condicion, cancellationToken);
+        Logger.LogInformation("Actualizando condición de pago: {Id}", request.Id);
+
+        var condicion = await _service.ObtenerPorId(request.Id, cancellationToken);
+        if (condicion == null)
+            throw new NotFoundException($"Condición de pago con id {request.Id} no encontrada");
+
+        Mapper.Map(request, condicion);
+
+        return await UpdateAuditableEntity(
+            condicion,
+            async () => await _service.Actualizar(condicion, cancellationToken),
+            () => condicion.Id,
+            cancellationToken
+        );
     }
 }

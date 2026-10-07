@@ -2,6 +2,7 @@ using Application.Interfaces;
 using Domain.Catalogo;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Application.Exceptions;
 
 namespace Infrastructure.Repository;
 
@@ -12,7 +13,7 @@ public class CondicionPagoService : ICondicionPagoService
     public CondicionPagoService(AppDbContext context) => _context = context;
 
     public async Task<List<CondicionPago>> ObtenerTodos(CancellationToken token)
-        => await _context.CondicionesPago.ToListAsync(token);
+        => await _context.CondicionesPago.AsNoTracking().ToListAsync(token);
 
     public async Task<CondicionPago?> ObtenerPorId(int id, CancellationToken token)
         => await _context.CondicionesPago.FirstOrDefaultAsync(x => x.Id == id, token);
@@ -35,7 +36,7 @@ public class CondicionPagoService : ICondicionPagoService
     {
         var condicion = await _context.CondicionesPago.FirstOrDefaultAsync(x => x.Id == id, token);
         if (condicion == null)
-            throw new InvalidOperationException($"Condición de pago con ID {id} no encontrada");
+            throw new NotFoundException($"Condición de pago con ID {id} no encontrada");
 
         condicion.Activo = activo;
         condicion.FechaActualizacion = DateTime.UtcNow;
@@ -47,7 +48,7 @@ public class CondicionPagoService : ICondicionPagoService
     {
         var condicion = await _context.CondicionesPago.FirstOrDefaultAsync(x => x.Id == id, token);
         if (condicion == null)
-            throw new InvalidOperationException($"Condición de pago con ID {id} no encontrada");
+            throw new NotFoundException($"Condición de pago con ID {id} no encontrada");
 
         _context.CondicionesPago.Remove(condicion);
         await _context.SaveChangesAsync(token);

@@ -13,8 +13,10 @@ public class ModuloSistemaService : IModuloSistemaService
     public async Task<List<ModuloSistema>> ObtenerTodos(CancellationToken token) 
         => await _context.ModulosSistema.AsNoTracking().ToListAsync(token); 
     
-    public async Task<ModuloSistema?> ObtenerPorId(int id, bool isAsTracking, CancellationToken token) 
-        => await _context.ModulosSistema.FirstOrDefaultAsync(m => m.Id == id, token); 
+    public async Task<ModuloSistema?> ObtenerPorId(int id, bool isAsTracking, CancellationToken token)
+        => isAsTracking
+            ? await _context.ModulosSistema.FirstOrDefaultAsync(m => m.Id == id, token)
+            : await _context.ModulosSistema.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id, token); 
     
     public async Task<int> Crear(ModuloSistema entity, CancellationToken token) { 
         _context.ModulosSistema.Add(entity); 

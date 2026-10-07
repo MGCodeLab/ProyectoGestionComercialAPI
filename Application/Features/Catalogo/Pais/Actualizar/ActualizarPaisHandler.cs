@@ -1,38 +1,44 @@
-using AutoMapper;
-using MediatR;
-using Microsoft.Extensions.Logging;
+using Application.Handlers;
 using Application.Exceptions;
 using Application.Interfaces;
+using AutoMapper;
+using Microsoft.Extensions.Logging;
+using MediatR;
 
 namespace Application.Features.Catalogo.Pais.Actualizar;
 
-public class ActualizarPaisHandler : IRequestHandler<ActualizarPaisCommand, Unit>
+public class ActualizarPaisHandler
+    : AuditableUpdateHandlerBase<ActualizarPaisCommand, Unit>
 {
     private readonly IPaisService _service;
-    private readonly IMapper _mapper;
-    private readonly ILogger<ActualizarPaisHandler> _logger;
 
-    public ActualizarPaisHandler(IPaisService service, IMapper mapper, ILogger<ActualizarPaisHandler> logger)
+    public ActualizarPaisHandler(
+        IPaisService service,
+        IMapper mapper,
+        ILogger<ActualizarPaisHandler> logger)
+        : base(mapper, logger)
     {
         _service = service;
-        _mapper = mapper;
-        _logger = logger;
     }
 
-    public async Task<Unit> Handle(ActualizarPaisCommand request, CancellationToken cancellationToken)
+    public override async Task<Unit> Handle(ActualizarPaisCommand request, CancellationToken cancellationToken)
     {
         var pais = await _service.ObtenerPorId(request.Id, true, cancellationToken);
         if (pais == null)
             throw new NotFoundException($"País con id {request.Id} no encontrado");
 
-        _logger.LogInformation("Actualizando país: {PaisId}", request.Id);
+        Logger.LogInformation("Actualizando país: {PaisId}", request.Id);
 
-        _mapper.Map(request, pais);
-        pais.FechaActualizacion = DateTime.UtcNow;
+        Mapper.Map(request, pais);
 
-        await _service.Actualizar(cancellationToken);
+        await UpdateAuditableEntity(
+            pais,
+            async () => await _service.Actualizar(cancellationToken),
+            () => Unit.Value,
+            cancellationToken
+        );
 
-        _logger.LogInformation("País actualizado exitosamente: {PaisId}", request.Id);
+        Logger.LogInformation("País actualizado exitosamente: {PaisId}", request.Id);
 
         return Unit.Value;
     }

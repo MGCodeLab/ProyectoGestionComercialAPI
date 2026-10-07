@@ -1,32 +1,41 @@
-using MediatR;
+using Application.Handlers;
+using Application.Exceptions;
 using Application.Interfaces;
 using Microsoft.Extensions.Logging;
+using MediatR;
 
-namespace Application.Features.Organizacion.Sucursal.ActualizarEstado
+namespace Application.Features.Organizacion.Sucursal.ActualizarEstado;
+
+public class ActualizarEstadoSucursalHandler
+    : AuditableUpdateHandlerBase<ActualizarEstadoSucursalCommand, int>
 {
-    public class ActualizarEstadoSucursalHandler : IRequestHandler<ActualizarEstadoSucursalCommand, int>
+    private readonly ISucursalService _service;
+
+    public ActualizarEstadoSucursalHandler(
+        ISucursalService service,
+        ILogger<ActualizarEstadoSucursalHandler> logger)
+        : base(null, logger)
     {
-        private readonly ISucursalService _service;
-        private readonly ILogger<ActualizarEstadoSucursalHandler> _logger;
+        _service = service;
+    }
 
-        public ActualizarEstadoSucursalHandler(ISucursalService service, ILogger<ActualizarEstadoSucursalHandler> logger)
-        {
-            _service = service;
-            _logger = logger;
-        }
+    public override async Task<int> Handle(ActualizarEstadoSucursalCommand request, CancellationToken cancellationToken)
+    {
+        var sucursal = await _service.ObtenerPorId(request.Id, true, cancellationToken);
+        if (sucursal == null)
+            throw new NotFoundException($"Sucursal con Id {request.Id} no encontrada");
 
-        public async Task<int> Handle(ActualizarEstadoSucursalCommand request, CancellationToken ct)
-        {
-            var sucursal = await _service.ObtenerPorId(request.Id, true);
-            if (sucursal == null)
-                throw new KeyNotFoundException($"Sucursal con Id {request.Id} no encontrada");
+        sucursal.Activo = request.Activo;
 
-            sucursal.Activo = request.Activo;
-            await _service.Actualizar(sucursal);
+        await UpdateAuditableEntity(
+            sucursal,
+            async () => await _service.Actualizar(sucursal, cancellationToken),
+            () => sucursal.Id,
+            cancellationToken
+        );
 
-            _logger.LogInformation($"Sucursal {request.Id} estado actualizado a {request.Activo}");
+        Logger.LogInformation("Sucursal {Id} estado actualizado a {Activo}", request.Id, request.Activo);
 
-            return sucursal.Id;
-        }
+        return sucursal.Id;
     }
 }

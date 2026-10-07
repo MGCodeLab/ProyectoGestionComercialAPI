@@ -1,24 +1,32 @@
+using Application.Handlers;
 using Application.Interfaces;
-using MediatR;
+using AutoMapper;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Catalogo.CategoriaProducto.Actualizar
 {
-    public class ActualizarCategoriaProductoHandler : IRequestHandler<ActualizarCategoriaProductoCommand, int>
+    public class ActualizarCategoriaProductoHandler
+        : AuditableUpdateHandlerBase<ActualizarCategoriaProductoCommand, int>
     {
         private readonly ICategoriaProductoService _service;
         private readonly ICategoriaProductoValidatorService _validator;
 
         public ActualizarCategoriaProductoHandler(
             ICategoriaProductoService service,
-            ICategoriaProductoValidatorService validator)
+            ICategoriaProductoValidatorService validator,
+            IMapper mapper,
+            ILogger<ActualizarCategoriaProductoHandler> logger)
+            : base(mapper, logger)
         {
             _service = service;
             _validator = validator;
         }
 
-        public async Task<int> Handle(ActualizarCategoriaProductoCommand command, CancellationToken cancellationToken)
+        public override async Task<int> Handle(ActualizarCategoriaProductoCommand command, CancellationToken cancellationToken)
         {
-            var categoria = await _service.ObtenerPorIdAsync(command.Id);
+            Logger.LogInformation("ActualizarCategoriaProducto: {@request}", command);
+
+            var categoria = await _service.ObtenerPorId(command.Id, tracking: true, cancellationToken);
             if (categoria == null)
                 throw new InvalidOperationException($"CategoriaProducto con ID {command.Id} no encontrada");
 
@@ -31,12 +39,15 @@ namespace Application.Features.Catalogo.CategoriaProducto.Actualizar
                     throw new InvalidOperationException("No se puede crear ciclo: padre no puede ser descendiente");
             }
 
-            categoria.Nombre = command.Nombre;
-            categoria.Descripcion = command.Descripcion;
-            categoria.CategoriaPadreId = command.CategoriaPadreId;
+            Mapper.Map(command, categoria);
 
-            await _service.Actualizar(categoria);
-            return categoria.Id;
+            // Usar el método base que establece FechaActualizacion automáticamente
+            return await UpdateAuditableEntity(
+                categoria,
+                async () => await _service.Actualizar(categoria, cancellationToken),
+                () => categoria.Id,
+                cancellationToken
+            );
         }
     }
 }

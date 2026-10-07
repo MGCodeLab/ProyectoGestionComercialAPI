@@ -31,16 +31,16 @@ namespace API.GestionComercial.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetList()
+        public async Task<IActionResult> GetList(CancellationToken cancellationToken)
         {
-            var sucursales = await _service.ObtenerTodosOptimizado();
+            var sucursales = await _service.ObtenerTodosOptimizado(cancellationToken);
             return this.OkResponse(sucursales);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
         {
-            var sucursal = await _service.ObtenerPorIdOptimizado(id);
+            var sucursal = await _service.ObtenerPorIdOptimizado(id, cancellationToken);
 
             if (sucursal == null)
                 return this.NotFoundResponse("Sucursal no encontrada");
@@ -49,25 +49,25 @@ namespace API.GestionComercial.Controllers
         }
 
         [HttpGet("combo/list")]
-        public async Task<IActionResult> GetCombo()
+        public async Task<IActionResult> GetCombo(CancellationToken cancellationToken)
         {
-            var result = await _service.ObtenerCombo();
+            var result = await _service.ObtenerCombo(cancellationToken);
             return this.OkResponse(result, "Sucursales para combo obtenidas exitosamente");
         }
 
         [HttpGet("combo/list/{idEmpresa}")]
-        public async Task<IActionResult> GetComboByIdEmpresa(int idEmpresa)
+        public async Task<IActionResult> GetComboByIdEmpresa(int idEmpresa, CancellationToken cancellationToken)
         {
-            var result = await _service.ObtenerComboByIdEmpresa(idEmpresa, HttpContext.RequestAborted);
+            var result = await _service.ObtenerComboByIdEmpresa(idEmpresa, cancellationToken);
             return this.OkResponse(result, "Sucursales para combo obtenidas exitosamente");
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(CrearSucursalDto dto)
+        public async Task<IActionResult> Create(CrearSucursalDto dto, CancellationToken cancellationToken)
         {
             var command = _mapper.Map<CrearSucursalCommand>(dto);
-            var id = await _mediator.Send(command);
-            var result = await _service.ObtenerPorIdOptimizado(id);
+            var id = await _mediator.Send(command, cancellationToken);
+            var result = await _service.ObtenerPorIdOptimizado(id, cancellationToken);
 
             return this.CreatedResponse(
                 nameof(GetById),
@@ -77,12 +77,12 @@ namespace API.GestionComercial.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, ActualizarSucursalDto dto)
+        public async Task<IActionResult> Update(int id, ActualizarSucursalDto dto, CancellationToken cancellationToken)
         {
             var command = _mapper.Map<ActualizarSucursalCommand>(dto);
             command = command with { Id = id };
-            await _mediator.Send(command);
-            var result = await _service.ObtenerPorIdOptimizado(id);
+            await _mediator.Send(command, cancellationToken);
+            var result = await _service.ObtenerPorIdOptimizado(id, cancellationToken);
 
             return this.OkResponse(result, "Sucursal actualizada correctamente");
         }

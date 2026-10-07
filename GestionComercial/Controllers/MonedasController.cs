@@ -56,14 +56,8 @@ public class MonedasController : ControllerBase
     {
         var command = _mapper.Map<CrearMonedaCommand>(dto);
         var id = await _mediator.Send(command, token);
-        var result = new MonedaDto
-        {
-            Id = id,
-            Nombre = dto.Nombre,
-            Simbolo = dto.Simbolo,
-            CodigoISO = dto.CodigoISO,
-            EsMonedaBase = dto.EsMonedaBase
-        };
+        var moneda = await _service.ObtenerPorId(id, isAsTracking: false, HttpContext.RequestAborted);
+        var result = _mapper.Map<MonedaDto>(moneda);
         return this.CreatedResponse(nameof(ObtenerPorId), new { id }, result, "Moneda creada exitosamente");
     }
 

@@ -23,7 +23,7 @@ namespace Application.Features.Organizacion.Almacen.Crear
         {
             var almacen = _mapper.Map<Domain.Organizacion.Almacen>(request);
 
-            var resultado = await _service.Crear(almacen);
+            var resultado = await _service.Crear(almacen, ct);
 
             _logger.LogInformation($"Almacén creado: {almacen.Id}");
 

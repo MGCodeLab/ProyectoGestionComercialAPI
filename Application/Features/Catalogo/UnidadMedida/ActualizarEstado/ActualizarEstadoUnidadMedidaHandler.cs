@@ -1,34 +1,43 @@
-using MediatR;
-using Microsoft.Extensions.Logging;
+using Application.Handlers;
 using Application.Exceptions;
 using Application.Interfaces;
+using Microsoft.Extensions.Logging;
+using MediatR;
 
 namespace Application.Features.Catalogo.UnidadMedida.ActualizarEstado;
 
-public class ActualizarEstadoUnidadMedidaHandler : IRequestHandler<ActualizarEstadoUnidadMedidaCommand>
+public class ActualizarEstadoUnidadMedidaHandler
+    : AuditableUpdateHandlerBase<ActualizarEstadoUnidadMedidaCommand, Unit>
 {
     private readonly IUnidadMedidaService _service;
-    private readonly ILogger<ActualizarEstadoUnidadMedidaHandler> _logger;
 
-    public ActualizarEstadoUnidadMedidaHandler(IUnidadMedidaService service, ILogger<ActualizarEstadoUnidadMedidaHandler> logger)
+    public ActualizarEstadoUnidadMedidaHandler(
+        IUnidadMedidaService service,
+        ILogger<ActualizarEstadoUnidadMedidaHandler> logger)
+        : base(null, logger)
     {
         _service = service;
-        _logger = logger;
     }
 
-    public async Task Handle(ActualizarEstadoUnidadMedidaCommand request, CancellationToken cancellationToken)
+    public override async Task<Unit> Handle(ActualizarEstadoUnidadMedidaCommand request, CancellationToken cancellationToken)
     {
         var unidad = await _service.ObtenerPorId(request.Id, true, cancellationToken);
         if (unidad == null)
             throw new NotFoundException($"Unidad de medida con id {request.Id} no encontrada");
 
-        _logger.LogInformation("Actualizando estado de unidad de medida: {UnidadId} a {Activo}", request.Id, request.Activo);
+        Logger.LogInformation("Actualizando estado de unidad de medida: {UnidadId} a {Activo}", request.Id, request.Activo);
 
         unidad.Activo = request.Activo;
-        unidad.FechaActualizacion = DateTime.UtcNow;
 
-        await _service.Actualizar(cancellationToken);
+        await UpdateAuditableEntity(
+            unidad,
+            async () => await _service.Actualizar(cancellationToken),
+            () => Unit.Value,
+            cancellationToken
+        );
 
-        _logger.LogInformation("Estado actualizado exitosamente: {UnidadId}", request.Id);
+        Logger.LogInformation("Estado actualizado exitosamente: {UnidadId}", request.Id);
+
+        return Unit.Value;
     }
 }

@@ -1,33 +1,40 @@
-using MediatR;
-using AutoMapper;
+using Application.Handlers;
 using Application.Interfaces;
+using AutoMapper;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Organizacion.Empresa.Actualizar
 {
-    public class ActualizarEmpresaHandler : IRequestHandler<ActualizarEmpresaCommand, int>
+    public class ActualizarEmpresaHandler
+        : AuditableUpdateHandlerBase<ActualizarEmpresaCommand, int>
     {
         private readonly IEmpresaService _service;
-        private readonly IMapper _mapper;
-        private readonly ILogger<ActualizarEmpresaHandler> _logger;
 
-        public ActualizarEmpresaHandler(IEmpresaService service, IMapper mapper, ILogger<ActualizarEmpresaHandler> logger)
+        public ActualizarEmpresaHandler(
+            IEmpresaService service,
+            IMapper mapper,
+            ILogger<ActualizarEmpresaHandler> logger)
+            : base(mapper, logger)
         {
             _service = service;
-            _mapper = mapper;
-            _logger = logger;
         }
 
-        public async Task<int> Handle(ActualizarEmpresaCommand request, CancellationToken ct)
+        public override async Task<int> Handle(ActualizarEmpresaCommand request, CancellationToken ct)
         {
-            var empresa = await _service.ObtenerPorId(request.Id, true);
+            var empresa = await _service.ObtenerPorId(request.Id, true, ct);
             if (empresa == null)
                 throw new KeyNotFoundException($"Empresa con Id {request.Id} no encontrada");
 
-            _mapper.Map(request, empresa);
-            await _service.Actualizar(empresa);
+            Mapper.Map(request, empresa);
 
-            _logger.LogInformation($"Empresa actualizada: {empresa.Id}");
+            await UpdateAuditableEntity(
+                empresa,
+                async () => await _service.Actualizar(empresa, ct),
+                () => empresa.Id,
+                ct
+            );
+
+            Logger.LogInformation($"Empresa actualizada: {empresa.Id}");
 
             return empresa.Id;
         }

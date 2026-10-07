@@ -23,7 +23,7 @@ namespace Application.Features.Organizacion.Sucursal.Crear
         {
             var sucursal = _mapper.Map<Domain.Organizacion.Sucursal>(request);
 
-            var resultado = await _service.Crear(sucursal);
+            var resultado = await _service.Crear(sucursal, ct);
 
             _logger.LogInformation($"Sucursal creada: {sucursal.Id}");
 
