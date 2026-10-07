@@ -2,6 +2,7 @@ using Application.Interfaces;
 using Domain.Catalogo;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Application.Exceptions;
 
 namespace Infrastructure.Repository;
 
@@ -35,7 +36,7 @@ public class CondicionPagoService : ICondicionPagoService
     {
         var condicion = await _context.CondicionesPago.FirstOrDefaultAsync(x => x.Id == id, token);
         if (condicion == null)
-            throw new InvalidOperationException($"Condición de pago con ID {id} no encontrada");
+            throw new NotFoundException($"Condición de pago con ID {id} no encontrada");
 
         condicion.Activo = activo;
         condicion.FechaActualizacion = DateTime.UtcNow;
@@ -47,7 +48,7 @@ public class CondicionPagoService : ICondicionPagoService
     {
         var condicion = await _context.CondicionesPago.FirstOrDefaultAsync(x => x.Id == id, token);
         if (condicion == null)
-            throw new InvalidOperationException($"Condición de pago con ID {id} no encontrada");
+            throw new NotFoundException($"Condición de pago con ID {id} no encontrada");
 
         _context.CondicionesPago.Remove(condicion);
         await _context.SaveChangesAsync(token);
